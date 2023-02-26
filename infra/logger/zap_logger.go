@@ -8,28 +8,27 @@ import (
 )
 
 type zapLogger struct {
-	Logger        *zap.Logger
-	SugaredLogger *zap.SugaredLogger
+	sugaredLogger *zap.SugaredLogger
 }
 
 func (l zapLogger) Print(v ...interface{}) {
-	l.SugaredLogger.Info(v)
+	l.sugaredLogger.Info(v)
 }
 
 func (l zapLogger) Warn(v ...interface{}) {
-	l.SugaredLogger.Warn(v)
+	l.sugaredLogger.Warn(v)
 }
 
 func (l zapLogger) Error(v ...interface{}) {
-	l.SugaredLogger.Error(v)
+	l.sugaredLogger.Error(v)
 }
 
 func (l zapLogger) Printf(format string, v ...interface{}) {
-	l.SugaredLogger.Infof(format, v)
+	l.sugaredLogger.Infof(format, v)
 }
 
 func (l zapLogger) Errorf(format string, v ...interface{}) {
-	l.SugaredLogger.Errorf(format, v)
+	l.sugaredLogger.Errorf(format, v)
 }
 
 func newZapLogger() *zapLogger {
@@ -56,7 +55,6 @@ func newZapLogger() *zapLogger {
 
 	defer logger.Sync()
 	return &zapLogger{
-		Logger:        logger,
-		SugaredLogger: logger.Sugar(),
+		sugaredLogger: logger.Sugar(),
 	}
 }
