@@ -1,6 +1,7 @@
 package log
 
 import (
+	"github.com/getsentry/sentry-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -53,7 +54,11 @@ func newZapLogger() *zapLogger {
 		}
 	}
 
-	defer logger.Sync()
+	defer func(logger *zap.Logger) {
+		if err := logger.Sync(); err != nil {
+			sentry.CaptureException(err)
+		}
+	}(logger)
 	return &zapLogger{
 		sugaredLogger: logger.Sugar(),
 	}
