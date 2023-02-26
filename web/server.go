@@ -3,14 +3,15 @@ package web
 import (
 	"fmt"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/config"
-	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
+
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 func Setup() {
@@ -34,7 +35,12 @@ func Setup() {
 func setupMiddlewares(app *fiber.App) {
 	app.Use(cors.New())
 	app.Use(compress.New())
-	app.Use(requestid.New())
+	app.Use(requestid.New(requestid.Config{
+		ContextKey: string(constant.TracingKey),
+		Generator: func() string {
+			return pkg.GetUniqueString()
+		},
+	}))
 	app.Use(limiter.New(limiter.Config{
 		Max: constant.MaxRequestPerMinute,
 		KeyGenerator: func(c *fiber.Ctx) string {
