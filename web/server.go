@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 
+	"github.com/gofiber/contrib/fiberzap"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -11,13 +12,14 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/logger"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 func Setup() {
 	// Create fiber app
 	app := fiber.New(fiber.Config{
-		Prefork: prod(config.App.Release),
+		Prefork: config.IsProd(),
 	})
 
 	// Middlewares
@@ -52,8 +54,7 @@ func setupMiddlewares(app *fiber.App) {
 			return c.Get(constant.OriginalIPHeader)
 		},
 	}))
-}
-
-func prod(release string) bool {
-	return release == constant.ReleaseProd
+	app.Use(fiberzap.New(fiberzap.Config{
+		Logger: logger.RequestLogger,
+	}))
 }
