@@ -1,4 +1,4 @@
-package main
+package config
 
 import "github.com/spf13/viper"
 
@@ -8,16 +8,17 @@ type Config struct {
 	Release string `json:"RELEASE"`
 }
 
-func loadConfig() (*Config, error) {
+var App Config
+
+func LoadConfig(path string) error {
 	viper.AutomaticEnv()
-	viper.SetConfigFile(".env")
+	viper.SetConfigFile(path)
 
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
+		return err
 	}
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
+	if err := viper.Unmarshal(&App); err != nil {
+		return err
 	}
-	return &config, nil
+	return nil
 }

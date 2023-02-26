@@ -36,4 +36,6 @@ fi
 
 go mod verify
 go mod vendor
+
+golangci-lint run
 go install -v -ldflags="-X ${REPO_PATH}/version.Version=${VERSION}" ./...
