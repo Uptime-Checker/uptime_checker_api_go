@@ -7,13 +7,13 @@ import (
 )
 
 type Config struct {
-	Host    string `json:"HOST"`
-	Port    string `json:"PORT"`
-	Release string `json:"RELEASE"`
+	Host    string `mapstructure:"HOST"`
+	Port    string `mapstructure:"PORT"`
+	Release string `mapstructure:"RELEASE"`
 
-	Version string `json:"VERSION"`
+	Version string `mapstructure:"VERSION"`
 
-	SentryDSN string `json:"SENTRY_DSN"`
+	SentryDSN string `mapstructure:"SENTRY_DSN"`
 }
 
 var App Config
