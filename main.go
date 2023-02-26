@@ -19,7 +19,7 @@ func main() {
 	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Ok")
+		return c.SendString("OK")
 	})
 
 	if err := app.Listen(fmt.Sprintf(":%s", config.Port)); err != nil {
