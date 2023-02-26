@@ -1,4 +1,4 @@
-package logger
+package log
 
 // Logger is the logging interface of the project
 type Logger interface {
@@ -9,8 +9,8 @@ type Logger interface {
 	Errorf(format string, v ...interface{})
 }
 
-var Log Logger
+var Default Logger
 
 func SetupLogger() {
-	Log = newZapLogger()
+	Default = newZapLogger()
 }

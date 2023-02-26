@@ -10,6 +10,10 @@ type Config struct {
 	Host    string `json:"HOST"`
 	Port    string `json:"PORT"`
 	Release string `json:"RELEASE"`
+
+	Version string `json:"VERSION"`
+
+	SentryDSN string `json:"SENTRY_DSN"`
 }
 
 var App Config

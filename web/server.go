@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -10,8 +11,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
+	"github.com/getsentry/sentry-go"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
@@ -61,4 +65,32 @@ func setupMiddlewares(app *fiber.App) {
 		TimeZone: constant.UTCTimeZone,
 		Format:   "[${time}] ${locals:tracing} | ${status} | ${latency} | ${method} | ${path}\n",
 	}))
+}
+
+func setupSentry() {
+	options := sentry.ClientOptions{
+		Dsn:              config.App.SentryDSN,
+		Environment:      config.App.Release,
+		Release:          config.App.Version,
+		TracesSampleRate: 0.2,
+		AttachStacktrace: config.IsProd,
+		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			if hint.Context != nil {
+				tracingID := pkg.GetTracingID(hint.Context)
+				event.Extra = map[string]interface{}{string(constant.TracingKey): tracingID}
+			}
+			return event
+		},
+	}
+	if !config.IsProd {
+		options.Debug = true
+	}
+
+	err := sentry.Init(options)
+	if err != nil {
+		log.Default.Errorf("sentry.Init: %s", err)
+	}
+	// Flush buffered events before the program terminates.
+	// Set the timeout to the maximum duration the program can afford to wait.
+	defer sentry.Flush(1 * time.Second)
 }
