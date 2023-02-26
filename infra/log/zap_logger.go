@@ -1,9 +1,10 @@
 package log
 
 import (
-	"github.com/getsentry/sentry-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/getsentry/sentry-go"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 )
