@@ -1,6 +1,10 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+)
 
 type Config struct {
 	Host    string `json:"HOST"`
@@ -21,4 +25,8 @@ func LoadConfig(path string) error {
 		return err
 	}
 	return nil
+}
+
+func IsProd() bool {
+	return App.Release == string(constant.EnvironmentProd)
 }
