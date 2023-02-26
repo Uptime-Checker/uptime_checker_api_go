@@ -14,6 +14,9 @@ type Config struct {
 	Version string `mapstructure:"VERSION"`
 
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
+
+	NewRelicApp     string `mapstructure:"NEWRELIC_APP"`
+	NewRelicLicense string `mapstructure:"NEWRELIC_LICENSE"`
 }
 
 var App Config
