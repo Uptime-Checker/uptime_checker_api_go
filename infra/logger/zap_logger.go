@@ -35,7 +35,7 @@ func (l zapLogger) Errorf(format string, v ...interface{}) {
 func newZapLogger() *zapLogger {
 	var logger *zap.Logger
 	var err error
-	if config.IsProd() {
+	if config.IsProd {
 		cfg := zap.NewProductionConfig()
 		cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		cfg.EncoderConfig.TimeKey = "time"

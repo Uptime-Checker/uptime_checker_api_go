@@ -13,6 +13,7 @@ type Config struct {
 }
 
 var App Config
+var IsProd bool
 
 func LoadConfig(path string) error {
 	viper.AutomaticEnv()
@@ -24,9 +25,6 @@ func LoadConfig(path string) error {
 	if err := viper.Unmarshal(&App); err != nil {
 		return err
 	}
+	IsProd = App.Release == string(constant.EnvironmentProd)
 	return nil
-}
-
-func IsProd() bool {
-	return App.Release == string(constant.EnvironmentProd)
 }
