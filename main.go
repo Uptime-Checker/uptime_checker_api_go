@@ -5,7 +5,6 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
 )
 
 func main() {
@@ -20,8 +19,7 @@ func main() {
 	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		port := viper.GetString("PORT")
-		return c.SendString(port)
+		return c.SendString("Ok")
 	})
 
 	if err := app.Listen(fmt.Sprintf(":%s", config.Port)); err != nil {
