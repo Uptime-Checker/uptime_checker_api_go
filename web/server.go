@@ -27,6 +27,11 @@ func Setup() {
 		return c.SendString("OK")
 	})
 
+	// 404 Handler
+	app.Use(func(c *fiber.Ctx) error {
+		return c.SendStatus(404) // => 404 "Not Found"
+	})
+
 	if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
 		panic("Server start failed")
 	}
@@ -36,7 +41,7 @@ func setupMiddlewares(app *fiber.App) {
 	app.Use(cors.New())
 	app.Use(compress.New())
 	app.Use(requestid.New(requestid.Config{
-		ContextKey: string(constant.TracingKey),
+		ContextKey: string(constant.TracingKey), // => Setting Tracing ID to the context
 		Generator: func() string {
 			return pkg.GetUniqueString()
 		},
