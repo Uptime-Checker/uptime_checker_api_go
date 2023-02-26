@@ -83,6 +83,12 @@ func setupSentry() {
 		TracesSampleRate: 0.2,
 		AttachStacktrace: config.IsProd,
 		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			if hint.Context != nil {
+				if c, ok := hint.Context.Value(sentry.RequestContextKey).(*fiber.Ctx); ok {
+					tracingID := pkg.GetTracingID(c.Context())
+					event.Extra = map[string]interface{}{string(constant.TracingKey): tracingID}
+				}
+			}
 			return event
 		},
 	}
