@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gofiber/contrib/fibersentry"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
 	"github.com/getsentry/sentry-go"
@@ -24,6 +26,9 @@ func Setup() {
 	app := fiber.New(fiber.Config{
 		Prefork: config.IsProd,
 	})
+
+	// Sentry
+	setupSentry()
 
 	// Middlewares
 	setupMiddlewares(app)
@@ -44,12 +49,16 @@ func Setup() {
 
 func setupMiddlewares(app *fiber.App) {
 	app.Use(cors.New())
+	app.Use(recover.New())
 	app.Use(compress.New())
 	app.Use(requestid.New(requestid.Config{
 		ContextKey: string(constant.TracingKey), // => Setting Tracing ID to the context
 		Generator: func() string {
 			return pkg.GetUniqueString()
 		},
+	}))
+	app.Use(fibersentry.New(fibersentry.Config{
+		Repanic: true,
 	}))
 	app.Use(limiter.New(limiter.Config{
 		Next: func(c *fiber.Ctx) bool {
@@ -60,7 +69,6 @@ func setupMiddlewares(app *fiber.App) {
 			return c.Get(constant.OriginalIPHeader)
 		},
 	}))
-
 	app.Use(logger.New(logger.Config{
 		TimeZone: constant.UTCTimeZone,
 		Format:   "[${time}] ${locals:tracing} | ${status} | ${latency} | ${method} | ${path}\n",
@@ -75,10 +83,6 @@ func setupSentry() {
 		TracesSampleRate: 0.2,
 		AttachStacktrace: config.IsProd,
 		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
-			if hint.Context != nil {
-				tracingID := pkg.GetTracingID(hint.Context)
-				event.Extra = map[string]interface{}{string(constant.TracingKey): tracingID}
-			}
 			return event
 		},
 	}
