@@ -40,14 +40,8 @@ func Setup() {
 	// Middlewares
 	setupMiddlewares(app, newRelicApp)
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("OK")
-	})
-
-	// 404 Handler
-	app.Use(func(c *fiber.Ctx) error {
-		return c.SendStatus(404) // => 404 "Not Found"
-	})
+	// Roues
+	SetupRoutes(app)
 
 	if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
 		panic("Server start failed")
@@ -81,7 +75,7 @@ func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 		Format:   "[${time}] ${locals:tracing} | ${status} | ${latency} | ${method} | ${path}\n",
 	}))
 
-	if !config.IsProd {
+	if config.IsProd {
 		app.Use(fibernewrelic.New(fibernewrelic.Config{
 			Application: newRelicApp,
 		}))
