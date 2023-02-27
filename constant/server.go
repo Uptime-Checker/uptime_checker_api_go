@@ -1,5 +1,10 @@
 package constant
 
 const UTCTimeZone = "UTC"
-const OriginalIPHeader = "X-Forwarded-For"
+
+const (
+	APIKeyHeader     = "X_API_KEY"
+	OriginalIPHeader = "X-Forwarded-For"
+)
+
 const MaxRequestPerMinute = 10

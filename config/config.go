@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Port    string `mapstructure:"PORT"`
 	Release string `mapstructure:"RELEASE"`
+	APIKey  string `mapstructure:"X_API_KEY"`
 
 	Version string `mapstructure:"VERSION"`
 
