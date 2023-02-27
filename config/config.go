@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-	Host    string `mapstructure:"HOST"`
 	Port    string `mapstructure:"PORT"`
 	Release string `mapstructure:"RELEASE"`
 
