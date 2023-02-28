@@ -5,7 +5,7 @@ import (
 )
 
 type GuestUserBody struct {
-	Email string `validate:"required,email,min=6,max=32"`
+	Email string `json:"email" validate:"required,email,min=6,max=32"`
 }
 
 func CreateGuestUser(c *fiber.Ctx) error {
