@@ -9,5 +9,14 @@ type GuestUserBody struct {
 }
 
 func CreateGuestUser(c *fiber.Ctx) error {
+	body := new(GuestUserBody)
+
+	if err := c.BodyParser(body); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := validate.Struct(body); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(processValidationError(err))
+	}
 	return c.SendString("about")
 }
