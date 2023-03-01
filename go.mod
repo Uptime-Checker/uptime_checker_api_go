@@ -9,6 +9,7 @@ require (
 	github.com/gofiber/contrib/fibernewrelic v1.0.2
 	github.com/gofiber/contrib/fibersentry v1.0.2
 	github.com/gofiber/fiber/v2 v2.42.0
+	github.com/lib/pq v1.10.5
 	github.com/newrelic/go-agent/v3 v3.20.3
 	github.com/segmentio/ksuid v1.0.4
 	github.com/spf13/viper v1.15.0

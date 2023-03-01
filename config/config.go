@@ -6,12 +6,18 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 )
 
-type Config struct {
+type config struct {
 	Port    string `mapstructure:"PORT"`
 	Release string `mapstructure:"RELEASE"`
 	APIKey  string `mapstructure:"X_API_KEY"`
 
 	Version string `mapstructure:"VERSION"`
+
+	DatabaseHost     string `mapstructure:"DB_HOST"`
+	DatabasePort     string `mapstructure:"DB_PORT"`
+	DatabaseUser     string `mapstructure:"DB_USER"`
+	DatabasePassword string `mapstructure:"DB_PASSWORD"`
+	DatabaseSchema   string `mapstructure:"DB_SCHEMA"`
 
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
 
@@ -19,7 +25,7 @@ type Config struct {
 	NewRelicLicense string `mapstructure:"NEWRELIC_LICENSE"`
 }
 
-var App Config
+var App config
 var IsProd bool
 
 func LoadConfig(path string) error {

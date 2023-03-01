@@ -1,4 +1,4 @@
-package controller
+package resp
 
 import (
 	"github.com/go-playground/validator/v10"
@@ -7,7 +7,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 )
 
-var validate = validator.New()
+var Validate = validator.New()
 
 type ValidationError struct {
 	Error  string      `json:"error"`
@@ -32,4 +32,12 @@ func processValidationError(err error) ValidationError {
 
 func processError(err error) map[string]interface{} {
 	return fiber.Map{"error": err.Error()}
+}
+
+func ServeError(c *fiber.Ctx, status int, err error) error {
+	return c.Status(status).JSON(processError(err))
+}
+
+func ServeValidationError(c *fiber.Ctx, status int, err error) error {
+	return c.Status(status).JSON(processValidationError(err))
 }
