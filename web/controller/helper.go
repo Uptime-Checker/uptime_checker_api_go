@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 )
@@ -27,4 +28,8 @@ func processValidationError(err error) ValidationError {
 		break
 	}
 	return validationErr
+}
+
+func processError(err error) map[string]interface{} {
+	return fiber.Map{"error": err.Error()}
 }
