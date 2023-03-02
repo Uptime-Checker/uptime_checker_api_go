@@ -16,7 +16,7 @@ func main() {
 	log.SetupLogger()
 
 	// Setup Database
-	if err := infra.ConnectDatabase(); err != nil {
+	if err := infra.ConnectDatabase(!config.IsProd); err != nil {
 		panic("database connection failed")
 	}
 	log.Default.Print("database connected")
