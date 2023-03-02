@@ -1,10 +1,18 @@
 package resp
 
 import (
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/go-playground/validator/v10"
+)
+
+const (
+	ErrMessageValidationFailed = "Validation Failed"
+)
+
+const (
+	ErrFailedToCreateGuestUser = "failed to create guest user"
+	ErrGuestUserRateLimited    = "guest user rate limited"
 )
 
 var Validate = validator.New()
@@ -19,7 +27,7 @@ type ValidationError struct {
 func processValidationError(err error) ValidationError {
 	validationErr := ValidationError{}
 	for _, err := range err.(validator.ValidationErrors) {
-		validationErr.Error = constant.ErrMessageValidationFailed
+		validationErr.Error = ErrMessageValidationFailed
 		validationErr.Field = err.Field()
 		validationErr.Reason = err.Tag()
 		validationErr.Value = err.Value()
@@ -30,14 +38,18 @@ func processValidationError(err error) ValidationError {
 	return validationErr
 }
 
-func processError(err error) map[string]interface{} {
-	return fiber.Map{"error": err.Error()}
+func processError(message string, err error) map[string]interface{} {
+	return fiber.Map{"message": message, "error": err.Error()}
 }
 
-func ServeError(c *fiber.Ctx, status int, err error) error {
-	return c.Status(status).JSON(processError(err))
+func ServeError(c *fiber.Ctx, status int, message string, err error) error {
+	return c.Status(status).JSON(processError(message, err))
 }
 
-func ServeValidationError(c *fiber.Ctx, status int, err error) error {
-	return c.Status(status).JSON(processValidationError(err))
+func ServeInternalServerError(c *fiber.Ctx, err error) error {
+	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+}
+
+func ServeValidationError(c *fiber.Ctx, err error) error {
+	return c.Status(fiber.StatusUnprocessableEntity).JSON(processValidationError(err))
 }

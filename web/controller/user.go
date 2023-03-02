@@ -1,7 +1,11 @@
 package controller
 
 import (
+	"fmt"
+
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
 	"github.com/gofiber/fiber/v2"
 
@@ -26,18 +30,34 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 	tracingID := pkg.GetTracingID(c.Context())
 
 	if err := c.BodyParser(body); err != nil {
-		return resp.ServeError(c, fiber.StatusInternalServerError, err)
+		return resp.ServeInternalServerError(c, err)
 	}
 
 	if err := resp.Validate.Struct(body); err != nil {
-		return resp.ServeValidationError(c, fiber.StatusUnprocessableEntity, err)
+		return resp.ServeValidationError(c, err)
 	}
 
-	log.Default.Print(tracingID, 1, "creating guest user", body.Email)
-	user, err := u.userDomain.CreateGuest(body.Email)
+	createUser := func() error {
+		log.Default.Print(tracingID, 0, "creating guest user", body.Email)
+		user, err := u.userDomain.CreateGuest(body.Email)
+		if err != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateGuestUser, err)
+		}
+		return resp.ServeData(c, fiber.StatusCreated, user)
+	}
+
+	latestGuestUser, err := u.userDomain.GetLatestGuestUser(body.Email)
 	if err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, err)
+		log.Default.Print(tracingID, 1, "no previous guest user", body.Email)
+		return createUser()
 	}
 
-	return resp.ServeData(c, fiber.StatusCreated, user)
+	passed := times.Now().Sub(latestGuestUser.InsertedAt).Seconds()
+	remaining := int(constant.GuestUserRateLimitInSeconds - passed)
+	log.Default.Print(tracingID, 2, "previous guest user exists", latestGuestUser.Email, "remaining", remaining)
+	if passed <= constant.GuestUserRateLimitInSeconds {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserRateLimited,
+			fmt.Errorf("remaining %d", remaining))
+	}
+	return createUser()
 }
