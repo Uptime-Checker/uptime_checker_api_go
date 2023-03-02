@@ -19,8 +19,9 @@ func NewUserDomain() *UserDomain {
 
 func (u *UserDomain) CreateGuest(email string) (*model.GuestUser, error) {
 	now := times.Now()
-	user := model.GuestUser{Email: email, Code: pkg.GetUniqueString(), ExpiresAt: now.Add(time.Minute * 10), InsertedAt: now, UpdatedAt: now}
-	insertStmt := GuestUser.INSERT(GuestUser.Email, GuestUser.Code, GuestUser.ExpiresAt, GuestUser.InsertedAt, GuestUser.UpdatedAt).MODEL(user).
+	code := pkg.GetUniqueString()
+	user := model.GuestUser{Email: email, Code: pkg.HashSha(code), ExpiresAt: now.Add(time.Minute * 10)}
+	insertStmt := GuestUser.INSERT(GuestUser.Email, GuestUser.Code, GuestUser.ExpiresAt).MODEL(user).
 		RETURNING(GuestUser.AllColumns)
 	err := insertStmt.Query(infra.DB, &user)
 	return &user, err

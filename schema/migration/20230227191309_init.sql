@@ -4,8 +4,8 @@ create table if not exists role (
     id bigserial,
     name varchar(255) not null,
     type integer default 1,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id)
 );
 create unique index if not exists role_type_index on role (type);
@@ -13,8 +13,8 @@ create table if not exists organization (
     id bigserial,
     name varchar(255) not null,
     slug varchar(255) not null,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id)
 );
 create unique index if not exists organization_slug_index on organization (slug);
@@ -30,8 +30,8 @@ create table if not exists "user" (
     last_login_at timestamp(0) default now(),
     role_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (role_id) references role,
     foreign key (organization_id) references organization on delete cascade
@@ -48,8 +48,8 @@ create table if not exists region (
     key varchar(255) not null,
     ip_address varchar(255),
     "default" boolean default false,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id)
 );
 create unique index if not exists region_key_index on region (key);
@@ -57,8 +57,8 @@ create table if not exists monitor_group (
     id bigserial,
     name varchar(255) not null,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (organization_id) references organization on delete cascade
 );
@@ -89,8 +89,8 @@ create table if not exists monitor (
     monitor_group_id bigint,
     prev_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     constraint monitor_unique_previous_id unique (prev_id, organization_id) deferrable initially deferred,
     foreign key (user_id) references "user",
@@ -113,8 +113,8 @@ create table if not exists assertion (
     comparison integer default 1,
     value varchar(255),
     monitor_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (monitor_id) references monitor on delete cascade
 );
@@ -126,8 +126,8 @@ create table if not exists monitor_region (
     last_checked_at timestamp(0),
     monitor_id bigint,
     region_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (monitor_id) references monitor on delete cascade,
     foreign key (region_id) references region on delete cascade
@@ -144,8 +144,8 @@ create table if not exists "check" (
     region_id bigint,
     monitor_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (region_id) references region,
     foreign key (monitor_id) references monitor on delete cascade,
@@ -160,8 +160,8 @@ create table if not exists monitor_integration (
     type integer,
     config jsonb,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (organization_id) references organization on delete cascade
 );
@@ -175,8 +175,8 @@ create table if not exists error_log (
     check_id bigint,
     monitor_id bigint,
     assertion_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (check_id) references "check" on delete cascade,
     foreign key (monitor_id) references monitor on delete cascade,
@@ -191,8 +191,8 @@ create table if not exists monitor_notification_policy (
     monitor_id bigint,
     organization_id bigint,
     integration_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (user_id) references "user" on delete cascade,
     foreign key (monitor_id) references monitor on delete cascade,
@@ -217,8 +217,8 @@ create table if not exists alarm (
     resolved_by_check_id bigint,
     monitor_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (triggered_by_check_id) references "check",
     foreign key (resolved_by_check_id) references "check",
@@ -236,8 +236,8 @@ create table if not exists monitor_alarm_policy (
     threshold integer default 0,
     monitor_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (monitor_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade
@@ -253,8 +253,8 @@ create table if not exists daily_report (
     date date,
     monitor_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (monitor_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade
@@ -274,8 +274,8 @@ create table if not exists user_contact (
     subscribed boolean default true not null,
     bounce_count integer default 0,
     user_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (user_id) references "user" on delete cascade
 );
@@ -292,8 +292,8 @@ create table if not exists monitor_notification (
     user_contact_id bigint,
     organization_id bigint,
     integration_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (alarm_id) references alarm on delete cascade,
     foreign key (monitor_id) references monitor on delete cascade,
@@ -312,8 +312,8 @@ create table if not exists guest_user (
     email varchar(255) not null,
     code varchar(255) not null,
     expires_at timestamp(0) not null,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id)
 );
 create unique index if not exists guest_user_code_index on guest_user (code);
@@ -327,8 +327,8 @@ create table if not exists invitation (
     invited_by_user_id bigint,
     role_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (invited_by_user_id) references "user",
     foreign key (role_id) references role,
@@ -347,8 +347,8 @@ create table if not exists organization_user (
     role_id bigint,
     user_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (role_id) references role,
     foreign key (user_id) references "user" on delete cascade,
@@ -366,8 +366,8 @@ create table if not exists product (
     description varchar(255),
     external_id varchar(255),
     tier integer default 1,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id)
 );
 create unique index if not exists product_name_index on product (name);
@@ -379,8 +379,8 @@ create table if not exists plan (
     type integer default 1,
     external_id varchar(255),
     product_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (product_id) references product on delete cascade
 );
@@ -399,8 +399,8 @@ create table if not exists subscription (
     plan_id bigint,
     product_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (plan_id) references plan,
     foreign key (product_id) references product,
@@ -429,8 +429,8 @@ create table if not exists receipt (
     product_id bigint,
     subscription_id bigint,
     organization_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (plan_id) references plan,
     foreign key (product_id) references product,
@@ -446,8 +446,8 @@ create table if not exists role_claim (
     id bigserial,
     claim varchar(255) not null,
     role_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (role_id) references role on delete cascade
 );
@@ -457,8 +457,8 @@ create table if not exists feature (
     id bigserial,
     name varchar(255) not null,
     type integer default 1,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id)
 );
 create unique index if not exists feature_name_type_index on feature (name, type);
@@ -467,8 +467,8 @@ create table if not exists product_feature (
     count integer default 1,
     product_id bigint,
     feature_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (product_id) references product on delete cascade,
     foreign key (feature_id) references feature on delete cascade
@@ -481,8 +481,8 @@ create table if not exists monitor_status_change (
     status integer default 1,
     changed_at timestamp(0),
     monitor_id bigint,
-    inserted_at timestamp(0) not null,
-    updated_at timestamp(0) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
     primary key (id),
     foreign key (monitor_id) references monitor on delete cascade
 );
