@@ -52,10 +52,10 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 		return createUser()
 	}
 
-	passed := times.Now().Sub(latestGuestUser.InsertedAt).Seconds()
-	remaining := int(constant.GuestUserRateLimitInSeconds - passed)
+	passed := times.Now().Sub(latestGuestUser.InsertedAt).Minutes()
+	remaining := int(constant.GuestUserRateLimitInMinutes - passed)
 	log.Default.Print(tracingID, 2, "previous guest user exists", latestGuestUser.Email, "remaining", remaining)
-	if passed <= constant.GuestUserRateLimitInSeconds {
+	if passed <= constant.GuestUserRateLimitInMinutes {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserRateLimited,
 			fmt.Errorf("remaining %d", remaining))
 	}

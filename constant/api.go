@@ -1,5 +1,5 @@
 package constant
 
 const (
-	GuestUserRateLimitInSeconds = 120
+	GuestUserRateLimitInMinutes = 5
 )
