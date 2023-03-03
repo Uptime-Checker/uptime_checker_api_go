@@ -14,12 +14,9 @@ func SetupRoutes(app *fiber.App) {
 		return c.SendString("OK")
 	})
 
-	// API Group
-	api := app.Group("/api")
-	api.Use(middlelayer.Header())
-
 	// API V1
-	v1 := api.Group("/v1")
+	v1 := app.Group("/v1")
+	v1.Use(middlelayer.Header())
 	v1.Get("/status", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
