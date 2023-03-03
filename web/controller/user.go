@@ -3,14 +3,14 @@ package controller
 import (
 	"fmt"
 
+	"github.com/gofiber/fiber/v2"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
-	"github.com/gofiber/fiber/v2"
-
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 )
 
 type UserController struct {
