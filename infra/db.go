@@ -10,6 +10,8 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 var DB *sql.DB
@@ -40,9 +42,15 @@ func ConnectDatabase(enableLogging bool) error {
 }
 
 func StartTransaction(ctx context.Context) (*sql.Tx, error) {
+	tracingID := pkg.GetTracingID(ctx)
+	log.Default.Print(tracingID, "start transaction")
+
 	return DB.BeginTx(ctx, nil)
 }
 
-func CommitTransaction(transaction *sql.Tx) error {
+func CommitTransaction(ctx context.Context, transaction *sql.Tx) error {
+	tracingID := pkg.GetTracingID(ctx)
+	log.Default.Print(tracingID, "commit transaction")
+
 	return transaction.Commit()
 }
