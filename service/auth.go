@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
@@ -25,7 +25,7 @@ func (u *UserService) VerifyGuestUser(ctx context.Context, email, code string) (
 
 	guestUser, err := u.userDomain.GetGuestUser(email, code)
 	if err != nil {
-		log.Default.Print(tracingID, 1, "no guest user with", email, "code:", code)
+		log.Default.Error(tracingID, 1, "no guest user with", email, "code:", code)
 		return nil, err
 	}
 	if times.CompareDate(now, guestUser.ExpiresAt) == constant.Date1AfterDate2 {

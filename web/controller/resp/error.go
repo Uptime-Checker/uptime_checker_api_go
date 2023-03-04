@@ -13,6 +13,7 @@ const (
 const (
 	ErrFailedToCreateGuestUser = "failed to create guest user"
 	ErrGuestUserRateLimited    = "guest user rate limited"
+	ErrGuestUserNotFound       = "guest user not found"
 )
 
 var Validate = validator.New()
