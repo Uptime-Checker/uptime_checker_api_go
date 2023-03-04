@@ -8,6 +8,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -84,6 +85,11 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 
+	tx, err := infra.StartTransaction(c.Context())
+	if err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
 	guestUser, err := u.userService.VerifyGuestUser(c.Context(), body.Email, body.Code)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
@@ -103,6 +109,11 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
 	}
+
+	if err := infra.CommitTransaction(tx); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
 	log.Default.Print(tracingID, 3, "updated user", user.ID, user.Email, user.Provider)
 	return resp.ServeData(c, fiber.StatusOK, user)
 }

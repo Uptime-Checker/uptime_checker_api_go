@@ -44,7 +44,7 @@ func Setup() {
 	SetupRoutes(app)
 
 	if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
-		panic("server start failed")
+		panic(err)
 	}
 }
 

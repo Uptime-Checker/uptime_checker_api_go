@@ -38,3 +38,11 @@ func ConnectDatabase(enableLogging bool) error {
 
 	return DB.Ping()
 }
+
+func StartTransaction(ctx context.Context) (*sql.Tx, error) {
+	return DB.BeginTx(ctx, nil)
+}
+
+func CommitTransaction(transaction *sql.Tx) error {
+	return transaction.Commit()
+}
