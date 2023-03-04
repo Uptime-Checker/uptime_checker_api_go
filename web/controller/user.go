@@ -7,6 +7,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -87,9 +88,21 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
 	}
+	log.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
-	user, err := u.userDomain.GetUser(body.Email)
+	_, err = u.userDomain.GetUser(body.Email)
 	if err != nil {
-
+		user, err := u.userDomain.CreateUser(body.Email, resource.UserLoginProviderEmail)
+		if err != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrCreatingNewUser, err)
+		}
+		log.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, user.Provider)
+		return resp.ServeData(c, fiber.StatusCreated, user)
 	}
+	user, err := u.userDomain.UpdateProvider(body.Email, resource.UserLoginProviderEmail)
+	if err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
+	}
+	log.Default.Print(tracingID, 3, "updated user", user.ID, user.Email, user.Provider)
+	return resp.ServeData(c, fiber.StatusOK, user)
 }

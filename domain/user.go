@@ -1,11 +1,12 @@
 package domain
 
 import (
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain/validate"
 	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
@@ -55,11 +56,41 @@ func (u *UserDomain) GetUser(email string) (*model.User, error) {
 	return user, err
 }
 
-func (u *UserDomain) CreateUser(email string, provider validate.UserLoginProvider) (*model.User, error) {
+func (u *UserDomain) CreateUser(email string, provider resource.UserLoginProvider) (*model.User, error) {
+	if !provider.Valid() {
+		return nil, constant.ErrInvalidProvider
+	}
+	providerValue := provider.Value()
 	now := times.Now()
-	user := &model.User{Email: email, Code: code, ExpiresAt: now.Add(time.Minute * 10)}
-	insertStmt := User.INSERT(GuestUser.Email, GuestUser.Code, GuestUser.ExpiresAt).MODEL(user).
+	user := &model.User{
+		Email:       email,
+		ProviderUID: &email,
+		Provider:    &providerValue,
+		LastLoginAt: &now,
+		UpdatedAt:   time.Time{},
+	}
+	insertStmt := User.INSERT(User.Email, User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).MODEL(user).
 		RETURNING(User.AllColumns)
 	err := insertStmt.Query(infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) UpdateProvider(email string, provider resource.UserLoginProvider) (*model.User, error) {
+	if !provider.Valid() {
+		return nil, constant.ErrInvalidProvider
+	}
+	providerValue := provider.Value()
+	now := times.Now()
+	user := &model.User{
+		ProviderUID: &email,
+		Provider:    &providerValue,
+		LastLoginAt: &now,
+		UpdatedAt:   time.Time{},
+	}
+
+	updateStmt := User.UPDATE(User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).
+		MODEL(User).WHERE(User.Email.EQ(String(email))).RETURNING(User.AllColumns)
+
+	err := updateStmt.Query(infra.DB, user)
 	return user, err
 }
