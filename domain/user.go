@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"context"
+	"database/sql"
 	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
@@ -20,47 +22,53 @@ func NewUserDomain() *UserDomain {
 	return &UserDomain{}
 }
 
-func (u *UserDomain) CreateGuest(email, code string) (*model.GuestUser, error) {
+func (u *UserDomain) CreateGuest(ctx context.Context, email, code string) (*model.GuestUser, error) {
 	now := times.Now()
 	user := &model.GuestUser{Email: email, Code: code, ExpiresAt: now.Add(time.Minute * 10)}
 	insertStmt := GuestUser.INSERT(GuestUser.Email, GuestUser.Code, GuestUser.ExpiresAt).MODEL(user).
 		RETURNING(GuestUser.AllColumns)
-	err := insertStmt.Query(infra.DB, user)
+	err := insertStmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }
 
-func (u *UserDomain) GetLatestGuestUser(email string) (*model.GuestUser, error) {
+func (u *UserDomain) GetLatestGuestUser(ctx context.Context, email string) (*model.GuestUser, error) {
 	stmt := SELECT(GuestUser.AllColumns).FROM(GuestUser).WHERE(GuestUser.Email.EQ(String(email))).
 		ORDER_BY(GuestUser.ExpiresAt.DESC()).LIMIT(1)
 
 	user := &model.GuestUser{}
-	err := stmt.Query(infra.DB, user)
+	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }
 
-func (u *UserDomain) GetGuestUser(email, code string) (*model.GuestUser, error) {
+func (u *UserDomain) GetGuestUser(ctx context.Context, email, code string) (*model.GuestUser, error) {
 	stmt := SELECT(GuestUser.AllColumns).FROM(GuestUser).WHERE(GuestUser.Email.EQ(String(email))).
 		WHERE(GuestUser.Code.EQ(String(code))).
 		ORDER_BY(GuestUser.ExpiresAt.DESC()).LIMIT(1)
 
 	user := &model.GuestUser{}
-	err := stmt.Query(infra.DB, user)
+	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }
 
-func (u *UserDomain) GetUser(email string) (*model.User, error) {
+func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, error) {
 	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.Email.EQ(String(email))).LIMIT(1)
 
 	user := &model.User{}
-	err := stmt.Query(infra.DB, user)
+	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }
 
-func (u *UserDomain) CreateUser(email string, provider resource.UserLoginProvider) (*model.User, error) {
+func (u *UserDomain) CreateUser(
+	ctx context.Context,
+	tx *sql.Tx,
+	email string,
+	provider resource.UserLoginProvider,
+) (*model.User, error) {
+
 	if !provider.Valid() {
 		return nil, constant.ErrInvalidProvider
 	}
-	providerValue := provider.Value()
+	providerValue := int32(provider)
 	now := times.Now()
 	user := &model.User{
 		Email:       email,
@@ -71,15 +79,21 @@ func (u *UserDomain) CreateUser(email string, provider resource.UserLoginProvide
 	}
 	insertStmt := User.INSERT(User.Email, User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).MODEL(user).
 		RETURNING(User.AllColumns)
-	err := insertStmt.Query(infra.DB, user)
+	err := insertStmt.QueryContext(ctx, tx, user)
 	return user, err
 }
 
-func (u *UserDomain) UpdateProvider(email string, provider resource.UserLoginProvider) (*model.User, error) {
+func (u *UserDomain) UpdateProvider(
+	ctx context.Context,
+	tx *sql.Tx,
+	email string,
+	provider resource.UserLoginProvider,
+) (*model.User, error) {
+
 	if !provider.Valid() {
 		return nil, constant.ErrInvalidProvider
 	}
-	providerValue := provider.Value()
+	providerValue := int32(provider)
 	now := times.Now()
 	user := &model.User{
 		ProviderUID: &email,
@@ -91,6 +105,12 @@ func (u *UserDomain) UpdateProvider(email string, provider resource.UserLoginPro
 	updateStmt := User.UPDATE(User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).
 		MODEL(user).WHERE(User.Email.EQ(String(email))).RETURNING(User.AllColumns)
 
-	err := updateStmt.Query(infra.DB, user)
+	err := updateStmt.QueryContext(ctx, tx, user)
 	return user, err
+}
+
+func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) error {
+	deleteStmt := GuestUser.DELETE().WHERE(GuestUser.ID.EQ(Int(id)))
+	_, err := deleteStmt.ExecContext(ctx, tx)
+	return err
 }

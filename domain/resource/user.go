@@ -1,13 +1,13 @@
 package resource
 
 // UserLoginProvider type
-type UserLoginProvider string
+type UserLoginProvider int
 
 // list of providers
 const (
-	UserLoginProviderEmail  UserLoginProvider = "email"
-	UserLoginProviderGoogle UserLoginProvider = "google"
-	UserLoginProviderGithub UserLoginProvider = "github"
+	UserLoginProviderEmail UserLoginProvider = iota + 1
+	UserLoginProviderGoogle
+	UserLoginProviderGithub
 )
 
 // Valid checks if the MediaType is valid
@@ -21,14 +21,6 @@ func (u UserLoginProvider) Valid() bool {
 	return false
 }
 
-func (u UserLoginProvider) Value() int32 {
-	switch u {
-	case UserLoginProviderEmail:
-		return 1
-	case UserLoginProviderGoogle:
-		return 2
-	case UserLoginProviderGithub:
-		return 3
-	}
-	return 1
+func (u UserLoginProvider) String() string {
+	return [...]string{"email", "google", "github"}[u-1]
 }

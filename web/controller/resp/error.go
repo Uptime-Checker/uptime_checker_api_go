@@ -16,6 +16,7 @@ const (
 	ErrGuestUserNotFound       = "guest user not found"
 	ErrCreatingNewUser         = "failed to create new user"
 	ErrUpdatingUser            = "failed to update user"
+	ErrDeletingGuestUser       = "failed to delete guest user"
 )
 
 var Validate = validator.New()

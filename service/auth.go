@@ -23,7 +23,7 @@ func (u *UserService) VerifyGuestUser(ctx context.Context, email, code string) (
 	now := times.Now()
 	tracingID := pkg.GetTracingID(ctx)
 
-	guestUser, err := u.userDomain.GetGuestUser(email, code)
+	guestUser, err := u.userDomain.GetGuestUser(ctx, email, code)
 	if err != nil {
 		log.Default.Error(tracingID, 1, "no guest user with", email, "code:", code)
 		return nil, err

@@ -45,14 +45,14 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 		log.Default.Print(tracingID, 0, "creating guest user", body.Email)
 
 		code := pkg.GetUniqueString()
-		user, err := u.userDomain.CreateGuest(body.Email, pkg.HashSha(code))
+		user, err := u.userDomain.CreateGuest(c.Context(), body.Email, pkg.HashSha(code))
 		if err != nil {
 			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateGuestUser, err)
 		}
 		return resp.ServeData(c, fiber.StatusCreated, user)
 	}
 
-	latestGuestUser, err := u.userDomain.GetLatestGuestUser(body.Email)
+	latestGuestUser, err := u.userDomain.GetLatestGuestUser(c.Context(), body.Email)
 	if err != nil {
 		log.Default.Print(tracingID, 1, "no previous guest user", body.Email)
 		return createUser()
@@ -96,19 +96,26 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	}
 	log.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
-	_, err = u.userDomain.GetUser(body.Email)
+	user, err := u.userDomain.GetUser(c.Context(), body.Email)
 	if err != nil {
-		user, err := u.userDomain.CreateUser(body.Email, resource.UserLoginProviderEmail)
+		user, err = u.userDomain.CreateUser(c.Context(), tx, body.Email, resource.UserLoginProviderEmail)
 		if err != nil {
 			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrCreatingNewUser, err)
 		}
 		log.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, user.Provider)
 		return resp.ServeData(c, fiber.StatusCreated, user)
+	} else {
+		user, err = u.userDomain.UpdateProvider(c.Context(), tx, body.Email, resource.UserLoginProviderEmail)
+		if err != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
+		}
+		log.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
 	}
-	user, err := u.userDomain.UpdateProvider(body.Email, resource.UserLoginProviderEmail)
-	if err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
+
+	if err := u.userDomain.DeleteGuestUser(c.Context(), tx, guestUser.ID); err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrDeletingGuestUser, err)
 	}
+	log.Default.Print(tracingID, 4, "delete guest user", guestUser.ID, guestUser.Email)
 
 	if err := infra.CommitTransaction(tx); err != nil {
 		return resp.ServeInternalServerError(c, err)
