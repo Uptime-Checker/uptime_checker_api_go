@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 
+	"github.com/getsentry/sentry-go"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -53,4 +55,31 @@ func CommitTransaction(ctx context.Context, transaction *sql.Tx) error {
 	log.Default.Print(tracingID, "commit transaction")
 
 	return transaction.Commit()
+}
+
+func RollbackTransaction(ctx context.Context, transaction *sql.Tx) error {
+	tracingID := pkg.GetTracingID(ctx)
+	log.Default.Print(tracingID, "rollback transaction")
+
+	return transaction.Rollback()
+}
+
+// Transaction creates a transaction and calls f.
+// When it is finished, it cleans up the transaction. If an error occured it
+// attempts to rollback, if not it commits.
+func Transaction(ctx context.Context, f func(context.Context, *sql.Tx) error) error {
+	tx, err := StartTransaction(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = f(ctx, tx)
+	if err != nil {
+		rollbackError := RollbackTransaction(ctx, tx)
+		if rollbackError != nil {
+			sentry.CaptureException(rollbackError)
+		}
+		return err
+	}
+	return CommitTransaction(ctx, tx)
 }

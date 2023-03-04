@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -74,8 +76,9 @@ type GuestUserLoginBody struct {
 }
 
 func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
+	ctx := c.Context()
 	body := new(GuestUserLoginBody)
-	tracingID := pkg.GetTracingID(c.Context())
+	tracingID := pkg.GetTracingID(ctx)
 
 	if err := c.BodyParser(body); err != nil {
 		return resp.ServeInternalServerError(c, err)
@@ -85,42 +88,32 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 
-	tx, err := infra.StartTransaction(c.Context())
-	if err != nil {
-		return resp.ServeInternalServerError(c, err)
-	}
-
-	guestUser, err := u.userService.VerifyGuestUser(c.Context(), body.Email, body.Code)
+	guestUser, err := u.userService.VerifyGuestUser(ctx, body.Email, body.Code)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
 	}
 	log.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
-	user, err := u.userDomain.GetUser(c.Context(), body.Email)
-	if err != nil {
-		user, err = u.userDomain.CreateUser(c.Context(), tx, body.Email, resource.UserLoginProviderEmail)
+	user, err := u.userDomain.GetUser(ctx, body.Email)
+	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		if err != nil {
-			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrCreatingNewUser, err)
+			user, err = u.userDomain.CreateUser(ctx, tx, body.Email, resource.UserLoginProviderEmail)
+			if err != nil {
+				return err
+			}
+			log.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
+		} else {
+			user, err = u.userDomain.UpdateProvider(ctx, tx, body.Email, resource.UserLoginProviderEmail)
+			if err != nil {
+				return err
+			}
+			log.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
 		}
-		log.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, user.Provider)
-		return resp.ServeData(c, fiber.StatusCreated, user)
-	} else {
-		user, err = u.userDomain.UpdateProvider(c.Context(), tx, body.Email, resource.UserLoginProviderEmail)
-		if err != nil {
-			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
-		}
-		log.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
+		log.Default.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
+		return u.userDomain.DeleteGuestUser(ctx, tx, guestUser.ID)
+	}); err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 
-	if err := u.userDomain.DeleteGuestUser(c.Context(), tx, guestUser.ID); err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrDeletingGuestUser, err)
-	}
-	log.Default.Print(tracingID, 4, "delete guest user", guestUser.ID, guestUser.Email)
-
-	if err := infra.CommitTransaction(tx); err != nil {
-		return resp.ServeInternalServerError(c, err)
-	}
-
-	log.Default.Print(tracingID, 3, "updated user", user.ID, user.Email, user.Provider)
 	return resp.ServeData(c, fiber.StatusOK, user)
 }
