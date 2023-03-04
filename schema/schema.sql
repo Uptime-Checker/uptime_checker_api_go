@@ -18,7 +18,7 @@ create table if not exists organization (
 create unique index if not exists organization_slug_index on organization (slug);
 create table if not exists "user" (
     id bigserial,
-    name varchar(255) not null,
+    name varchar(255),
     email varchar(255) not null,
     picture_url varchar(255),
     password varchar(255),
