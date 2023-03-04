@@ -85,11 +85,11 @@ func (u *UserDomain) UpdateProvider(email string, provider resource.UserLoginPro
 		ProviderUID: &email,
 		Provider:    &providerValue,
 		LastLoginAt: &now,
-		UpdatedAt:   time.Time{},
+		UpdatedAt:   now,
 	}
 
 	updateStmt := User.UPDATE(User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).
-		MODEL(User).WHERE(User.Email.EQ(String(email))).RETURNING(User.AllColumns)
+		MODEL(user).WHERE(User.Email.EQ(String(email))).RETURNING(User.AllColumns)
 
 	err := updateStmt.Query(infra.DB, user)
 	return user, err
