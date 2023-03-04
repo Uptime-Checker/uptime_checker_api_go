@@ -50,7 +50,6 @@ func Setup() {
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 	app.Use(cors.New())
-	app.Use(recover.New())
 	app.Use(compress.New())
 	app.Use(requestid.New(requestid.Config{
 		ContextKey: string(constant.TracingKey), // => Setting Tracing ID to the context
@@ -74,6 +73,7 @@ func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 		TimeZone: constant.UTCTimeZone,
 		Format:   "[${time}] ${locals:tracing} | ${status} | ${latency} | ${method} | ${path}\n",
 	}))
+	app.Use(recover.New(recover.Config{EnableStackTrace: !config.IsProd}))
 
 	if config.IsProd {
 		app.Use(fibernewrelic.New(fibernewrelic.Config{
