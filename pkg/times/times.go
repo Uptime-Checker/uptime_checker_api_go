@@ -1,10 +1,14 @@
 package times
 
-import "time"
+import (
+	"time"
+
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+)
 
 // CompareDate compares date1 and date2. If date1 is before date2 it returns -1,
 // if date1 is after date2 it returns 1 otherwise 0
-func CompareDate(date1, date2 time.Time) int {
+func CompareDate(date1, date2 time.Time) constant.DateCompare {
 	dt1 := date1.UTC()
 	dt2 := date2.UTC()
 	y1, m1, d1 := dt1.Date()
@@ -14,12 +18,12 @@ func CompareDate(date1, date2 time.Time) int {
 	t1 := time.Date(y1, m1, d1, h1, n1, s1, dt1.Nanosecond(), time.UTC)
 	t2 := time.Date(y2, m2, d2, h2, n2, s2, dt2.Nanosecond(), time.UTC)
 	if t1.Before(t2) {
-		return -1
+		return constant.Date1BeforeDate2
 	}
 	if t1.After(t2) {
-		return 1
+		return constant.Date1AfterDate2
 	}
-	return 0
+	return constant.Date1EqualDate2
 }
 
 // Now returns in utc
