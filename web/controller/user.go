@@ -10,23 +10,25 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
+	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
 )
 
 type UserController struct {
-	userDomain *domain.UserDomain
+	userDomain  *domain.UserDomain
+	userService *service.UserService
 }
 
-func NewUserController(userDomain *domain.UserDomain) *UserController {
-	return &UserController{userDomain: userDomain}
+func NewUserController(userDomain *domain.UserDomain, userService *service.UserService) *UserController {
+	return &UserController{userDomain: userDomain, userService: userService}
 }
 
-type GuestUserBody struct {
+type CreateGuestUserBody struct {
 	Email string `json:"email" validate:"required,email,min=6,max=32"`
 }
 
 func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
-	body := new(GuestUserBody)
+	body := new(CreateGuestUserBody)
 	tracingID := pkg.GetTracingID(c.Context())
 
 	if err := c.BodyParser(body); err != nil {
@@ -39,7 +41,9 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 
 	createUser := func() error {
 		log.Default.Print(tracingID, 0, "creating guest user", body.Email)
-		user, err := u.userDomain.CreateGuest(body.Email)
+
+		code := pkg.GetUniqueString()
+		user, err := u.userDomain.CreateGuest(body.Email, pkg.HashSha(code))
 		if err != nil {
 			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateGuestUser, err)
 		}
@@ -60,4 +64,32 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 			fmt.Errorf("remaining %d", remaining))
 	}
 	return createUser()
+}
+
+type GuestUserLoginBody struct {
+	Email string `json:"email" validate:"required,email,min=6,max=32"`
+	Code  string `json:"code" validate:"required,min=6,max=100"`
+}
+
+func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
+	body := new(GuestUserLoginBody)
+	tracingID := pkg.GetTracingID(c.Context())
+
+	if err := c.BodyParser(body); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
+	if err := resp.Validate.Struct(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+
+	guestUser, err := u.userService.VerifyGuestUser(c.Context(), body.Email, body.Code)
+	if err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
+	}
+
+	user, err := u.userDomain.GetUser(body.Email)
+	if err != nil {
+
+	}
 }

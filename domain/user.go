@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/validate"
 	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
@@ -43,5 +44,22 @@ func (u *UserDomain) GetGuestUser(email, code string) (*model.GuestUser, error) 
 
 	user := &model.GuestUser{}
 	err := stmt.Query(infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) GetUser(email string) (*model.User, error) {
+	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.Email.EQ(String(email))).LIMIT(1)
+
+	user := &model.User{}
+	err := stmt.Query(infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) CreateUser(email string, provider validate.UserLoginProvider) (*model.User, error) {
+	now := times.Now()
+	user := &model.User{Email: email, Code: code, ExpiresAt: now.Add(time.Minute * 10)}
+	insertStmt := User.INSERT(GuestUser.Email, GuestUser.Code, GuestUser.ExpiresAt).MODEL(user).
+		RETURNING(User.AllColumns)
+	err := insertStmt.Query(infra.DB, user)
 	return user, err
 }
