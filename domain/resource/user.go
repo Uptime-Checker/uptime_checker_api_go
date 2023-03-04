@@ -1,4 +1,4 @@
-package validate
+package resource
 
 // UserLoginProvider type
 type UserLoginProvider string
@@ -19,4 +19,16 @@ func (u UserLoginProvider) Valid() bool {
 		}
 	}
 	return false
+}
+
+func (u UserLoginProvider) Value() int32 {
+	switch u {
+	case UserLoginProviderEmail:
+		return 1
+	case UserLoginProviderGoogle:
+		return 2
+	case UserLoginProviderGithub:
+		return 3
+	}
+	return 1
 }
