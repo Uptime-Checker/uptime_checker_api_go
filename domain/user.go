@@ -117,6 +117,7 @@ func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) 
 func (u *UserDomain) CreateUserContact(
 	ctx context.Context,
 	tx *sql.Tx,
+	userID int64,
 	email string,
 	mode resource.UserContactMode,
 	verified bool,
@@ -127,11 +128,12 @@ func (u *UserDomain) CreateUserContact(
 	}
 	modeValue := int32(mode)
 	userContact := &model.UserContact{
+		UserID:   &userID,
 		Email:    &email,
 		Mode:     &modeValue,
 		Verified: verified,
 	}
-	insertStmt := UserContact.INSERT(UserContact.Email, UserContact.Mode, UserContact.Verified).MODEL(userContact).
+	insertStmt := UserContact.INSERT(UserContact.MutableColumns).MODEL(userContact).
 		RETURNING(UserContact.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, userContact)
 	return userContact, err

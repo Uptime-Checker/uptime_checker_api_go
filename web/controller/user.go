@@ -21,10 +21,11 @@ import (
 type UserController struct {
 	userDomain  *domain.UserDomain
 	authService *service.AuthService
+	userService *service.UserService
 }
 
-func NewUserController(userDomain *domain.UserDomain, authService *service.AuthService) *UserController {
-	return &UserController{userDomain: userDomain, authService: authService}
+func NewUserController(userDomain *domain.UserDomain, authService *service.AuthService, userService *service.UserService) *UserController {
+	return &UserController{userDomain: userDomain, authService: authService, userService: userService}
 }
 
 type CreateGuestUserBody struct {
@@ -97,7 +98,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	user, err := u.userDomain.GetUser(ctx, body.Email)
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		if err != nil {
-			user, err = u.userDomain.CreateUser(ctx, tx, body.Email, resource.UserLoginProviderEmail)
+			user, err = u.userService.CreateNewUserAndContact(ctx, tx, body.Email)
 			if err != nil {
 				return err
 			}
