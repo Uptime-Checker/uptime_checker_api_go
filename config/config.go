@@ -28,6 +28,7 @@ type config struct {
 
 var App config
 var IsProd bool
+var JWTKey = []byte(App.JWTKey)
 
 func LoadConfig(path string) error {
 	viper.AutomaticEnv()

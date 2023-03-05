@@ -9,8 +9,8 @@ import (
 
 func Header() func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		headerKey := c.Get(constant.APIKeyHeader)
-		if headerKey != config.App.APIKey {
+		headerAPIKey := c.Get(constant.APIKeyHeader)
+		if headerAPIKey != config.App.APIKey {
 			return fiber.ErrPreconditionFailed
 		}
 

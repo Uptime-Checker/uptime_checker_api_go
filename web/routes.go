@@ -45,9 +45,11 @@ func registerUserHandlers(
 	authService *service.AuthService,
 	userService *service.UserService,
 ) {
+	auth := middlelayer.Protected(authService)
+
 	handler := controller.NewUserController(userDomain, authService, userService)
 	router.Post("/guest", handler.CreateGuestUser)
 	router.Post("/guest/login", handler.GuestUserLogin)
 
-	router.Post("/me", handler.GetMe)
+	router.Get("/me", auth, handler.GetMe)
 }

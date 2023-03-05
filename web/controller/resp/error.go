@@ -8,6 +8,7 @@ import (
 
 const (
 	ErrMessageValidationFailed = "Validation Failed"
+	ErrMessageUnauthorized     = "Unauthorized"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 	ErrUpdatingUser            = "failed to update user"
 	ErrDeletingGuestUser       = "failed to delete guest user"
 	ErrGuestUserLoginFailed    = "failed to login guest user"
+	ErrMalformedJWT            = "missing or malformed JWT"
 )
 
 var Validate = validator.New()
@@ -57,4 +59,8 @@ func ServeInternalServerError(c *fiber.Ctx, err error) error {
 
 func ServeValidationError(c *fiber.Ctx, err error) error {
 	return c.Status(fiber.StatusUnprocessableEntity).JSON(processValidationError(err))
+}
+
+func ServeUnauthorizedError(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": ErrMessageUnauthorized})
 }
