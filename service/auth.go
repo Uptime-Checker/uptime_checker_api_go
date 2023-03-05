@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
@@ -54,5 +55,27 @@ func (a *AuthService) GenerateUserToken(user *model.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.App.JWTKey))
+	return token.SignedString(config.JWTKey)
+}
+
+// GetUserByToken returns user by token
+func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*model.User, error) {
+	token, err := jwt.Parse(tok, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, constant.ErrInvalidUserToken
+		}
+		return config.JWTKey, nil
+	})
+	if err != nil {
+		return nil, err
+	} else if !token.Valid {
+		return nil, constant.ErrInvalidUserToken
+	}
+
+	usr := pkg.BearerClaims{}
+	if err := mapstructure.Decode(token.Claims, &usr); err != nil {
+		return nil, err
+	}
+
+	return a.userDomain.GetUser(ctx, usr.Email)
 }
