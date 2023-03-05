@@ -18,6 +18,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
+	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
 )
 
 type UserController struct {
@@ -135,5 +136,6 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 }
 
 func (u *UserController) GetMe(c *fiber.Ctx) error {
-	return resp.ServeData(c, fiber.StatusOK, nil)
+	user := middlelayer.GetUser(c)
+	return resp.ServeData(c, fiber.StatusOK, user)
 }
