@@ -3,8 +3,6 @@
 set -e
 
 PROJ="uptime_checker_api_go"
-ORG_PATH="github.com/Uptime-Checker"
-REPO_PATH="${ORG_PATH}/${PROJ}"
 
 if ! [ -x "$(command -v go)" ]; then
     echo "go is not installed"
@@ -19,7 +17,6 @@ if [ -z "${GOPATH}" ]; then
     exit 1
 fi
 
-PATH="${PATH}:${GOPATH}/bin"
 COMMIT=$(git rev-parse --short HEAD)
 TAG=$(git describe --exact-match --abbrev=0 --tags "${COMMIT}" 2> /dev/null || true)
 
@@ -38,4 +35,4 @@ go mod verify
 go mod vendor
 
 golangci-lint run
-go install -v -ldflags="-X ${REPO_PATH}/version.Version=${VERSION}" ./...
+go build -o bin/${PROJ}

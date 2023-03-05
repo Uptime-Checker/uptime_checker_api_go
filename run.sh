@@ -1,3 +1,3 @@
 #! /bin/sh
 
-./build.sh && "$GOPATH"/bin/uptime_checker_api_go
+./build.sh && ./bin/uptime_checker_api_go

@@ -1,3 +1,3 @@
 #! /bin/sh
 
-"$GOPATH"/bin/uptime_checker_api_go
+./bin/uptime_checker_api_go
