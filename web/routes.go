@@ -39,7 +39,12 @@ func SetupRoutes(app *fiber.App) {
 	})
 }
 
-func registerUserHandlers(router fiber.Router, userDomain *domain.UserDomain, authService *service.AuthService, userService *service.UserService) {
+func registerUserHandlers(
+	router fiber.Router,
+	userDomain *domain.UserDomain,
+	authService *service.AuthService,
+	userService *service.UserService,
+) {
 	handler := controller.NewUserController(userDomain, authService, userService)
 	router.Post("/guest", handler.CreateGuestUser)
 	router.Post("/guest/login", handler.GuestUserLogin)

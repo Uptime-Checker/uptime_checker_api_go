@@ -24,7 +24,11 @@ type UserController struct {
 	userService *service.UserService
 }
 
-func NewUserController(userDomain *domain.UserDomain, authService *service.AuthService, userService *service.UserService) *UserController {
+func NewUserController(
+	userDomain *domain.UserDomain,
+	authService *service.AuthService,
+	userService *service.UserService,
+) *UserController {
 	return &UserController{userDomain: userDomain, authService: authService, userService: userService}
 }
 
@@ -73,7 +77,7 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 
 type GuestUserLoginBody struct {
 	Email string `json:"email" validate:"required,email,min=6,max=32"`
-	Code  string `json:"code" validate:"required,min=6,max=100"`
+	Code  string `json:"code"  validate:"required,min=6,max=100"`
 }
 
 func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
