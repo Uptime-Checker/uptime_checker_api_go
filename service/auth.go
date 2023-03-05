@@ -2,7 +2,11 @@ package service
 
 import (
 	"context"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
@@ -33,4 +37,22 @@ func (a *AuthService) VerifyGuestUser(ctx context.Context, email, code string) (
 		return nil, constant.ErrGuestUserCodeExpired
 	}
 	return guestUser, nil
+}
+
+func (a *AuthService) GenerateUserToken(user *model.User) (string, error) {
+	now := times.Now()
+	expirationTime := now.Add(constant.BearerTokenExpirationInDays * 24 * time.Hour)
+	claims := &pkg.BearerClaims{
+		UserID: user.ID,
+		Email:  user.Email,
+		RegisteredClaims: &jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+			NotBefore: jwt.NewNumericDate(now),
+			IssuedAt:  jwt.NewNumericDate(now),
+			Audience:  jwt.ClaimStrings{user.Email},
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(config.App.JWTKey))
 }

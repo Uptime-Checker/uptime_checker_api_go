@@ -10,6 +10,7 @@ type config struct {
 	Port    string `mapstructure:"PORT"`
 	Release string `mapstructure:"RELEASE"`
 	APIKey  string `mapstructure:"X_API_KEY"`
+	JWTKey  string `mapstructure:"JWT_KEY"`
 
 	Version string `mapstructure:"VERSION"`
 

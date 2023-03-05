@@ -7,6 +7,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/jinzhu/copier"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -99,9 +101,9 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	}
 	log.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
-	user, err := u.userDomain.GetUser(ctx, body.Email)
+	user, userGetError := u.userDomain.GetUser(ctx, body.Email)
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-		if err != nil {
+		if userGetError != nil {
 			user, err = u.userService.CreateNewUserAndContact(ctx, tx, body.Email)
 			if err != nil {
 				return err
@@ -120,5 +122,18 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 
-	return resp.ServeData(c, fiber.StatusOK, user)
+	token, err := u.authService.GenerateUserToken(user)
+	if err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
+	respUser := resp.User{Token: token}
+	if err := copier.Copy(&respUser, &user); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, respUser)
+}
+
+func (u *UserController) GetMe(c *fiber.Ctx) error {
+	return resp.ServeData(c, fiber.StatusOK, nil)
 }
