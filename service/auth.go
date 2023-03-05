@@ -11,19 +11,19 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
-type UserService struct {
+type AuthService struct {
 	userDomain *domain.UserDomain
 }
 
-func NewUserService(userDomain *domain.UserDomain) *UserService {
-	return &UserService{userDomain: userDomain}
+func NewAuthService(userDomain *domain.UserDomain) *AuthService {
+	return &AuthService{userDomain: userDomain}
 }
 
-func (u *UserService) VerifyGuestUser(ctx context.Context, email, code string) (*model.GuestUser, error) {
+func (a *AuthService) VerifyGuestUser(ctx context.Context, email, code string) (*model.GuestUser, error) {
 	now := times.Now()
 	tracingID := pkg.GetTracingID(ctx)
 
-	guestUser, err := u.userDomain.GetGuestUser(ctx, email, code)
+	guestUser, err := a.userDomain.GetGuestUser(ctx, email, code)
 	if err != nil {
 		log.Default.Error(tracingID, 1, "no guest user with", email, "code:", code)
 		return nil, err

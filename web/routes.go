@@ -26,7 +26,7 @@ func SetupRoutes(app *fiber.App) {
 	userDomain := domain.NewUserDomain()
 
 	// Service Registration
-	userService := service.NewUserService(userDomain)
+	userService := service.NewAuthService(userDomain)
 
 	// User router for auth and user account
 	userRouter := v1.Group("/user")
@@ -38,7 +38,7 @@ func SetupRoutes(app *fiber.App) {
 	})
 }
 
-func registerUserHandlers(router fiber.Router, userDomain *domain.UserDomain, userService *service.UserService) {
+func registerUserHandlers(router fiber.Router, userDomain *domain.UserDomain, userService *service.AuthService) {
 	handler := controller.NewUserController(userDomain, userService)
 	router.Post("/guest", handler.CreateGuestUser)
 	router.Post("/guest/login", handler.GuestUserLogin)

@@ -20,11 +20,11 @@ import (
 
 type UserController struct {
 	userDomain  *domain.UserDomain
-	userService *service.UserService
+	authService *service.AuthService
 }
 
-func NewUserController(userDomain *domain.UserDomain, userService *service.UserService) *UserController {
-	return &UserController{userDomain: userDomain, userService: userService}
+func NewUserController(userDomain *domain.UserDomain, authService *service.AuthService) *UserController {
+	return &UserController{userDomain: userDomain, authService: authService}
 }
 
 type CreateGuestUserBody struct {
@@ -88,7 +88,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 
-	guestUser, err := u.userService.VerifyGuestUser(ctx, body.Email, body.Code)
+	guestUser, err := u.authService.VerifyGuestUser(ctx, body.Email, body.Code)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
 	}
