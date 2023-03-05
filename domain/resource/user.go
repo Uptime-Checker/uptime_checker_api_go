@@ -24,3 +24,34 @@ func (u UserLoginProvider) Valid() bool {
 func (u UserLoginProvider) String() string {
 	return [...]string{"email", "google", "github"}[u-1]
 }
+
+// UserContactMode type
+type UserContactMode int
+
+// list of contact modes
+const (
+	UserContactModeEmail UserContactMode = iota + 1
+	UserContactModeSMS
+	UserContactModePhone
+	UserContactModeSMSAndPhone
+)
+
+// Valid checks if the MediaType is valid
+func (u UserContactMode) Valid() bool {
+	contactModes := []UserContactMode{
+		UserContactModeEmail,
+		UserContactModeSMS,
+		UserContactModePhone,
+		UserContactModeSMSAndPhone,
+	}
+	for _, c := range contactModes {
+		if c == u {
+			return true
+		}
+	}
+	return false
+}
+
+func (u UserContactMode) String() string {
+	return [...]string{"email", "sms", "phone", "smsAndPhone"}[u-1]
+}

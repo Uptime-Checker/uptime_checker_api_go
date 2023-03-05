@@ -75,9 +75,8 @@ func (u *UserDomain) CreateUser(
 		ProviderUID: &email,
 		Provider:    &providerValue,
 		LastLoginAt: &now,
-		UpdatedAt:   time.Time{},
 	}
-	insertStmt := User.INSERT(User.Email, User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).MODEL(user).
+	insertStmt := User.INSERT(User.Email, User.ProviderUID, User.Provider, User.LastLoginAt).MODEL(user).
 		RETURNING(User.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, user)
 	return user, err
@@ -113,4 +112,27 @@ func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) 
 	deleteStmt := GuestUser.DELETE().WHERE(GuestUser.ID.EQ(Int(id)))
 	_, err := deleteStmt.ExecContext(ctx, tx)
 	return err
+}
+
+func (u *UserDomain) CreateUserContact(
+	ctx context.Context,
+	tx *sql.Tx,
+	email string,
+	mode resource.UserContactMode,
+	verified bool,
+) (*model.UserContact, error) {
+
+	if !mode.Valid() {
+		return nil, constant.ErrInvalidUserContactMode
+	}
+	modeValue := int32(mode)
+	userContact := &model.UserContact{
+		Email:    &email,
+		Mode:     &modeValue,
+		Verified: verified,
+	}
+	insertStmt := UserContact.INSERT(UserContact.Email, UserContact.Mode, UserContact.Verified).MODEL(userContact).
+		RETURNING(UserContact.AllColumns)
+	err := insertStmt.QueryContext(ctx, tx, userContact)
+	return userContact, err
 }
