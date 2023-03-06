@@ -10,7 +10,7 @@ const (
 	UserLoginProviderGithub
 )
 
-// Valid checks if the MediaType is valid
+// Valid checks if the UserLoginProvider is valid
 func (u UserLoginProvider) Valid() bool {
 	providers := []UserLoginProvider{UserLoginProviderEmail, UserLoginProviderGoogle, UserLoginProviderGithub}
 	for _, p := range providers {
@@ -36,7 +36,7 @@ const (
 	UserContactModeSMSAndPhone
 )
 
-// Valid checks if the MediaType is valid
+// Valid checks if the UserContactMode is valid
 func (u UserContactMode) Valid() bool {
 	contactModes := []UserContactMode{
 		UserContactModeEmail,
