@@ -80,7 +80,7 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		log.Default.Print(tracingID, 3, "created organization", organization.Name, "slug" organization.Slug)
+		log.Default.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
 		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.ID, role.ID, organization.ID)
 		if err != nil {
