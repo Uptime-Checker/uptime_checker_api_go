@@ -66,13 +66,13 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrPlanNotFound, err)
 	}
-	log.Default.Print(tracingID, 1, "found plan", plan.Name, plan.Product.Name)
+	log.Default.Print(tracingID, 1, "found plan", plan.Name, "product", plan.Product.Name)
 
 	role, err := o.organizationDomain.GetRoleByType(ctx, resource.RoleTypeSuperAdmin)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrRoleNotFound, err)
 	}
-	log.Default.Print(tracingID, 2, "assign role", role.Name)
+	log.Default.Print(tracingID, 2, "to assign role", role.Name)
 
 	var organization *model.Organization
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
@@ -80,7 +80,7 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		log.Default.Print(tracingID, 3, "created organization", organization.Name, organization.Slug)
+		log.Default.Print(tracingID, 3, "created organization", organization.Name, "slug" organization.Slug)
 
 		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.ID, role.ID, organization.ID)
 		if err != nil {

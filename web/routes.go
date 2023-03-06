@@ -25,10 +25,13 @@ func SetupRoutes(app *fiber.App) {
 	// Domain Registration
 	userDomain := domain.NewUserDomain()
 	paymentDomain := domain.NewPaymentDomain()
+	organizationDomain := domain.NewOrganizationDomain()
 
 	// Service Registration
 	authService := service.NewAuthService(userDomain)
 	userService := service.NewUserService(userDomain)
+	paymentService := service.NewPaymentService(paymentDomain)
+	organizationService := service.NewOrganizationService(organizationDomain)
 
 	// User router for auth and user account
 	userRouter := v1.Group("/user")
@@ -36,7 +39,15 @@ func SetupRoutes(app *fiber.App) {
 
 	// Organization router for managing organization
 	orgRouter := v1.Group("/organization")
-	registerOrganizationHandlers(orgRouter, paymentDomain, authService, userService)
+	registerOrganizationHandlers(
+		orgRouter,
+		userDomain,
+		paymentDomain,
+		organizationDomain,
+		authService,
+		paymentService,
+		organizationService,
+	)
 
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {
@@ -62,13 +73,22 @@ func registerUserHandlers(
 
 func registerOrganizationHandlers(
 	router fiber.Router,
+	userDomain *domain.UserDomain,
 	paymentDomain *domain.PaymentDomain,
+	organizationDomain *domain.OrganizationDomain,
 	authService *service.AuthService,
-	userService *service.UserService,
+	paymentService *service.PaymentService,
+	organizationService *service.OrganizationService,
 ) {
 	auth := middlelayer.Protected(authService)
 
-	handler := controller.NewOrganizationController(paymentDomain, userService)
+	handler := controller.NewOrganizationController(
+		userDomain,
+		paymentDomain,
+		organizationDomain,
+		paymentService,
+		organizationService,
+	)
 
 	router.Post("/", auth, handler.CreateOrganization)
 }

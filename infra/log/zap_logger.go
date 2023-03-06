@@ -51,6 +51,7 @@ func newZapLogger() *zapLogger {
 	} else {
 		cfg := zap.NewDevelopmentConfig()
 		cfg.DisableStacktrace = true
+		cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		cfg.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.RFC3339)
 		logger, err = cfg.Build(zap.AddCallerSkip(1))
 		if err != nil {
