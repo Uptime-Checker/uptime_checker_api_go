@@ -36,3 +36,34 @@ func (s SubscriptionStatus) Valid() bool {
 func (s SubscriptionStatus) String() string {
 	return [...]string{"incomplete", "incompleteExpired", "trialing", "active", "pastDue", "canceled", "unpaid"}[s-1]
 }
+
+// ProductTier type
+type ProductTier int
+
+// list of product tiers
+const (
+	ProductTierFree ProductTier = iota + 1
+	ProductTierDeveloper
+	ProductTierStartup
+	ProductTierEnterprise
+)
+
+// Valid checks if the ProductTier is valid
+func (p ProductTier) Valid() bool {
+	productTiers := []ProductTier{
+		ProductTierFree,
+		ProductTierDeveloper,
+		ProductTierStartup,
+		ProductTierEnterprise,
+	}
+	for _, c := range productTiers {
+		if c == p {
+			return true
+		}
+	}
+	return false
+}
+
+func (p ProductTier) String() string {
+	return [...]string{"Free", "Developer", "Startup", "Enterprise"}[p-1]
+}

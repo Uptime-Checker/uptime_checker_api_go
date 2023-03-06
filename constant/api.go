@@ -1,8 +1,11 @@
 package constant
 
 const (
-	GuestUserRateLimitInMinutes = 5
-	BearerTokenExpirationInDays = 180
+	GuestUserRateLimitInMinutes     = 5
+	GuestUserCodeExpiryInMinutes    = 10
+	BearerTokenExpirationInDays     = 180
+	FreeSubscriptionDurationInDays  = 120
+	TrialSubscriptionDurationInDays = 14
 )
 
 // DateCompare type

@@ -22,9 +22,15 @@ func NewUserDomain() *UserDomain {
 	return &UserDomain{}
 }
 
+// Guest User
+
 func (u *UserDomain) CreateGuest(ctx context.Context, email, code string) (*model.GuestUser, error) {
 	now := times.Now()
-	user := &model.GuestUser{Email: email, Code: code, ExpiresAt: now.Add(time.Minute * 10)}
+	user := &model.GuestUser{
+		Email:     email,
+		Code:      code,
+		ExpiresAt: now.Add(time.Minute * constant.GuestUserCodeExpiryInMinutes),
+	}
 	insertStmt := GuestUser.INSERT(GuestUser.Email, GuestUser.Code, GuestUser.ExpiresAt).MODEL(user).
 		RETURNING(GuestUser.AllColumns)
 	err := insertStmt.QueryContext(ctx, infra.DB, user)
@@ -49,6 +55,14 @@ func (u *UserDomain) GetGuestUser(ctx context.Context, email, code string) (*mod
 	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }
+
+func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) error {
+	deleteStmt := GuestUser.DELETE().WHERE(GuestUser.ID.EQ(Int(id)))
+	_, err := deleteStmt.ExecContext(ctx, tx)
+	return err
+}
+
+// User
 
 func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, error) {
 	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.Email.EQ(String(email))).LIMIT(1)
@@ -127,11 +141,26 @@ func (u *UserDomain) UpdateName(
 	return user, err
 }
 
-func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) error {
-	deleteStmt := GuestUser.DELETE().WHERE(GuestUser.ID.EQ(Int(id)))
-	_, err := deleteStmt.ExecContext(ctx, tx)
-	return err
+func (u *UserDomain) UpdateOrganizationAndRole(
+	ctx context.Context,
+	id, roleID, organizationID int64,
+) (*model.User, error) {
+
+	now := times.Now()
+	user := &model.User{
+		RoleID:         &roleID,
+		OrganizationID: &organizationID,
+		UpdatedAt:      now,
+	}
+
+	updateStmt := User.UPDATE(User.RoleID, User.OrganizationID, User.UpdatedAt).MODEL(user).WHERE(User.ID.EQ(Int(id))).
+		RETURNING(User.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, infra.DB, user)
+	return user, err
 }
+
+// User Contact
 
 func (u *UserDomain) CreateUserContact(
 	ctx context.Context,
