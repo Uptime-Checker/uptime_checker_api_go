@@ -120,6 +120,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 		log.Default.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
 		return u.userDomain.DeleteGuestUser(ctx, tx, guestUser.ID)
 	}); err != nil {
+		log.Default.Error(tracingID, 5, "failed to login guest user", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 
