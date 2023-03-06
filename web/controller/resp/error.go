@@ -12,15 +12,17 @@ const (
 )
 
 const (
-	ErrFailedToCreateGuestUser = "failed to create guest user"
-	ErrGuestUserRateLimited    = "guest user rate limited"
-	ErrGuestUserNotFound       = "guest user not found"
-	ErrPlanNotFound            = "plan not found"
-	ErrCreatingNewUser         = "failed to create new user"
-	ErrUpdatingUser            = "failed to update user"
-	ErrDeletingGuestUser       = "failed to delete guest user"
-	ErrGuestUserLoginFailed    = "failed to login guest user"
-	ErrMalformedJWT            = "missing or malformed JWT"
+	ErrFailedToCreateGuestUser    = "failed to create guest user"
+	ErrFailedToCreateOrganization = "failed to create organization"
+	ErrGuestUserRateLimited       = "guest user rate limited"
+	ErrGuestUserNotFound          = "guest user not found"
+	ErrPlanNotFound               = "plan not found"
+	ErrRoleNotFound               = "role not found"
+	ErrCreatingNewUser            = "failed to create new user"
+	ErrUpdatingUser               = "failed to update user"
+	ErrDeletingGuestUser          = "failed to delete guest user"
+	ErrGuestUserLoginFailed       = "failed to login guest user"
+	ErrMalformedJWT               = "missing or malformed JWT"
 )
 
 var Validate = validator.New()

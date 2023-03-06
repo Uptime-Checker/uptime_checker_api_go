@@ -143,6 +143,7 @@ func (u *UserDomain) UpdateName(
 
 func (u *UserDomain) UpdateOrganizationAndRole(
 	ctx context.Context,
+	tx *sql.Tx,
 	id, roleID, organizationID int64,
 ) (*model.User, error) {
 
@@ -156,7 +157,7 @@ func (u *UserDomain) UpdateOrganizationAndRole(
 	updateStmt := User.UPDATE(User.RoleID, User.OrganizationID, User.UpdatedAt).MODEL(user).WHERE(User.ID.EQ(Int(id))).
 		RETURNING(User.AllColumns)
 
-	err := updateStmt.QueryContext(ctx, infra.DB, user)
+	err := updateStmt.QueryContext(ctx, tx, user)
 	return user, err
 }
 
