@@ -108,6 +108,25 @@ func (u *UserDomain) UpdateProvider(
 	return user, err
 }
 
+func (u *UserDomain) UpdateName(
+	ctx context.Context,
+	id int64,
+	name string,
+) (*model.User, error) {
+
+	now := times.Now()
+	user := &model.User{
+		Name:      name,
+		UpdatedAt: now,
+	}
+
+	updateStmt := User.UPDATE(User.Name, User.UpdatedAt).
+		MODEL(user).WHERE(User.ID.EQ(Int(id))).RETURNING(User.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
 func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) error {
 	deleteStmt := GuestUser.DELETE().WHERE(GuestUser.ID.EQ(Int(id)))
 	_, err := deleteStmt.ExecContext(ctx, tx)

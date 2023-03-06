@@ -52,4 +52,5 @@ func registerUserHandlers(
 	router.Post("/guest/login", handler.GuestUserLogin)
 
 	router.Get("/me", auth, handler.GetMe)
+	router.Patch("/update", auth, handler.Update)
 }

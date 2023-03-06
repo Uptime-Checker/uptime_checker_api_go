@@ -139,3 +139,26 @@ func (u *UserController) GetMe(c *fiber.Ctx) error {
 	user := middlelayer.GetUser(c)
 	return resp.ServeData(c, fiber.StatusOK, user)
 }
+
+type UserUpdateBody struct {
+	Name string `json:"name" validate:"required,min=4,max=32"`
+}
+
+func (u *UserController) Update(c *fiber.Ctx) error {
+	user := middlelayer.GetUser(c)
+	body := new(UserUpdateBody)
+
+	if err := c.BodyParser(body); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
+	if err := resp.Validate.Struct(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+
+	updatedUser, err := u.userDomain.UpdateName(c.Context(), user.ID, body.Name)
+	if err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, updatedUser)
+}
