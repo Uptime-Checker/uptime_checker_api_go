@@ -22,13 +22,20 @@ func NewUserDomain() *UserDomain {
 	return &UserDomain{}
 }
 
-type UserWithRole struct {
+type UserWithRoleAndSubscription struct {
 	*model.User
 	Organization *model.Organization
 
 	Role struct {
 		*model.Role
 		Claims []*model.RoleClaim
+	}
+
+	Subscription struct {
+		*model.Subscription
+		Plan     *model.Plan
+		Product  *model.Product
+		Features []*model.Feature
 	}
 }
 
@@ -82,17 +89,34 @@ func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, er
 	return user, err
 }
 
-func (u *UserDomain) GetUserWithRole(ctx context.Context, id int64) (*UserWithRole, error) {
-	stmt := SELECT(User.AllColumns, Role.AllColumns, RoleClaim.AllColumns, Organization.AllColumns).
+func (u *UserDomain) GetUserWithRoleAndSubscription(
+	ctx context.Context,
+	id int64,
+) (*UserWithRoleAndSubscription, error) {
+	stmt := SELECT(
+		User.AllColumns,
+		Role.AllColumns,
+		RoleClaim.AllColumns,
+		Organization.AllColumns,
+		Subscription.AllColumns,
+		Plan.AllColumns,
+		Product.AllColumns,
+		Feature.AllColumns,
+	).
 		FROM(
 			User.
 				LEFT_JOIN(Role, User.RoleID.EQ(Role.ID)).
 				LEFT_JOIN(RoleClaim, User.RoleID.EQ(RoleClaim.RoleID)).
-				LEFT_JOIN(Organization, User.OrganizationID.EQ(Organization.ID)),
+				LEFT_JOIN(Organization, User.OrganizationID.EQ(Organization.ID)).
+				LEFT_JOIN(Subscription, User.OrganizationID.EQ(Subscription.OrganizationID)).
+				LEFT_JOIN(Plan, Subscription.PlanID.EQ(Plan.ID)).
+				LEFT_JOIN(Product, Subscription.ProductID.EQ(Product.ID)).
+				LEFT_JOIN(ProductFeature, Product.ID.EQ(ProductFeature.ProductID)).
+				LEFT_JOIN(Feature, ProductFeature.FeatureID.EQ(Feature.ID)),
 		).
 		WHERE(User.ID.EQ(Int(id)))
 
-	user := &UserWithRole{}
+	user := &UserWithRoleAndSubscription{}
 	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }

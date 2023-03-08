@@ -52,6 +52,10 @@ func processError(message string, err error) map[string]interface{} {
 	return fiber.Map{"message": message, "error": err.Error()}
 }
 
+func SendError(c *fiber.Ctx, status int, err error) error {
+	return c.Status(status).JSON(fiber.Map{"error": err.Error()})
+}
+
 func ServeError(c *fiber.Ctx, status int, message string, err error) error {
 	return c.Status(status).JSON(processError(message, err))
 }

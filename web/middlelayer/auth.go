@@ -34,11 +34,11 @@ func Protected(auth *service.AuthService) func(*fiber.Ctx) error {
 }
 
 // GetUser returns user that's in context
-func GetUser(c *fiber.Ctx) *domain.UserWithRole {
+func GetUser(c *fiber.Ctx) *domain.UserWithRoleAndSubscription {
 	v := c.Context().Value(string(constant.UserKey))
 	if v == nil {
 		panic("middleware: GetUser called without calling auth middleware prior")
 	}
-	u, _ := v.(*domain.UserWithRole)
+	u, _ := v.(*domain.UserWithRoleAndSubscription)
 	return u
 }

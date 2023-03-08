@@ -23,7 +23,6 @@ create table if not exists "user" (
     name varchar(255),
     email varchar(255) not null,
     picture_url varchar(255),
-    password varchar(255),
     payment_customer_id varchar(255),
     provider_uid varchar(255),
     provider integer default 1,

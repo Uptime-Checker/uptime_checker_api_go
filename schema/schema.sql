@@ -74,7 +74,6 @@ create table if not exists monitor (
     body_format integer default 1,
     headers jsonb default '{}'::jsonb,
     username text,
-    password text,
     "on" boolean default true,
     muted boolean default false,
     status integer default 1,
