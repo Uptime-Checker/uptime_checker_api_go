@@ -157,7 +157,7 @@ func (u *UserController) Update(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 
-	updatedUser, err := u.userDomain.UpdateName(c.Context(), user.ID, body.Name)
+	updatedUser, err := u.userDomain.UpdateName(c.Context(), user.User.ID, body.Name)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrUpdatingUser, err)
 	}

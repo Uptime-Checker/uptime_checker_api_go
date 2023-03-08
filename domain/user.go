@@ -22,6 +22,16 @@ func NewUserDomain() *UserDomain {
 	return &UserDomain{}
 }
 
+type UserWithRole struct {
+	*model.User
+	Organization *model.Organization
+
+	Role struct {
+		*model.Role
+		Claims []*model.RoleClaim
+	}
+}
+
 // Guest User
 
 func (u *UserDomain) CreateGuest(ctx context.Context, email, code string) (*model.GuestUser, error) {
@@ -68,6 +78,21 @@ func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, er
 	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.Email.EQ(String(email))).LIMIT(1)
 
 	user := &model.User{}
+	err := stmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) GetUserWithRole(ctx context.Context, id int64) (*UserWithRole, error) {
+	stmt := SELECT(User.AllColumns, Role.AllColumns, RoleClaim.AllColumns, Organization.AllColumns).
+		FROM(
+			User.
+				LEFT_JOIN(Role, User.RoleID.EQ(Role.ID)).
+				LEFT_JOIN(RoleClaim, User.RoleID.EQ(RoleClaim.RoleID)).
+				LEFT_JOIN(Organization, User.OrganizationID.EQ(Organization.ID)),
+		).
+		WHERE(User.ID.EQ(Int(id)))
+
+	user := &UserWithRole{}
 	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }

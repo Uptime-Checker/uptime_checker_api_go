@@ -76,13 +76,13 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 
 	var organization *model.Organization
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-		organization, err = o.organizationService.Create(ctx, tx, body.Name, body.Slug, user.ID, role.ID)
+		organization, err = o.organizationService.Create(ctx, tx, body.Name, body.Slug, user.User.ID, role.ID)
 		if err != nil {
 			return err
 		}
 		log.Default.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
-		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.ID, role.ID, organization.ID)
+		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
 		if err != nil {
 			return err
 		}
