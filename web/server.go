@@ -13,6 +13,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
@@ -79,5 +80,7 @@ func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 		app.Use(fibernewrelic.New(fibernewrelic.Config{
 			Application: newRelicApp,
 		}))
+	} else {
+		app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics"}))
 	}
 }
