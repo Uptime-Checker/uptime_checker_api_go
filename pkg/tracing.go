@@ -13,7 +13,7 @@ func GetTracingID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
 	}
-	val := ctx.Value(string(constant.TracingKey))
+	val := ctx.Value(constant.TracingKey.String())
 	if val == nil {
 		return ""
 	}
@@ -23,7 +23,7 @@ func GetTracingID(ctx context.Context) string {
 
 // NewTracingID sets tracing id
 func NewTracingID(ctx context.Context) context.Context {
-	ctx = context.WithValue(ctx, string(constant.TracingKey), GetUniqueString())
+	ctx = context.WithValue(ctx, constant.TracingKey.String(), GetUniqueString())
 	return ctx
 }
 
