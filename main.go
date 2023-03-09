@@ -4,7 +4,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/cache"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web"
 )
 
@@ -14,7 +14,7 @@ func main() {
 	}
 
 	// Setup Logger
-	log.SetupLogger()
+	lgr.SetupLogger()
 
 	// Setup Cache
 	cache.SetupCache()
@@ -23,6 +23,6 @@ func main() {
 	if err := infra.ConnectDatabase(!config.IsProd); err != nil {
 		panic("database connection failed")
 	}
-	log.Default.Print("database connected")
+	lgr.Default.Print("database connected")
 	web.Setup()
 }

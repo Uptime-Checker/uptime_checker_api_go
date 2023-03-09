@@ -1,4 +1,4 @@
-package log
+package lgr
 
 // Logger is the logging interface of the project
 type Logger interface {

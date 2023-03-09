@@ -12,7 +12,7 @@ import (
 	"github.com/getsentry/sentry-go"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
@@ -45,21 +45,21 @@ func ConnectDatabase(enableLogging bool) error {
 
 func StartTransaction(ctx context.Context) (*sql.Tx, error) {
 	tracingID := pkg.GetTracingID(ctx)
-	log.Default.Print(tracingID, "start transaction")
+	lgr.Default.Print(tracingID, "start transaction")
 
 	return DB.BeginTx(ctx, nil)
 }
 
 func CommitTransaction(ctx context.Context, transaction *sql.Tx) error {
 	tracingID := pkg.GetTracingID(ctx)
-	log.Default.Print(tracingID, "commit transaction")
+	lgr.Default.Print(tracingID, "commit transaction")
 
 	return transaction.Commit()
 }
 
 func RollbackTransaction(ctx context.Context, transaction *sql.Tx) error {
 	tracingID := pkg.GetTracingID(ctx)
-	log.Default.Print(tracingID, "rollback transaction")
+	lgr.Default.Print(tracingID, "rollback transaction")
 
 	return transaction.Rollback()
 }

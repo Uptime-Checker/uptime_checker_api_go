@@ -13,7 +13,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
@@ -52,7 +52,7 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 	}
 
 	createUser := func() error {
-		log.Default.Print(tracingID, 0, "creating guest user", body.Email)
+		lgr.Default.Print(tracingID, 0, "creating guest user", body.Email)
 
 		code := pkg.GetUniqueString()
 		user, err := u.userDomain.CreateGuest(c.Context(), body.Email, pkg.HashSha(code))
@@ -64,13 +64,13 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 
 	latestGuestUser, err := u.userDomain.GetLatestGuestUser(c.Context(), body.Email)
 	if err != nil {
-		log.Default.Print(tracingID, 1, "no previous guest user", body.Email)
+		lgr.Default.Print(tracingID, 1, "no previous guest user", body.Email)
 		return createUser()
 	}
 
 	passed := times.Now().Sub(latestGuestUser.InsertedAt).Minutes()
 	remaining := int(constant.GuestUserRateLimitInMinutes - passed)
-	log.Default.Print(tracingID, 2, "previous guest user exists", latestGuestUser.Email, "remaining", remaining)
+	lgr.Default.Print(tracingID, 2, "previous guest user exists", latestGuestUser.Email, "remaining", remaining)
 	if passed <= constant.GuestUserRateLimitInMinutes {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserRateLimited,
 			fmt.Errorf("remaining %d", remaining))
@@ -100,7 +100,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
 	}
-	log.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
+	lgr.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
 	user, userGetError := u.userDomain.GetUser(ctx, body.Email)
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
@@ -109,18 +109,18 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			log.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
+			lgr.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
 		} else {
 			user, err = u.userDomain.UpdateProvider(ctx, tx, body.Email, resource.UserLoginProviderEmail)
 			if err != nil {
 				return err
 			}
-			log.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
+			lgr.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
 		}
-		log.Default.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
+		lgr.Default.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
 		return u.userDomain.DeleteGuestUser(ctx, tx, guestUser.ID)
 	}); err != nil {
-		log.Default.Error(tracingID, 5, "failed to login guest user", err.Error())
+		lgr.Default.Error(tracingID, 5, "failed to login guest user", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
@@ -34,7 +34,7 @@ func SetupSentry() {
 
 	err := sentry.Init(options)
 	if err != nil {
-		log.Default.Errorf("sentry.Init: %s", err)
+		lgr.Default.Errorf("sentry.Init: %s", err)
 	}
 	// Flush buffered events before the program terminates.
 	// Set the timeout to the maximum duration the program can afford to wait.
