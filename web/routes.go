@@ -4,7 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
+	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
 )
@@ -52,6 +54,12 @@ func SetupRoutes(app *fiber.App) {
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
+	})
+
+	// Setup Cron
+	syncProductsTask := task.NewSyncProductsTask()
+	app.Hooks().OnListen(func() error {
+		return infra.SetupCron(syncProductsTask)
 	})
 }
 
