@@ -3,6 +3,7 @@ module github.com/Uptime-Checker/uptime_checker_api_go
 go 1.20
 
 require (
+	github.com/coocood/freecache v1.2.3
 	github.com/getsentry/sentry-go v0.18.0
 	github.com/go-jet/jet/v2 v2.9.0
 	github.com/go-playground/validator/v10 v10.11.2
@@ -23,6 +24,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

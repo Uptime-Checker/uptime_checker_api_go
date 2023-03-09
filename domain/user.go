@@ -10,6 +10,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
@@ -20,23 +21,6 @@ type UserDomain struct{}
 
 func NewUserDomain() *UserDomain {
 	return &UserDomain{}
-}
-
-type UserWithRoleAndSubscription struct {
-	*model.User
-	Organization *model.Organization
-
-	Role struct {
-		*model.Role
-		Claims []*model.RoleClaim
-	}
-
-	Subscription struct {
-		*model.Subscription
-		Plan     *model.Plan
-		Product  *model.Product
-		Features []*model.Feature
-	}
 }
 
 // Guest User
@@ -92,7 +76,7 @@ func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, er
 func (u *UserDomain) GetUserWithRoleAndSubscription(
 	ctx context.Context,
 	id int64,
-) (*UserWithRoleAndSubscription, error) {
+) (*pkg.UserWithRoleAndSubscription, error) {
 	stmt := SELECT(
 		User.AllColumns,
 		Role.AllColumns,
@@ -116,7 +100,7 @@ func (u *UserDomain) GetUserWithRoleAndSubscription(
 		).
 		WHERE(User.ID.EQ(Int(id)))
 
-	user := &UserWithRoleAndSubscription{}
+	user := &pkg.UserWithRoleAndSubscription{}
 	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }

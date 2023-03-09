@@ -6,7 +6,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
@@ -34,11 +33,11 @@ func Protected(auth *service.AuthService) func(*fiber.Ctx) error {
 }
 
 // GetUser returns user that's in context
-func GetUser(c *fiber.Ctx) *domain.UserWithRoleAndSubscription {
+func GetUser(c *fiber.Ctx) *pkg.UserWithRoleAndSubscription {
 	v := c.Context().Value(string(constant.UserKey))
 	if v == nil {
 		panic("middleware: GetUser called without calling auth middleware prior")
 	}
-	u, _ := v.(*domain.UserWithRoleAndSubscription)
+	u, _ := v.(*pkg.UserWithRoleAndSubscription)
 	return u
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -59,7 +60,7 @@ func (a *AuthService) GenerateUserToken(user *model.User) (string, error) {
 }
 
 // GetUserByToken returns user by token
-func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*domain.UserWithRoleAndSubscription, error) {
+func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*pkg.UserWithRoleAndSubscription, error) {
 	token, err := jwt.Parse(tok, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, constant.ErrInvalidUserToken
@@ -77,5 +78,14 @@ func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*domain.U
 		return nil, err
 	}
 
-	return a.userDomain.GetUserWithRoleAndSubscription(ctx, usr.UserID)
+	cachedUser := cache.GetUserWithRoleAndSubscription()
+	if cachedUser == nil {
+		user, err := a.userDomain.GetUserWithRoleAndSubscription(ctx, usr.UserID)
+		if err != nil {
+			return nil, err
+		}
+		cache.SetUserWithRoleAndSubscription(user)
+		return user, nil
+	}
+	return cachedUser, nil
 }

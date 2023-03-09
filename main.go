@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/log"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web"
 )
@@ -14,6 +15,9 @@ func main() {
 
 	// Setup Logger
 	log.SetupLogger()
+
+	// Setup Cache
+	cache.SetupCache()
 
 	// Setup Database
 	if err := infra.ConnectDatabase(!config.IsProd); err != nil {
