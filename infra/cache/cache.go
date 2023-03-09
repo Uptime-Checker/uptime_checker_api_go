@@ -47,3 +47,7 @@ func GetUserWithRoleAndSubscription() *pkg.UserWithRoleAndSubscription {
 	}
 	return &user
 }
+
+func DeleteUserWithRoleAndSubscription() {
+	cache.Del([]byte(KeyUser))
+}
