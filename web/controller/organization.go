@@ -9,6 +9,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
@@ -97,5 +98,7 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		lgr.Default.Error(tracingID, 6, "failed to create organization", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateOrganization, err)
 	}
+
+	cache.DeleteUserWithRoleAndSubscription()
 	return resp.ServeData(c, fiber.StatusOK, organization)
 }
