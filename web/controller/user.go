@@ -16,6 +16,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
+	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
@@ -111,7 +112,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 			}
 			lgr.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
 		} else {
-			user, err = u.userDomain.UpdateProvider(ctx, tx, body.Email, resource.UserLoginProviderEmail)
+			user, err = u.userDomain.UpdateProvider(ctx, tx, user.ID, body.Email, resource.UserLoginProviderEmail)
 			if err != nil {
 				return err
 			}
@@ -124,6 +125,67 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 
+	token, err := u.authService.GenerateUserToken(user)
+	if err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
+	respUser := resp.User{Token: token}
+	if err := copier.Copy(&respUser, &user); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, respUser)
+}
+
+type ProviderLoginBody struct {
+	Name        string `json:"name"        validate:"required"`
+	Email       string `json:"email"       validate:"required,email,min=6,max=32"`
+	Provider    int    `json:"provider"    validate:"required"`
+	ProviderUID string `json:"providerUID" validate:"required"`
+	Picture     string `json:"picture"     validate:"url"`
+}
+
+func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
+	ctx := c.Context()
+	body := new(ProviderLoginBody)
+	tracingID := pkg.GetTracingID(ctx)
+
+	if err := c.BodyParser(body); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
+	if err := resp.Validate.Struct(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+
+	var user *model.User
+	var err error
+	provider := resource.UserLoginProvider(body.Provider)
+
+	user, err = u.userDomain.GetUser(ctx, body.Email)
+	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		if err != nil {
+			user, err = u.userService.CreateNewProviderUserAndContact(
+				ctx, tx, body.Name, body.Email, body.Provider, body.ProviderUID, body.Picture,
+			)
+			if err != nil {
+				return err
+			}
+			lgr.Default.Print(tracingID, 1, "created new user", user.ID, user.Email, "provider", provider.String())
+		} else {
+			user, err = u.userDomain.UpdateProvider(
+				ctx, tx, user.ID, body.Email, resource.UserLoginProvider(body.Provider),
+			)
+			if err != nil {
+				return err
+			}
+			lgr.Default.Print(tracingID, 2, "update user provider", user.ID, user.Email, "provider", provider.String())
+		}
+		return nil
+	}); err != nil {
+		lgr.Default.Error(tracingID, 3, "failed to login provider user", body.Email, provider.String(), err.Error())
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
+	}
 	token, err := u.authService.GenerateUserToken(user)
 	if err != nil {
 		return resp.ServeInternalServerError(c, err)

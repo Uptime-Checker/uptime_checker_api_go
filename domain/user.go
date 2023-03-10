@@ -108,7 +108,7 @@ func (u *UserDomain) GetUserWithRoleAndSubscription(
 func (u *UserDomain) CreateUser(
 	ctx context.Context,
 	tx *sql.Tx,
-	email string,
+	user *model.User,
 	provider resource.UserLoginProvider,
 ) (*model.User, error) {
 
@@ -117,13 +117,10 @@ func (u *UserDomain) CreateUser(
 	}
 	providerValue := int32(provider)
 	now := times.Now()
-	user := &model.User{
-		Email:       email,
-		ProviderUID: &email,
-		Provider:    &providerValue,
-		LastLoginAt: &now,
-	}
-	insertStmt := User.INSERT(User.Email, User.ProviderUID, User.Provider, User.LastLoginAt).MODEL(user).
+
+	user.Provider = &providerValue
+	user.LastLoginAt = &now
+	insertStmt := User.INSERT(User.MutableColumns).MODEL(user).
 		RETURNING(User.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, user)
 	return user, err
@@ -132,7 +129,8 @@ func (u *UserDomain) CreateUser(
 func (u *UserDomain) UpdateProvider(
 	ctx context.Context,
 	tx *sql.Tx,
-	email string,
+	id int64,
+	providerUID string,
 	provider resource.UserLoginProvider,
 ) (*model.User, error) {
 
@@ -142,14 +140,14 @@ func (u *UserDomain) UpdateProvider(
 	providerValue := int32(provider)
 	now := times.Now()
 	user := &model.User{
-		ProviderUID: &email,
+		ProviderUID: &providerUID,
 		Provider:    &providerValue,
 		LastLoginAt: &now,
 		UpdatedAt:   now,
 	}
 
 	updateStmt := User.UPDATE(User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).
-		MODEL(user).WHERE(User.Email.EQ(String(email))).RETURNING(User.AllColumns)
+		MODEL(user).WHERE(User.ID.EQ(Int(id))).RETURNING(User.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, tx, user)
 	return user, err

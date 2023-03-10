@@ -74,6 +74,7 @@ func registerUserHandlers(
 	handler := controller.NewUserController(userDomain, authService, userService)
 	router.Post("/guest", handler.CreateGuestUser)
 	router.Post("/guest/login", handler.GuestUserLogin)
+	router.Post("/provider/login", handler.ProviderLogin)
 
 	router.Get("/me", auth, handler.GetMe)
 	router.Patch("/", auth, handler.Update)
