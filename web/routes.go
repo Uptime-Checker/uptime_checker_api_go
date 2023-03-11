@@ -100,4 +100,5 @@ func registerOrganizationHandlers(
 	)
 
 	router.Post("/", auth, handler.CreateOrganization)
+	router.Get("/list", auth, handler.ListOrganizationsOfUser)
 }

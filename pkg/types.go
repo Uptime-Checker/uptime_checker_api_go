@@ -29,3 +29,9 @@ type UserWithRoleAndSubscription struct {
 		Features []*model.Feature
 	}
 }
+
+type OrganizationUserRole struct {
+	*model.OrganizationUser
+	Role         *model.Role
+	Organization *model.Organization
+}

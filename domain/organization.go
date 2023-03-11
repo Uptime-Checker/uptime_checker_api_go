@@ -8,6 +8,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -61,4 +62,21 @@ func (o *OrganizationDomain) GetRoleByType(ctx context.Context, roleType resourc
 	role := &model.Role{}
 	err := stmt.QueryContext(ctx, infra.DB, role)
 	return role, err
+}
+
+func (o *OrganizationDomain) ListOrganizationsOfUser(
+	ctx context.Context,
+	userID int64,
+) ([]pkg.OrganizationUserRole, error) {
+	stmt := SELECT(OrganizationUser.AllColumns, Organization.AllColumns, Role.AllColumns).
+		FROM(
+			OrganizationUser.
+				LEFT_JOIN(Role, OrganizationUser.RoleID.EQ(Role.ID)).
+				LEFT_JOIN(Organization, OrganizationUser.OrganizationID.EQ(Organization.ID)),
+		).
+		WHERE(OrganizationUser.UserID.EQ(Int(userID)))
+
+	var organizationUserRoles []pkg.OrganizationUserRole
+	err := stmt.QueryContext(ctx, infra.DB, &organizationUserRoles)
+	return organizationUserRoles, err
 }

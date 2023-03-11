@@ -102,3 +102,12 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 	cache.DeleteUserWithRoleAndSubscription(user.ID)
 	return resp.ServeData(c, fiber.StatusOK, organization)
 }
+
+func (o *OrganizationController) ListOrganizationsOfUser(c *fiber.Ctx) error {
+	user := middlelayer.GetUser(c)
+	organizationUserRoles, err := o.organizationDomain.ListOrganizationsOfUser(c.Context(), user.ID)
+	if err != nil {
+		return resp.SendError(c, fiber.StatusBadRequest, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, organizationUserRoles)
+}
