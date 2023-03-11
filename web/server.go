@@ -51,7 +51,6 @@ func Setup() {
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 	app.Use(cors.New())
-	app.Use(compress.New())
 	app.Use(requestid.New(requestid.Config{
 		ContextKey: string(constant.TracingKey), // => Setting Tracing ID to the context
 		Generator: func() string {
@@ -61,15 +60,6 @@ func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 	app.Use(fibersentry.New(fibersentry.Config{
 		Repanic: true,
 	}))
-	app.Use(limiter.New(limiter.Config{
-		Next: func(c *fiber.Ctx) bool {
-			return !config.IsProd // => Skip limiter in dev
-		},
-		Max: constant.MaxRequestPerMinute,
-		KeyGenerator: func(c *fiber.Ctx) string {
-			return c.Get(constant.OriginalIPHeader)
-		},
-	}))
 	app.Use(logger.New(logger.Config{
 		TimeZone: constant.UTCTimeZone,
 		Format:   "[${time}] ${locals:tracing} | ${status} | ${latency} | ${method} | ${path}\n",
@@ -77,8 +67,15 @@ func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 	app.Use(recover.New(recover.Config{EnableStackTrace: !config.IsProd}))
 
 	if config.IsProd {
+		app.Use(compress.New())
 		app.Use(fibernewrelic.New(fibernewrelic.Config{
 			Application: newRelicApp,
+		}))
+		app.Use(limiter.New(limiter.Config{
+			Max: constant.MaxRequestPerMinute,
+			KeyGenerator: func(c *fiber.Ctx) string {
+				return c.Get(constant.OriginalIPHeader)
+			},
 		}))
 	} else {
 		app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics"}))
