@@ -78,7 +78,7 @@ func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*pkg.User
 		return nil, err
 	}
 
-	cachedUser := cache.GetUserWithRoleAndSubscription()
+	cachedUser := cache.GetUserWithRoleAndSubscription(usr.UserID)
 	if cachedUser == nil {
 		user, err := a.userDomain.GetUserWithRoleAndSubscription(ctx, usr.UserID)
 		if err != nil {

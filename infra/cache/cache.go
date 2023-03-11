@@ -2,6 +2,7 @@ package cache
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/coocood/freecache"
 	"github.com/getsentry/sentry-go"
@@ -14,7 +15,7 @@ var cache *freecache.Cache
 const cacheSize = 10 * 1024 * 1024 // 10 MB
 
 const (
-	KeyUser = "user_"
+	KeyUser = "user"
 )
 
 func SetupCache() {
@@ -33,11 +34,11 @@ func SetUserWithRoleAndSubscription(user *pkg.UserWithRoleAndSubscription) {
 	if err != nil {
 		sentry.CaptureException(err)
 	}
-	set(KeyUser, serializedUser, 7*24*60*60)
+	set(getUserCacheKey(user.ID), serializedUser, 7*24*60*60)
 }
 
-func GetUserWithRoleAndSubscription() *pkg.UserWithRoleAndSubscription {
-	serializedUser, err := cache.Get([]byte(KeyUser))
+func GetUserWithRoleAndSubscription(userID int64) *pkg.UserWithRoleAndSubscription {
+	serializedUser, err := cache.Get([]byte(getUserCacheKey(userID)))
 	if err != nil {
 		return nil
 	}
@@ -48,6 +49,10 @@ func GetUserWithRoleAndSubscription() *pkg.UserWithRoleAndSubscription {
 	return &user
 }
 
-func DeleteUserWithRoleAndSubscription() {
-	cache.Del([]byte(KeyUser))
+func DeleteUserWithRoleAndSubscription(userID int64) {
+	cache.Del([]byte(getUserCacheKey(userID)))
+}
+
+func getUserCacheKey(userID int64) string {
+	return fmt.Sprintf("%s_%d", KeyUser, userID)
 }
