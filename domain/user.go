@@ -130,6 +130,7 @@ func (u *UserDomain) UpdateProvider(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,
+	picture *string,
 	providerUID string,
 	provider resource.UserLoginProvider,
 ) (*model.User, error) {
@@ -142,11 +143,12 @@ func (u *UserDomain) UpdateProvider(
 	user := &model.User{
 		ProviderUID: &providerUID,
 		Provider:    &providerValue,
+		PictureURL:  picture,
 		LastLoginAt: &now,
 		UpdatedAt:   now,
 	}
 
-	updateStmt := User.UPDATE(User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).
+	updateStmt := User.UPDATE(User.PictureURL, User.ProviderUID, User.Provider, User.LastLoginAt, User.UpdatedAt).
 		MODEL(user).WHERE(User.ID.EQ(Int(id))).RETURNING(User.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, tx, user)

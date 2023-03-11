@@ -112,7 +112,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 			}
 			lgr.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
 		} else {
-			user, err = u.userDomain.UpdateProvider(ctx, tx, user.ID, body.Email, resource.UserLoginProviderEmail)
+			user, err = u.userDomain.UpdateProvider(ctx, tx, user.ID, nil, body.Email, resource.UserLoginProviderEmail)
 			if err != nil {
 				return err
 			}
@@ -174,7 +174,7 @@ func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
 			lgr.Default.Print(tracingID, 1, "created new user", user.ID, user.Email, "provider", provider.String())
 		} else {
 			user, err = u.userDomain.UpdateProvider(
-				ctx, tx, user.ID, body.Email, resource.UserLoginProvider(body.Provider),
+				ctx, tx, user.ID, &body.Picture, body.Email, resource.UserLoginProvider(body.Provider),
 			)
 			if err != nil {
 				return err
