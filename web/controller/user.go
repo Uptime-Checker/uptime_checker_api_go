@@ -13,6 +13,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -117,6 +118,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 				return err
 			}
 			lgr.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
+			cache.DeleteUserWithRoleAndSubscription(user.ID)
 		}
 		lgr.Default.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
 		return u.userDomain.DeleteGuestUser(ctx, tx, guestUser.ID)
@@ -180,6 +182,7 @@ func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
 				return err
 			}
 			lgr.Default.Print(tracingID, 2, "update user provider", user.ID, user.Email, "provider", provider.String())
+			cache.DeleteUserWithRoleAndSubscription(user.ID)
 		}
 		return nil
 	}); err != nil {
