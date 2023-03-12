@@ -19,10 +19,10 @@ func NewMonitorController(
 	return &MonitorController{monitorDomain: monitorDomain, monitorService: monitorService}
 }
 
-func (o *MonitorController) Create(c *fiber.Ctx) error {
+func (m *MonitorController) Create(c *fiber.Ctx) error {
 	return nil
 }
 
-func (o *MonitorController) ListMonitors(c *fiber.Ctx) error {
+func (m *MonitorController) ListMonitors(c *fiber.Ctx) error {
 	return nil
 }
