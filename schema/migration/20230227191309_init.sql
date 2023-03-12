@@ -69,7 +69,6 @@ create table if not exists monitor (
     url varchar(255) not null,
     method integer default 1,
     interval integer default 300,
-    timeout integer default 5,
     type integer default 1,
     body text,
     body_format integer default 1,
@@ -84,7 +83,8 @@ create table if not exists monitor (
     next_check_at timestamp(0),
     last_checked_at timestamp(0),
     last_failed_at timestamp(0),
-    user_id bigint,
+    created_by bigint,
+    updated_by bigint,
     monitor_group_id bigint,
     prev_id bigint,
     organization_id bigint,
@@ -92,7 +92,8 @@ create table if not exists monitor (
     updated_at timestamp(0) not null default now(),
     primary key (id),
     constraint monitor_unique_previous_id unique (prev_id, organization_id) deferrable initially deferred,
-    foreign key (user_id) references "user",
+    foreign key (created_by) references "user",
+    foreign key (updated_by) references "user",
     foreign key (monitor_group_id) references monitor_group,
     foreign key (prev_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade
@@ -100,7 +101,8 @@ create table if not exists monitor (
 create unique index if not exists monitor_url_organization_id_index on monitor (url, organization_id);
 create index if not exists monitor_on_index on monitor ("on");
 create index if not exists monitor_status_index on monitor (status);
-create index if not exists monitor_user_id_index on monitor (user_id);
+create index if not exists monitor_created_by_index on monitor (created_by);
+create index if not exists monitor_updated_by_index on monitor (updated_by);
 create index if not exists monitor_organization_id_index on monitor (organization_id);
 create index if not exists monitor_monitor_group_id_index on monitor (monitor_group_id);
 create index if not exists monitor_next_check_at_index on monitor (next_check_at);
