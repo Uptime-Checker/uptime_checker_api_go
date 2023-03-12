@@ -16,6 +16,7 @@ require (
 	github.com/lib/pq v1.10.5
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/newrelic/go-agent/v3 v3.20.3
+	github.com/samber/lo v1.37.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/spf13/viper v1.15.0
 	go.uber.org/zap v1.24.0
@@ -58,6 +59,7 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
