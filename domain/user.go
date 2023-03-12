@@ -163,7 +163,7 @@ func (u *UserDomain) UpdateName(
 
 	now := times.Now()
 	user := &model.User{
-		Name:      name,
+		Name:      &name,
 		UpdatedAt: now,
 	}
 

@@ -40,7 +40,7 @@ func (u *UserService) CreateNewProviderUserAndContact(
 	provider int, providerUID, picture string,
 ) (*model.User, error) {
 	user := &model.User{
-		Name:        name,
+		Name:        &name,
 		Email:       email,
 		ProviderUID: &providerUID,
 		PictureURL:  &picture,
