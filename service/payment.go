@@ -8,6 +8,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
@@ -24,7 +25,7 @@ func (p *PaymentService) CreateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
 	organizationID int64,
-	planWithProduct domain.PlanWithProduct,
+	planWithProduct pkg.PlanWithProduct,
 ) (*model.Subscription, error) {
 	now := times.Now()
 
