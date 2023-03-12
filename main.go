@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web"
 )
 
