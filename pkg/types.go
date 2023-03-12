@@ -13,6 +13,11 @@ type BearerClaims struct {
 	*jwt.RegisteredClaims
 }
 
+type SubscriptionFeature struct {
+	*model.ProductFeature
+	*model.Feature
+}
+
 type UserWithRoleAndSubscription struct {
 	*model.User
 	Organization *model.Organization
@@ -26,7 +31,7 @@ type UserWithRoleAndSubscription struct {
 		*model.Subscription
 		Plan     *model.Plan
 		Product  *model.Product
-		Features []*model.Feature
+		Features []*SubscriptionFeature
 	}
 }
 
@@ -39,10 +44,4 @@ type OrganizationUserRole struct {
 type PlanWithProduct struct {
 	*model.Plan
 	*model.Product
-}
-
-type SubscriptionFeature struct {
-	Name  string
-	Type  *int32
-	Count *int32
 }

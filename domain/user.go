@@ -86,6 +86,7 @@ func (u *UserDomain) GetUserWithRoleAndSubscription(
 		Plan.AllColumns,
 		Product.AllColumns,
 		Feature.AllColumns,
+		ProductFeature.AllColumns,
 	).
 		FROM(
 			User.

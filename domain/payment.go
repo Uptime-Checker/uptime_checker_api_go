@@ -10,6 +10,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
@@ -22,16 +23,11 @@ func NewPaymentDomain() *PaymentDomain {
 	return &PaymentDomain{}
 }
 
-type PlanWithProduct struct {
-	*model.Plan
-	*model.Product
-}
-
-func (p *PaymentDomain) GetPlanWithProduct(ctx context.Context, id int64) (*PlanWithProduct, error) {
+func (p *PaymentDomain) GetPlanWithProduct(ctx context.Context, id int64) (*pkg.PlanWithProduct, error) {
 	stmt := SELECT(Plan.AllColumns, Product.AllColumns).
 		FROM(Plan.LEFT_JOIN(Product, Plan.ProductID.EQ(Product.ID))).WHERE(Plan.ID.EQ(Int(id)))
 
-	planWithProduct := &PlanWithProduct{}
+	planWithProduct := &pkg.PlanWithProduct{}
 	err := stmt.QueryContext(ctx, infra.DB, planWithProduct)
 	return planWithProduct, err
 }

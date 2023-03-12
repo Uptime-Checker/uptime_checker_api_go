@@ -10,3 +10,9 @@ var (
 	ErrInvalidSubscriptionStatus = errors.New("invalid subscription status")
 	ErrExpiresAtInThePast        = errors.New("expires at in the past")
 )
+
+var (
+	ErrUpgradeSubscription = errors.New("upgrade subscription")
+	ErrUpgradePermission   = errors.New("upgrade permission")
+	ErrSubscriptionExpired = errors.New("subscription expired")
+)
