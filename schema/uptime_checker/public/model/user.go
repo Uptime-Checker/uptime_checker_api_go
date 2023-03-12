@@ -13,10 +13,9 @@ import (
 
 type User struct {
 	ID                int64 `sql:"primary_key"`
-	Name              string
+	Name              *string
 	Email             string
 	PictureURL        *string
-	Password          *string
 	PaymentCustomerID *string
 	ProviderUID       *string
 	Provider          *int32

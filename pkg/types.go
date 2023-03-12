@@ -35,3 +35,14 @@ type OrganizationUserRole struct {
 	Role         *model.Role
 	Organization *model.Organization
 }
+
+type PlanWithProduct struct {
+	*model.Plan
+	*model.Product
+}
+
+type SubscriptionFeature struct {
+	Name  string
+	Type  *int32
+	Count *int32
+}

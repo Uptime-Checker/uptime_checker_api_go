@@ -21,7 +21,6 @@ type userTable struct {
 	Name              postgres.ColumnString
 	Email             postgres.ColumnString
 	PictureURL        postgres.ColumnString
-	Password          postgres.ColumnString
 	PaymentCustomerID postgres.ColumnString
 	ProviderUID       postgres.ColumnString
 	Provider          postgres.ColumnInteger
@@ -74,7 +73,6 @@ func newUserTableImpl(schemaName, tableName, alias string) userTable {
 		NameColumn              = postgres.StringColumn("name")
 		EmailColumn             = postgres.StringColumn("email")
 		PictureURLColumn        = postgres.StringColumn("picture_url")
-		PasswordColumn          = postgres.StringColumn("password")
 		PaymentCustomerIDColumn = postgres.StringColumn("payment_customer_id")
 		ProviderUIDColumn       = postgres.StringColumn("provider_uid")
 		ProviderColumn          = postgres.IntegerColumn("provider")
@@ -83,8 +81,8 @@ func newUserTableImpl(schemaName, tableName, alias string) userTable {
 		OrganizationIDColumn    = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn        = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn         = postgres.TimestampColumn("updated_at")
-		allColumns              = postgres.ColumnList{IDColumn, NameColumn, EmailColumn, PictureURLColumn, PasswordColumn, PaymentCustomerIDColumn, ProviderUIDColumn, ProviderColumn, LastLoginAtColumn, RoleIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns          = postgres.ColumnList{NameColumn, EmailColumn, PictureURLColumn, PasswordColumn, PaymentCustomerIDColumn, ProviderUIDColumn, ProviderColumn, LastLoginAtColumn, RoleIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns              = postgres.ColumnList{IDColumn, NameColumn, EmailColumn, PictureURLColumn, PaymentCustomerIDColumn, ProviderUIDColumn, ProviderColumn, LastLoginAtColumn, RoleIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns          = postgres.ColumnList{NameColumn, EmailColumn, PictureURLColumn, PaymentCustomerIDColumn, ProviderUIDColumn, ProviderColumn, LastLoginAtColumn, RoleIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return userTable{
@@ -95,7 +93,6 @@ func newUserTableImpl(schemaName, tableName, alias string) userTable {
 		Name:              NameColumn,
 		Email:             EmailColumn,
 		PictureURL:        PictureURLColumn,
-		Password:          PasswordColumn,
 		PaymentCustomerID: PaymentCustomerIDColumn,
 		ProviderUID:       ProviderUIDColumn,
 		Provider:          ProviderColumn,

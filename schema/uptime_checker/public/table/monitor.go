@@ -22,7 +22,6 @@ type monitorTable struct {
 	URL             postgres.ColumnString
 	Method          postgres.ColumnInteger
 	Interval        postgres.ColumnInteger
-	Timeout         postgres.ColumnInteger
 	Type            postgres.ColumnInteger
 	Body            postgres.ColumnString
 	BodyFormat      postgres.ColumnInteger
@@ -37,7 +36,8 @@ type monitorTable struct {
 	NextCheckAt     postgres.ColumnTimestamp
 	LastCheckedAt   postgres.ColumnTimestamp
 	LastFailedAt    postgres.ColumnTimestamp
-	UserID          postgres.ColumnInteger
+	CreatedBy       postgres.ColumnInteger
+	UpdatedBy       postgres.ColumnInteger
 	MonitorGroupID  postgres.ColumnInteger
 	PrevID          postgres.ColumnInteger
 	OrganizationID  postgres.ColumnInteger
@@ -88,7 +88,6 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		URLColumn             = postgres.StringColumn("url")
 		MethodColumn          = postgres.IntegerColumn("method")
 		IntervalColumn        = postgres.IntegerColumn("interval")
-		TimeoutColumn         = postgres.IntegerColumn("timeout")
 		TypeColumn            = postgres.IntegerColumn("type")
 		BodyColumn            = postgres.StringColumn("body")
 		BodyFormatColumn      = postgres.IntegerColumn("body_format")
@@ -103,14 +102,15 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		NextCheckAtColumn     = postgres.TimestampColumn("next_check_at")
 		LastCheckedAtColumn   = postgres.TimestampColumn("last_checked_at")
 		LastFailedAtColumn    = postgres.TimestampColumn("last_failed_at")
-		UserIDColumn          = postgres.IntegerColumn("user_id")
+		CreatedByColumn       = postgres.IntegerColumn("created_by")
+		UpdatedByColumn       = postgres.IntegerColumn("updated_by")
 		MonitorGroupIDColumn  = postgres.IntegerColumn("monitor_group_id")
 		PrevIDColumn          = postgres.IntegerColumn("prev_id")
 		OrganizationIDColumn  = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn      = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn       = postgres.TimestampColumn("updated_at")
-		allColumns            = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, IntervalColumn, TimeoutColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, UserIDColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns        = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, IntervalColumn, TimeoutColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, UserIDColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns            = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns        = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorTable{
@@ -122,7 +122,6 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		URL:             URLColumn,
 		Method:          MethodColumn,
 		Interval:        IntervalColumn,
-		Timeout:         TimeoutColumn,
 		Type:            TypeColumn,
 		Body:            BodyColumn,
 		BodyFormat:      BodyFormatColumn,
@@ -137,7 +136,8 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		NextCheckAt:     NextCheckAtColumn,
 		LastCheckedAt:   LastCheckedAtColumn,
 		LastFailedAt:    LastFailedAtColumn,
-		UserID:          UserIDColumn,
+		CreatedBy:       CreatedByColumn,
+		UpdatedBy:       UpdatedByColumn,
 		MonitorGroupID:  MonitorGroupIDColumn,
 		PrevID:          PrevIDColumn,
 		OrganizationID:  OrganizationIDColumn,

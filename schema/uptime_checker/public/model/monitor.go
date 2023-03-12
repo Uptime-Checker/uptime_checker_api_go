@@ -17,7 +17,6 @@ type Monitor struct {
 	URL             string
 	Method          *int32
 	Interval        *int32
-	Timeout         *int32
 	Type            *int32
 	Body            *string
 	BodyFormat      *int32
@@ -32,7 +31,8 @@ type Monitor struct {
 	NextCheckAt     *time.Time
 	LastCheckedAt   *time.Time
 	LastFailedAt    *time.Time
-	UserID          *int64
+	CreatedBy       *int64
+	UpdatedBy       *int64
 	MonitorGroupID  *int64
 	PrevID          *int64
 	OrganizationID  *int64
