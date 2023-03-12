@@ -28,12 +28,14 @@ func SetupRoutes(app *fiber.App) {
 	userDomain := domain.NewUserDomain()
 	paymentDomain := domain.NewPaymentDomain()
 	organizationDomain := domain.NewOrganizationDomain()
+	monitorDomain := domain.NewMonitorDomain()
 
 	// Service Registration
 	authService := service.NewAuthService(userDomain)
 	userService := service.NewUserService(userDomain)
 	paymentService := service.NewPaymentService(paymentDomain)
 	organizationService := service.NewOrganizationService(organizationDomain)
+	monitorService := service.NewMonitorService(monitorDomain)
 
 	// User router for auth and user account
 	userRouter := v1.Group("/user")
@@ -49,6 +51,15 @@ func SetupRoutes(app *fiber.App) {
 		authService,
 		paymentService,
 		organizationService,
+	)
+
+	// Monitor router for managing monitor
+	monitorRouter := v1.Group("/monitor")
+	registerMonitorHandlers(
+		monitorRouter,
+		monitorDomain,
+		authService,
+		monitorService,
 	)
 
 	// 404 Handler
@@ -101,4 +112,21 @@ func registerOrganizationHandlers(
 
 	router.Post("/", auth, handler.CreateOrganization)
 	router.Get("/list", auth, handler.ListOrganizationsOfUser)
+}
+
+func registerMonitorHandlers(
+	router fiber.Router,
+	monitorDomain *domain.MonitorDomain,
+	authService *service.AuthService,
+	monitorService *service.MonitorService,
+) {
+	auth := middlelayer.Protected(authService)
+
+	handler := controller.NewMonitorController(
+		monitorDomain,
+		monitorService,
+	)
+
+	router.Post("/", auth, handler.Create)
+	router.Get("/list", auth, handler.ListMonitors)
 }
