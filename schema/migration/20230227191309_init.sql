@@ -106,7 +106,7 @@ create index if not exists monitor_updated_by_index on monitor (updated_by);
 create index if not exists monitor_organization_id_index on monitor (organization_id);
 create index if not exists monitor_monitor_group_id_index on monitor (monitor_group_id);
 create index if not exists monitor_next_check_at_index on monitor (next_check_at);
-create index if not exists monitor_last_checked_at_next_check_at_index on monitor (last_checked_at, next_check_at);
+create index if not exists monitor_next_check_at_last_checked_at_index on monitor (next_check_at, last_checked_at);
 create table if not exists assertion (
     id bigserial,
     source integer default 1,
@@ -488,6 +488,22 @@ create table if not exists monitor_status_change (
     foreign key (monitor_id) references monitor on delete cascade
 );
 create index if not exists monitor_status_change_monitor_id_index on monitor_status_change (monitor_id);
+create table if not exists job (
+    id bigserial,
+    status integer default 1,
+    "on" boolean default true,
+    name varchar(255) not null,
+    interval integer,
+    last_ran_at timestamp(0),
+    next_run_at timestamp(0),
+    recurring boolean default false,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
+    primary key (id)
+);
+create index if not exists job_on_index on job ("on");
+create index if not exists job_recurring_index on job (recurring);
+create index if not exists job_next_run_at_last_ran_at_index on job (next_run_at, last_ran_at);
 -- +goose StatementEnd
 -- +goose Down
 -- +goose StatementBegin
@@ -519,4 +535,5 @@ drop table "user";
 drop table role;
 drop table monitor_group;
 drop table organization;
+drop table job;
 -- +goose StatementEnd

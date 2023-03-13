@@ -72,3 +72,6 @@ INSERT INTO role_claim (claim, role_id)
 VALUES('BILLING', 1);
 INSERT INTO role_claim (claim, role_id)
 VALUES('DESTROY_ORGANIZATION', 1);
+-- Job
+INSERT INTO job (status, "on", name, interval, recurring)
+VALUES(1, true, 'SYNC_STRIPE_PRODUCTS', 60, true);
