@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
@@ -28,7 +29,8 @@ func (j *JobDomain) ListJobsToRun(ctx context.Context, from, to int) ([]model.Jo
 
 	condition := Job.NextRunAt.GT(TimestampT(prev)).
 		AND(Job.NextRunAt.LT(TimestampT(later))).
-		AND(Job.LastRanAt.LT(TimestampT(prev)))
+		AND(Job.LastRanAt.LT(TimestampT(prev))).
+		AND(Job.Status.NOT_EQ(Int(int64(resource.JobStatusRunning))))
 
 	condition = condition.OR(Job.LastRanAt.IS_NULL())
 	condition = condition.AND(Job.On.EQ(Bool(true)))
@@ -50,6 +52,7 @@ func (j *JobDomain) ListRecurringJobs(ctx context.Context) ([]model.Job, error) 
 
 func (j *JobDomain) UpdateRunning(
 	ctx context.Context,
+	tx *sql.Tx,
 	id int64,
 	lastRunAt, nextRunAt *time.Time,
 	status resource.JobStatus,
@@ -70,12 +73,13 @@ func (j *JobDomain) UpdateRunning(
 	updateStmt := Job.UPDATE(Job.Status, Job.LastRanAt, Job.NextRunAt, Job.UpdatedAt).
 		MODEL(job).WHERE(Job.ID.EQ(Int(id))).RETURNING(Job.AllColumns)
 
-	err := updateStmt.QueryContext(ctx, infra.DB, job)
+	err := updateStmt.QueryContext(ctx, tx, job)
 	return job, err
 }
 
 func (j *JobDomain) UpdateStatus(
 	ctx context.Context,
+	tx *sql.Tx,
 	id int64,
 	status resource.JobStatus,
 ) (*model.Job, error) {
@@ -90,14 +94,15 @@ func (j *JobDomain) UpdateStatus(
 		UpdatedAt: now,
 	}
 
-	updateStmt := Job.UPDATE(Job.Status, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id)))
+	updateStmt := Job.UPDATE(Job.Status, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id))).RETURNING(Job.AllColumns)
 
-	err := updateStmt.QueryContext(ctx, infra.DB, job)
+	err := updateStmt.QueryContext(ctx, tx, job)
 	return job, err
 }
 
 func (j *JobDomain) UpdateNextRunAt(
 	ctx context.Context,
+	tx *sql.Tx,
 	id int64,
 	nextRunAt *time.Time,
 	status resource.JobStatus,
@@ -114,7 +119,8 @@ func (j *JobDomain) UpdateNextRunAt(
 		UpdatedAt: now,
 	}
 
-	updateStmt := Job.UPDATE(Job.Status, Job.NextRunAt, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id)))
-	err := updateStmt.QueryContext(ctx, infra.DB, job)
+	updateStmt := Job.UPDATE(Job.Status, Job.NextRunAt, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id))).
+		RETURNING(Job.AllColumns)
+	err := updateStmt.QueryContext(ctx, tx, job)
 	return job, err
 }

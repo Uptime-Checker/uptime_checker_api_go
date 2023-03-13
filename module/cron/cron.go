@@ -2,6 +2,8 @@ package cron
 
 import (
 	"context"
+	"database/sql"
+
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -10,6 +12,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -20,7 +23,7 @@ import (
 var s *gocron.Scheduler
 
 type Task interface {
-	Do()
+	Do(tx *sql.Tx)
 }
 
 // JobName type
@@ -55,14 +58,19 @@ func (c *Cron) Start() error {
 	if err != nil {
 		sentry.CaptureException(err)
 	} else {
-		for _, job := range recurringJobs {
-			if times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
-				nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval+int32(random)))
-				_, err := c.jobDomain.UpdateNextRunAt(ctx, job.ID, &nextRunAt, resource.JobStatusScheduled)
-				if err != nil {
-					sentry.CaptureException(err)
+		if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+			for _, job := range recurringJobs {
+				if times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
+					nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval))
+					_, err := c.jobDomain.UpdateNextRunAt(ctx, tx, job.ID, &nextRunAt, resource.JobStatusScheduled)
+					if err != nil {
+						return err
+					}
 				}
 			}
+			return nil
+		}); err != nil {
+			sentry.CaptureException(err)
 		}
 	}
 
@@ -94,16 +102,20 @@ func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, task T, j
 		nextRunAt = now.Add(time.Minute * time.Duration(*job.Interval))
 	}
 
-	_, err := jobDomain.UpdateRunning(ctx, job.ID, &now, &nextRunAt, resource.JobStatusRunning)
-	if err != nil {
-		sentry.CaptureException(err)
-	}
-	task.Do()
-
-	if *job.Recurring {
-		_, err = jobDomain.UpdateStatus(ctx, job.ID, resource.JobStatusScheduled)
+	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		_, err := jobDomain.UpdateRunning(ctx, tx, job.ID, &now, &nextRunAt, resource.JobStatusRunning)
 		if err != nil {
-			sentry.CaptureException(err)
+			return err
 		}
+		task.Do(tx)
+		if *job.Recurring {
+			_, err = jobDomain.UpdateStatus(ctx, tx, job.ID, resource.JobStatusScheduled)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		sentry.CaptureException(err)
 	}
 }

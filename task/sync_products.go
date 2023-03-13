@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/getsentry/sentry-go"
 
@@ -15,7 +16,7 @@ func NewSyncProductsTask() *SyncProductsTask {
 	return &SyncProductsTask{}
 }
 
-func (s SyncProductsTask) Do() {
+func (s SyncProductsTask) Do(tx *sql.Tx) {
 	ctx := pkg.NewTracingID(context.Background())
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
