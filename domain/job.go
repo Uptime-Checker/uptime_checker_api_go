@@ -26,11 +26,12 @@ func (j *JobDomain) ListJobsToRun(ctx context.Context, from, to int) ([]model.Jo
 	prev := now.Add(time.Second * time.Duration(from))
 	later := now.Add(time.Second * time.Duration(to))
 
-	condition := Job.On.EQ(Bool(true)).AND(Job.NextRunAt.GT(TimestampT(prev))).
+	condition := Job.NextRunAt.GT(TimestampT(prev)).
 		AND(Job.NextRunAt.LT(TimestampT(later))).
 		AND(Job.LastRanAt.LT(TimestampT(prev)))
 
 	condition = condition.OR(Job.LastRanAt.IS_NULL())
+	condition = condition.AND(Job.On.EQ(Bool(true)))
 
 	stmt := SELECT(Job.AllColumns).FROM(Job).WHERE(condition)
 
@@ -47,7 +48,7 @@ func (j *JobDomain) ListRecurringJobs(ctx context.Context, from, to int) ([]mode
 	return jobs, err
 }
 
-func (j *JobDomain) UpdateJob(
+func (j *JobDomain) UpdateRunning(
 	ctx context.Context,
 	id int64,
 	lastRunAt, nextRunAt *time.Time,
@@ -68,6 +69,28 @@ func (j *JobDomain) UpdateJob(
 
 	updateStmt := Job.UPDATE(Job.Status, Job.LastRanAt, Job.NextRunAt, Job.UpdatedAt).
 		MODEL(job).WHERE(Job.ID.EQ(Int(id))).RETURNING(Job.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, infra.DB, job)
+	return job, err
+}
+
+func (j *JobDomain) UpdateStatus(
+	ctx context.Context,
+	id int64,
+	status resource.JobStatus,
+) (*model.Job, error) {
+	if !status.Valid() {
+		return nil, constant.ErrInvalidJobStatus
+	}
+	statusValue := int32(status)
+
+	now := times.Now()
+	job := &model.Job{
+		Status:    &statusValue,
+		UpdatedAt: now,
+	}
+
+	updateStmt := Job.UPDATE(Job.Status, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id))).RETURNING(Job.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, infra.DB, job)
 	return job, err

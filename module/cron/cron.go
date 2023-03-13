@@ -72,10 +72,21 @@ func (c *Cron) checkAndRun() {
 
 func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, task T, job model.Job) {
 	now := times.Now()
-	nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval))
-	_, err := jobDomain.UpdateJob(ctx, job.ID, &now, &nextRunAt, resource.JobStatusRunning)
+	nextRunAt := now
+	if *job.Recurring {
+		nextRunAt = now.Add(time.Minute * time.Duration(*job.Interval))
+	}
+
+	_, err := jobDomain.UpdateRunning(ctx, job.ID, &now, &nextRunAt, resource.JobStatusRunning)
 	if err != nil {
 		sentry.CaptureException(err)
 	}
 	task.Do()
+
+	if *job.Recurring {
+		_, err = jobDomain.UpdateStatus(ctx, job.ID, resource.JobStatusScheduled)
+		if err != nil {
+			sentry.CaptureException(err)
+		}
+	}
 }
