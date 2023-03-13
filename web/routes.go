@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller"
@@ -25,6 +25,7 @@ func SetupRoutes(app *fiber.App) {
 	})
 
 	// Domain Registration
+	jobDomain := domain.NewJobDomain()
 	userDomain := domain.NewUserDomain()
 	paymentDomain := domain.NewPaymentDomain()
 	organizationDomain := domain.NewOrganizationDomain()
@@ -69,8 +70,9 @@ func SetupRoutes(app *fiber.App) {
 
 	// Setup Cron
 	syncProductsTask := task.NewSyncProductsTask()
+	cron := module.NewCron(jobDomain, syncProductsTask)
 	app.Hooks().OnListen(func() error {
-		return infra.SetupCron(syncProductsTask)
+		return cron.Start()
 	})
 }
 
