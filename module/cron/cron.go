@@ -7,6 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-co-op/gocron"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
@@ -40,13 +41,29 @@ func NewCron(jobDomain *domain.JobDomain, syncProductsTask *task.SyncProductsTas
 }
 
 func (c *Cron) Start() error {
-	s = gocron.NewScheduler(time.UTC)
 	now := times.Now()
+	ctx := context.Background()
+	s = gocron.NewScheduler(time.UTC)
 
 	random := pkg.RandomNumber(60, 120)
 	_, err := s.Every(30).Second().StartAt(now.Add(time.Second * time.Duration(random))).Do(c.checkAndRun)
 	if err != nil {
 		return err
+	}
+
+	recurringJobs, err := c.jobDomain.ListRecurringJobs(ctx)
+	if err != nil {
+		sentry.CaptureException(err)
+	} else {
+		for _, job := range recurringJobs {
+			if times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
+				nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval+int32(random)))
+				_, err := c.jobDomain.UpdateNextRunAt(ctx, job.ID, &nextRunAt, resource.JobStatusScheduled)
+				if err != nil {
+					sentry.CaptureException(err)
+				}
+			}
+		}
 	}
 
 	s.StartAsync()

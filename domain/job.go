@@ -40,7 +40,7 @@ func (j *JobDomain) ListJobsToRun(ctx context.Context, from, to int) ([]model.Jo
 	return jobs, err
 }
 
-func (j *JobDomain) ListRecurringJobs(ctx context.Context, from, to int) ([]model.Job, error) {
+func (j *JobDomain) ListRecurringJobs(ctx context.Context) ([]model.Job, error) {
 	stmt := SELECT(Job.AllColumns).FROM(Job).WHERE(Job.On.EQ(Bool(true)).AND(Job.Recurring.EQ(Bool(true))))
 
 	var jobs []model.Job
@@ -90,8 +90,31 @@ func (j *JobDomain) UpdateStatus(
 		UpdatedAt: now,
 	}
 
-	updateStmt := Job.UPDATE(Job.Status, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id))).RETURNING(Job.AllColumns)
+	updateStmt := Job.UPDATE(Job.Status, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id)))
 
+	err := updateStmt.QueryContext(ctx, infra.DB, job)
+	return job, err
+}
+
+func (j *JobDomain) UpdateNextRunAt(
+	ctx context.Context,
+	id int64,
+	nextRunAt *time.Time,
+	status resource.JobStatus,
+) (*model.Job, error) {
+	if !status.Valid() {
+		return nil, constant.ErrInvalidJobStatus
+	}
+	statusValue := int32(status)
+
+	now := times.Now()
+	job := &model.Job{
+		Status:    &statusValue,
+		NextRunAt: nextRunAt,
+		UpdatedAt: now,
+	}
+
+	updateStmt := Job.UPDATE(Job.Status, Job.NextRunAt, Job.UpdatedAt).MODEL(job).WHERE(Job.ID.EQ(Int(id)))
 	err := updateStmt.QueryContext(ctx, infra.DB, job)
 	return job, err
 }
