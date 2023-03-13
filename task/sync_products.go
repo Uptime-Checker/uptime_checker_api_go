@@ -15,7 +15,7 @@ func NewSyncProductsTask() *SyncProductsTask {
 	return &SyncProductsTask{}
 }
 
-func (s *SyncProductsTask) Run() {
+func (s SyncProductsTask) Do() {
 	ctx := pkg.NewTracingID(context.Background())
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)

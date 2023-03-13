@@ -19,7 +19,7 @@ import (
 var s *gocron.Scheduler
 
 type Task interface {
-	task.SyncProductsTask
+	Do()
 }
 
 // JobName type
@@ -77,5 +77,5 @@ func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, task T, j
 	if err != nil {
 		sentry.CaptureException(err)
 	}
-	task.Run()
+	task.Do()
 }
