@@ -77,9 +77,9 @@ create table if not exists monitor (
     password text,
     "on" boolean default true,
     muted boolean default false,
-    global_alert_channel boolean default true,
-    alter_reminder_interval integer default 300,
-    alter_reminder_count integer default 5,
+    global_alarm_settings boolean default true,
+    alarm_reminder_interval integer default 300,
+    alarm_reminder_count integer default 5,
     status integer default 1,
     check_ssl boolean default false,
     follow_redirects boolean default false,
@@ -191,11 +191,11 @@ create index if not exists error_log_monitor_id_index on error_log (monitor_id);
 create index if not exists error_log_assertion_id_index on error_log (assertion_id);
 create table if not exists alarm_channel (
     id bigserial,
+    "on" boolean default true,
     user_id bigint,
     monitor_id bigint,
     organization_id bigint,
     integration_id bigint,
-    monitor_status integer,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
@@ -235,11 +235,10 @@ create index if not exists alarm_organization_id_index on alarm (organization_id
 create unique index if not exists alarm_triggered_by_check_id_index on alarm (triggered_by_check_id);
 create unique index if not exists uq_monitor_on_alarm on alarm (monitor_id, ongoing)
 where (ongoing = true);
-create table if not exists monitor_alarm_policy (
+create table if not exists alarm_policy (
     id bigserial,
     reason varchar(255),
     threshold integer default 0,
-    monitor_status integer,
     monitor_id bigint,
     organization_id bigint,
     inserted_at timestamp(0) not null default now(),
@@ -248,9 +247,9 @@ create table if not exists monitor_alarm_policy (
     foreign key (monitor_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade
 );
-create index if not exists monitor_alarm_policy_monitor_id_index on monitor_alarm_policy (monitor_id);
-create index if not exists monitor_alarm_policy_organization_id_index on monitor_alarm_policy (organization_id);
-create unique index if not exists monitor_alarm_policy_reason_monitor_id_organization_id_index on monitor_alarm_policy (reason, monitor_id, organization_id);
+create index if not exists alarm_policy_monitor_id_index on alarm_policy (monitor_id);
+create index if not exists alarm_policy_organization_id_index on alarm_policy (organization_id);
+create unique index if not exists alarm_policy_reason_monitor_id_organization_id_index on alarm_policy (reason, monitor_id, organization_id);
 create table if not exists daily_report (
     id bigserial,
     successful_checks integer default 0,
@@ -516,7 +515,7 @@ drop table monitor_region;
 drop table error_log;
 drop table assertion;
 drop table alarm_channel;
-drop table monitor_alarm_policy;
+drop table alarm_policy;
 drop table daily_report;
 drop table monitor_notification;
 drop table monitor_integration;
