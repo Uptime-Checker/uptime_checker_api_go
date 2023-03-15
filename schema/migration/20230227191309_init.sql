@@ -77,6 +77,9 @@ create table if not exists monitor (
     password text,
     "on" boolean default true,
     muted boolean default false,
+    global_alert_channel boolean default true,
+    alter_reminder_interval integer default 300,
+    alter_reminder_count integer default 5,
     status integer default 1,
     check_ssl boolean default false,
     follow_redirects boolean default false,
@@ -186,7 +189,7 @@ create table if not exists error_log (
 create index if not exists error_log_check_id_index on error_log (check_id);
 create index if not exists error_log_monitor_id_index on error_log (monitor_id);
 create index if not exists error_log_assertion_id_index on error_log (assertion_id);
-create table if not exists monitor_notification_policy (
+create table if not exists alarm_channel (
     id bigserial,
     user_id bigint,
     monitor_id bigint,
@@ -200,11 +203,11 @@ create table if not exists monitor_notification_policy (
     foreign key (organization_id) references organization on delete cascade,
     foreign key (integration_id) references monitor_integration on delete cascade
 );
-create index if not exists monitor_notification_policy_user_id_index on monitor_notification_policy (user_id);
-create index if not exists monitor_notification_policy_monitor_id_index on monitor_notification_policy (monitor_id);
-create index if not exists monitor_notification_policy_integration_id_index on monitor_notification_policy (integration_id);
-create index if not exists monitor_notification_policy_organization_id_index on monitor_notification_policy (organization_id);
-create unique index if not exists monitor_notification_policy_user_id_monitor_id_integration_id_o on monitor_notification_policy (
+create index if not exists alarm_channel_user_id_index on alarm_channel (user_id);
+create index if not exists alarm_channel_monitor_id_index on alarm_channel (monitor_id);
+create index if not exists alarm_channel_integration_id_index on alarm_channel (integration_id);
+create index if not exists alarm_channel_organization_id_index on alarm_channel (organization_id);
+create unique index if not exists alarm_channel_user_id_monitor_id_integration_id_o on alarm_channel (
     user_id,
     monitor_id,
     integration_id,
@@ -510,7 +513,7 @@ create index if not exists job_next_run_at_last_ran_at_index on job (next_run_at
 drop table monitor_region;
 drop table error_log;
 drop table assertion;
-drop table monitor_notification_policy;
+drop table alarm_channel;
 drop table monitor_alarm_policy;
 drop table daily_report;
 drop table monitor_notification;
