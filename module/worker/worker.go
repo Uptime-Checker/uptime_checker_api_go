@@ -45,5 +45,12 @@ func (w *Worker) Start(ctx context.Context) error {
 		return err
 	}
 
-	return workers.Run(ctx)
+	// work jobs in goroutine
+	go func() {
+		err := workers.Run(ctx)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	return nil
 }
