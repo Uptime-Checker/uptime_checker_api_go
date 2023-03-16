@@ -7,10 +7,11 @@ import (
 )
 
 type config struct {
-	Port    string `mapstructure:"PORT"`
-	Release string `mapstructure:"RELEASE"`
-	APIKey  string `mapstructure:"X_API_KEY"`
-	JWTKey  string `mapstructure:"JWT_KEY"`
+	Port       string `mapstructure:"PORT"`
+	Release    string `mapstructure:"RELEASE"`
+	APIKey     string `mapstructure:"X_API_KEY"`
+	JWTKey     string `mapstructure:"JWT_KEY"`
+	WorkerPool int    `mapstructure:"WORKER_POOL"`
 
 	Version string `mapstructure:"VERSION"`
 
