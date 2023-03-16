@@ -18,7 +18,7 @@ import (
 
 var DB *sql.DB
 
-func ConnectDatabase(enableLogging bool) error {
+func ConnectDatabase(ctx context.Context, enableLogging bool) error {
 	connectString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		config.App.DatabaseHost, config.App.DatabasePort, config.App.DatabaseUser, config.App.DatabasePassword,
 		config.App.DatabaseSchema)
@@ -40,7 +40,7 @@ func ConnectDatabase(enableLogging bool) error {
 		})
 	}
 
-	return DB.Ping()
+	return DB.PingContext(ctx)
 }
 
 func StartTransaction(ctx context.Context) (*sql.Tx, error) {
