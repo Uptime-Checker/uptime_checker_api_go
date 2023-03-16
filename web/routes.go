@@ -1,17 +1,20 @@
 package web
 
 import (
+	"context"
+
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/cron"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/worker"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
 )
 
-func SetupRoutes(app *fiber.App) {
+func SetupRoutes(ctx context.Context, app *fiber.App) {
 	// Default route
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("OK")
@@ -70,9 +73,18 @@ func SetupRoutes(app *fiber.App) {
 
 	// Setup Cron
 	syncProductsTask := task.NewSyncProductsTask()
+	runCheckTask := task.NewRunCheckTask()
+
 	cogman := cron.NewCron(jobDomain, syncProductsTask)
+	wheel := worker.NewWorker(runCheckTask)
 	app.Hooks().OnListen(func() error {
-		return cogman.Start()
+		if err := cogman.Start(ctx); err != nil {
+			return err
+		}
+		if err := wheel.Start(ctx); err != nil {
+			return err
+		}
+		return nil
 	})
 }
 
