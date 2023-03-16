@@ -11,6 +11,7 @@ const (
 const AuthScheme = "Bearer"
 
 const MaxRequestPerMinute = 10
+const ServerShutdownTimeout = 5
 
 // Environment type
 type Environment string

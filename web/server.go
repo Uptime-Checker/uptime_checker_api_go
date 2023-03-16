@@ -3,6 +3,10 @@ package web
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/newrelic/go-agent/v3/newrelic"
@@ -21,10 +25,13 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 func Setup(ctx context.Context, shutdown context.CancelFunc) {
+	tracingID := pkg.GetTracingID(ctx)
+
 	// Create fiber app
 	app := fiber.New(fiber.Config{
 		Prefork: config.IsProd,
@@ -45,9 +52,27 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	// Roues
 	SetupRoutes(ctx, shutdown, app)
 
-	if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
-		panic(err)
-	}
+	// Listen from a different goroutine
+	go func() {
+		if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
+			panic(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)                    // Create channel to signify a signal being sent
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // When an interrupt or termination signal is sent, notify the channel
+
+	<-c // This blocks the main thread until an interrupt is received
+	lgr.Default.Print(tracingID, "gracefully shutting down...")
+	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
+	cleanup(ctx)
+	lgr.Default.Print(tracingID, "app was successful shutdown")
+}
+
+func cleanup(ctx context.Context) {
+	tracingID := pkg.GetTracingID(ctx)
+	lgr.Default.Print(tracingID, "running cleanup tasks...")
+	_ = infra.DB.Close()
 }
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
