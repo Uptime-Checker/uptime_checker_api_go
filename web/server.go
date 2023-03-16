@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/getsentry/sentry-go"
@@ -23,7 +24,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
-func Setup() {
+func Setup(ctx context.Context) {
 	// Create fiber app
 	app := fiber.New(fiber.Config{
 		Prefork: config.IsProd,
@@ -42,7 +43,7 @@ func Setup() {
 	setupMiddlewares(app, newRelicApp)
 
 	// Roues
-	SetupRoutes(app)
+	SetupRoutes(ctx, app)
 
 	if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
 		panic(err)

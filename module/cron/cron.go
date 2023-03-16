@@ -43,9 +43,8 @@ func NewCron(jobDomain *domain.JobDomain, syncProductsTask *task.SyncProductsTas
 	return &Cron{jobDomain: jobDomain, syncProductsTask: syncProductsTask}
 }
 
-func (c *Cron) Start() error {
+func (c *Cron) Start(ctx context.Context) error {
 	now := times.Now()
-	ctx := context.Background()
 	s = gocron.NewScheduler(time.UTC)
 
 	random := pkg.RandomNumber(60, 120)

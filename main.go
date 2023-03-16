@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
@@ -9,8 +11,9 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	if err := config.LoadConfig(".env"); err != nil {
-		panic("config load failed")
+		panic(err)
 	}
 
 	// Setup Logger
@@ -20,9 +23,9 @@ func main() {
 	cache.SetupCache()
 
 	// Setup Database
-	if err := infra.ConnectDatabase(!config.IsProd); err != nil {
-		panic("database connection failed")
+	if err := infra.ConnectDatabase(ctx, !config.IsProd); err != nil {
+		panic(err)
 	}
 	lgr.Default.Print("database connected")
-	web.Setup()
+	web.Setup(ctx)
 }
