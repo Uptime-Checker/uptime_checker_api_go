@@ -66,7 +66,7 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	lgr.Default.Print(tracingID, "gracefully shutting down...")
 	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
 	cleanup(ctx, shutdown)
-	lgr.Default.Print(tracingID, "app was successful shutdown")
+	lgr.Default.Print(tracingID, "app was successfully shutdown")
 }
 
 func cleanup(ctx context.Context, shutdown context.CancelFunc) {

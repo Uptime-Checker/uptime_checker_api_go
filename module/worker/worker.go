@@ -2,8 +2,10 @@ package worker
 
 import (
 	"context"
+	"time"
 
 	"github.com/vgarvardt/gue/v5"
+	"github.com/vgarvardt/gue/v5/adapter"
 	"github.com/vgarvardt/gue/v5/adapter/libpq"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
@@ -43,7 +45,13 @@ func (w *Worker) Start(ctx context.Context) error {
 	}
 
 	// create a pool of workers
-	workers, err := gue.NewWorkerPool(Client, workMap, config.App.WorkerPool)
+	workers, err := gue.NewWorkerPool(
+		Client, workMap,
+		config.App.WorkerPool,
+		gue.WithPoolLogger(adapter.NewStdLogger()),
+		gue.WithPoolPollInterval(500*time.Millisecond),
+		gue.WithPoolPollStrategy(gue.RunAtPollStrategy),
+	)
 	if err != nil {
 		return err
 	}
