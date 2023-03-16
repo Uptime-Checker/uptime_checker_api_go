@@ -59,7 +59,7 @@ func (c *Cron) Start(ctx context.Context) error {
 	} else {
 		if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 			for _, job := range recurringJobs {
-				if times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
+				if job.NextRunAt == nil || times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
 					nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval))
 					_, err := c.jobDomain.UpdateNextRunAt(ctx, tx, job.ID, &nextRunAt, resource.JobStatusScheduled)
 					if err != nil {
