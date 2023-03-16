@@ -3,7 +3,6 @@ package cron
 import (
 	"context"
 	"database/sql"
-
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -44,6 +43,7 @@ func NewCron(jobDomain *domain.JobDomain, syncProductsTask *task.SyncProductsTas
 }
 
 func (c *Cron) Start(ctx context.Context) error {
+	tracingID := pkg.GetTracingID(ctx)
 	now := times.Now()
 	s = gocron.NewScheduler(time.UTC)
 
@@ -74,6 +74,7 @@ func (c *Cron) Start(ctx context.Context) error {
 	}
 
 	s.StartAsync()
+	lgr.Default.Print(tracingID, "cron started")
 	return nil
 }
 
