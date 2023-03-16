@@ -61,7 +61,7 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 
 	quitCh := initQuitCh()
 	sig := <-quitCh // This blocks the main thread until an interrupt is received
-	lgr.Default.Print(tracingID, "received interrupt, gracefully shutting down...", sig.String())
+	lgr.Default.Print(tracingID, "received", fmt.Sprintf("(%s)", sig.String()), "gracefully shutting down...")
 	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
 	cleanup(ctx, shutdown)
 	lgr.Default.Print(tracingID, "app was successfully shutdown")
