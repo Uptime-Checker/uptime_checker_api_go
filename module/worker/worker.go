@@ -35,7 +35,7 @@ func (w *Worker) Start(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
 	poolAdapter := libpq.NewConnPool(infra.DB)
 
-	Client, err := gue.NewClient(poolAdapter)
+	Wheel, err := gue.NewClient(poolAdapter)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (w *Worker) Start(ctx context.Context) error {
 
 	// create a pool of workers
 	workers, err := gue.NewWorkerPool(
-		Client, workMap,
+		Wheel, workMap,
 		config.App.WorkerPool,
 		gue.WithPoolLogger(adapter.NewStdLogger()),
 		gue.WithPoolPollInterval(500*time.Millisecond),
@@ -58,8 +58,7 @@ func (w *Worker) Start(ctx context.Context) error {
 
 	// work jobs in goroutine
 	go func() {
-		err := workers.Run(ctx)
-		if err != nil {
+		if err := workers.Run(ctx); err != nil {
 			panic(err)
 		}
 	}()
