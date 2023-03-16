@@ -25,5 +25,5 @@ func RunCheckAsync(ctx context.Context, monitorID int64, runAt time.Time) error 
 	}
 
 	job := &gue.Job{Type: worker.TaskRunCheck, RunAt: runAt, Args: payload}
-	return worker.Client.Enqueue(ctx, job)
+	return worker.Wheel.Enqueue(ctx, job)
 }

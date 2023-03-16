@@ -15,7 +15,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
-var Client *gue.Client
+var Wheel *gue.Client
 
 // Task list
 const (
