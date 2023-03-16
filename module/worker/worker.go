@@ -35,7 +35,8 @@ func (w *Worker) Start(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
 	poolAdapter := libpq.NewConnPool(infra.DB)
 
-	Wheel, err := gue.NewClient(poolAdapter)
+	var err error
+	Wheel, err = gue.NewClient(poolAdapter)
 	if err != nil {
 		return err
 	}
