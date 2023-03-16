@@ -14,7 +14,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
 )
 
-func SetupRoutes(ctx context.Context, app *fiber.App) {
+func SetupRoutes(ctx context.Context, shutdown context.CancelFunc, app *fiber.App) {
 	// Default route
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("OK")
@@ -84,6 +84,10 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		if err := wheel.Start(ctx); err != nil {
 			return err
 		}
+		return nil
+	})
+	app.Hooks().OnShutdown(func() error {
+		shutdown()
 		return nil
 	})
 }

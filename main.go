@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, shutdown := context.WithCancel(context.Background())
 	if err := config.LoadConfig(".env"); err != nil {
 		panic(err)
 	}
@@ -27,5 +27,5 @@ func main() {
 		panic(err)
 	}
 	lgr.Default.Print("database connected")
-	web.Setup(ctx)
+	web.Setup(ctx, shutdown)
 }

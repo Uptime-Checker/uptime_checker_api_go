@@ -24,7 +24,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
-func Setup(ctx context.Context) {
+func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	// Create fiber app
 	app := fiber.New(fiber.Config{
 		Prefork: config.IsProd,
@@ -43,7 +43,7 @@ func Setup(ctx context.Context) {
 	setupMiddlewares(app, newRelicApp)
 
 	// Roues
-	SetupRoutes(ctx, app)
+	SetupRoutes(ctx, shutdown, app)
 
 	if err := app.Listen(fmt.Sprintf(":%s", config.App.Port)); err != nil {
 		panic(err)
