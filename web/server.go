@@ -59,14 +59,26 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 		}
 	}()
 
-	c := make(chan os.Signal, 1)                    // Create channel to signify a signal being sent
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // When an interrupt or termination signal is sent, notify the channel
-
-	<-c // This blocks the main thread until an interrupt is received
-	lgr.Default.Print(tracingID, "gracefully shutting down...")
+	quitCh := initQuitCh()
+	sig := <-quitCh // This blocks the main thread until an interrupt is received
+	lgr.Default.Print(tracingID, "received interrupt, gracefully shutting down...", sig.String())
 	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
 	cleanup(ctx, shutdown)
 	lgr.Default.Print(tracingID, "app was successfully shutdown")
+}
+
+func initQuitCh() chan os.Signal {
+	sigCh := make(chan os.Signal, 1) // Create channel to signify a signal being sent
+	signal.Notify(
+		sigCh,
+		os.Interrupt,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	) // When an interrupt or termination signal is sent, notify the channel
+
+	return sigCh
 }
 
 func cleanup(ctx context.Context, shutdown context.CancelFunc) {
