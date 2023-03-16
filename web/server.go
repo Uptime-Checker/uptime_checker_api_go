@@ -50,7 +50,7 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	setupMiddlewares(app, newRelicApp)
 
 	// Roues
-	SetupRoutes(ctx, shutdown, app)
+	SetupRoutes(ctx, app)
 
 	// Listen from a different goroutine
 	go func() {
@@ -65,14 +65,15 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	<-c // This blocks the main thread until an interrupt is received
 	lgr.Default.Print(tracingID, "gracefully shutting down...")
 	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
-	cleanup(ctx)
+	cleanup(ctx, shutdown)
 	lgr.Default.Print(tracingID, "app was successful shutdown")
 }
 
-func cleanup(ctx context.Context) {
+func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 	tracingID := pkg.GetTracingID(ctx)
 	lgr.Default.Print(tracingID, "running cleanup tasks...")
 	_ = infra.DB.Close()
+	shutdown()
 }
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
