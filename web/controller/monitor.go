@@ -4,9 +4,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/gandalf"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
+	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
 )
 
 type MonitorController struct {
@@ -42,6 +44,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	ctx := c.Context()
 	body := new(MonitorBody)
 	tracingID := pkg.GetTracingID(ctx)
+	user := middlelayer.GetUser(c)
 
 	if err := c.BodyParser(body); err != nil {
 		return resp.ServeInternalServerError(c, err)
@@ -50,6 +53,15 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	if err := resp.Validate.Struct(body); err != nil {
 		return resp.ServeValidationError(c, err)
 	}
+
+	count, err := m.monitorDomain.Count(ctx, *user.OrganizationID)
+	if err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+	if err := gandalf.CanCreateMonitor(user, int32(count), int32(body.Interval)); err != nil {
+		return resp.SendError(c, fiber.StatusBadRequest, err)
+	}
+
 	return c.SendString(tracingID)
 }
 
