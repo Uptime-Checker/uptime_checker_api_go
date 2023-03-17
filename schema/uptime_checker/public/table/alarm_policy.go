@@ -11,9 +11,9 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 )
 
-var MonitorAlarmPolicy = newMonitorAlarmPolicyTable("public", "monitor_alarm_policy", "")
+var AlarmPolicy = newAlarmPolicyTable("public", "alarm_policy", "")
 
-type monitorAlarmPolicyTable struct {
+type alarmPolicyTable struct {
 	postgres.Table
 
 	//Columns
@@ -29,40 +29,40 @@ type monitorAlarmPolicyTable struct {
 	MutableColumns postgres.ColumnList
 }
 
-type MonitorAlarmPolicyTable struct {
-	monitorAlarmPolicyTable
+type AlarmPolicyTable struct {
+	alarmPolicyTable
 
-	EXCLUDED monitorAlarmPolicyTable
+	EXCLUDED alarmPolicyTable
 }
 
-// AS creates new MonitorAlarmPolicyTable with assigned alias
-func (a MonitorAlarmPolicyTable) AS(alias string) *MonitorAlarmPolicyTable {
-	return newMonitorAlarmPolicyTable(a.SchemaName(), a.TableName(), alias)
+// AS creates new AlarmPolicyTable with assigned alias
+func (a AlarmPolicyTable) AS(alias string) *AlarmPolicyTable {
+	return newAlarmPolicyTable(a.SchemaName(), a.TableName(), alias)
 }
 
-// Schema creates new MonitorAlarmPolicyTable with assigned schema name
-func (a MonitorAlarmPolicyTable) FromSchema(schemaName string) *MonitorAlarmPolicyTable {
-	return newMonitorAlarmPolicyTable(schemaName, a.TableName(), a.Alias())
+// Schema creates new AlarmPolicyTable with assigned schema name
+func (a AlarmPolicyTable) FromSchema(schemaName string) *AlarmPolicyTable {
+	return newAlarmPolicyTable(schemaName, a.TableName(), a.Alias())
 }
 
-// WithPrefix creates new MonitorAlarmPolicyTable with assigned table prefix
-func (a MonitorAlarmPolicyTable) WithPrefix(prefix string) *MonitorAlarmPolicyTable {
-	return newMonitorAlarmPolicyTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+// WithPrefix creates new AlarmPolicyTable with assigned table prefix
+func (a AlarmPolicyTable) WithPrefix(prefix string) *AlarmPolicyTable {
+	return newAlarmPolicyTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
 }
 
-// WithSuffix creates new MonitorAlarmPolicyTable with assigned table suffix
-func (a MonitorAlarmPolicyTable) WithSuffix(suffix string) *MonitorAlarmPolicyTable {
-	return newMonitorAlarmPolicyTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+// WithSuffix creates new AlarmPolicyTable with assigned table suffix
+func (a AlarmPolicyTable) WithSuffix(suffix string) *AlarmPolicyTable {
+	return newAlarmPolicyTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
 }
 
-func newMonitorAlarmPolicyTable(schemaName, tableName, alias string) *MonitorAlarmPolicyTable {
-	return &MonitorAlarmPolicyTable{
-		monitorAlarmPolicyTable: newMonitorAlarmPolicyTableImpl(schemaName, tableName, alias),
-		EXCLUDED:                newMonitorAlarmPolicyTableImpl("", "excluded", ""),
+func newAlarmPolicyTable(schemaName, tableName, alias string) *AlarmPolicyTable {
+	return &AlarmPolicyTable{
+		alarmPolicyTable: newAlarmPolicyTableImpl(schemaName, tableName, alias),
+		EXCLUDED:         newAlarmPolicyTableImpl("", "excluded", ""),
 	}
 }
 
-func newMonitorAlarmPolicyTableImpl(schemaName, tableName, alias string) monitorAlarmPolicyTable {
+func newAlarmPolicyTableImpl(schemaName, tableName, alias string) alarmPolicyTable {
 	var (
 		IDColumn             = postgres.IntegerColumn("id")
 		ReasonColumn         = postgres.StringColumn("reason")
@@ -75,7 +75,7 @@ func newMonitorAlarmPolicyTableImpl(schemaName, tableName, alias string) monitor
 		mutableColumns       = postgres.ColumnList{ReasonColumn, ThresholdColumn, MonitorIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
-	return monitorAlarmPolicyTable{
+	return alarmPolicyTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns

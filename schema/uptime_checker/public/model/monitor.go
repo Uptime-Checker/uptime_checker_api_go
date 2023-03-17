@@ -12,30 +12,33 @@ import (
 )
 
 type Monitor struct {
-	ID              int64 `sql:"primary_key"`
-	Name            string
-	URL             string
-	Method          *int32
-	Interval        *int32
-	Type            *int32
-	Body            *string
-	BodyFormat      *int32
-	Headers         *string
-	Username        *string
-	Password        *string
-	On              *bool
-	Muted           *bool
-	Status          *int32
-	CheckSsl        *bool
-	FollowRedirects *bool
-	NextCheckAt     *time.Time
-	LastCheckedAt   *time.Time
-	LastFailedAt    *time.Time
-	CreatedBy       *int64
-	UpdatedBy       *int64
-	MonitorGroupID  *int64
-	PrevID          *int64
-	OrganizationID  *int64
-	InsertedAt      time.Time
-	UpdatedAt       time.Time
+	ID                    int64 `sql:"primary_key"`
+	Name                  string
+	URL                   string
+	Method                *int32
+	Interval              *int32
+	Type                  *int32
+	Body                  *string
+	BodyFormat            *int32
+	Headers               *string
+	Username              *string
+	Password              *string
+	On                    *bool
+	Muted                 *bool
+	GlobalAlarmSettings   *bool
+	AlarmReminderInterval *int32
+	AlarmReminderCount    *int32
+	Status                *int32
+	CheckSsl              *bool
+	FollowRedirects       *bool
+	NextCheckAt           *time.Time
+	LastCheckedAt         *time.Time
+	LastFailedAt          *time.Time
+	CreatedBy             *int64
+	UpdatedBy             *int64
+	MonitorGroupID        *int64
+	PrevID                *int64
+	OrganizationID        *int64
+	InsertedAt            time.Time
+	UpdatedAt             time.Time
 }

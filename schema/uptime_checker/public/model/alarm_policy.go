@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type MonitorAlarmPolicy struct {
+type AlarmPolicy struct {
 	ID             int64 `sql:"primary_key"`
 	Reason         *string
 	Threshold      *int32

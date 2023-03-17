@@ -17,32 +17,35 @@ type monitorTable struct {
 	postgres.Table
 
 	//Columns
-	ID              postgres.ColumnInteger
-	Name            postgres.ColumnString
-	URL             postgres.ColumnString
-	Method          postgres.ColumnInteger
-	Interval        postgres.ColumnInteger
-	Type            postgres.ColumnInteger
-	Body            postgres.ColumnString
-	BodyFormat      postgres.ColumnInteger
-	Headers         postgres.ColumnString
-	Username        postgres.ColumnString
-	Password        postgres.ColumnString
-	On              postgres.ColumnBool
-	Muted           postgres.ColumnBool
-	Status          postgres.ColumnInteger
-	CheckSsl        postgres.ColumnBool
-	FollowRedirects postgres.ColumnBool
-	NextCheckAt     postgres.ColumnTimestamp
-	LastCheckedAt   postgres.ColumnTimestamp
-	LastFailedAt    postgres.ColumnTimestamp
-	CreatedBy       postgres.ColumnInteger
-	UpdatedBy       postgres.ColumnInteger
-	MonitorGroupID  postgres.ColumnInteger
-	PrevID          postgres.ColumnInteger
-	OrganizationID  postgres.ColumnInteger
-	InsertedAt      postgres.ColumnTimestamp
-	UpdatedAt       postgres.ColumnTimestamp
+	ID                    postgres.ColumnInteger
+	Name                  postgres.ColumnString
+	URL                   postgres.ColumnString
+	Method                postgres.ColumnInteger
+	Interval              postgres.ColumnInteger
+	Type                  postgres.ColumnInteger
+	Body                  postgres.ColumnString
+	BodyFormat            postgres.ColumnInteger
+	Headers               postgres.ColumnString
+	Username              postgres.ColumnString
+	Password              postgres.ColumnString
+	On                    postgres.ColumnBool
+	Muted                 postgres.ColumnBool
+	GlobalAlarmSettings   postgres.ColumnBool
+	AlarmReminderInterval postgres.ColumnInteger
+	AlarmReminderCount    postgres.ColumnInteger
+	Status                postgres.ColumnInteger
+	CheckSsl              postgres.ColumnBool
+	FollowRedirects       postgres.ColumnBool
+	NextCheckAt           postgres.ColumnTimestamp
+	LastCheckedAt         postgres.ColumnTimestamp
+	LastFailedAt          postgres.ColumnTimestamp
+	CreatedBy             postgres.ColumnInteger
+	UpdatedBy             postgres.ColumnInteger
+	MonitorGroupID        postgres.ColumnInteger
+	PrevID                postgres.ColumnInteger
+	OrganizationID        postgres.ColumnInteger
+	InsertedAt            postgres.ColumnTimestamp
+	UpdatedAt             postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -83,66 +86,72 @@ func newMonitorTable(schemaName, tableName, alias string) *MonitorTable {
 
 func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 	var (
-		IDColumn              = postgres.IntegerColumn("id")
-		NameColumn            = postgres.StringColumn("name")
-		URLColumn             = postgres.StringColumn("url")
-		MethodColumn          = postgres.IntegerColumn("method")
-		IntervalColumn        = postgres.IntegerColumn("interval")
-		TypeColumn            = postgres.IntegerColumn("type")
-		BodyColumn            = postgres.StringColumn("body")
-		BodyFormatColumn      = postgres.IntegerColumn("body_format")
-		HeadersColumn         = postgres.StringColumn("headers")
-		UsernameColumn        = postgres.StringColumn("username")
-		PasswordColumn        = postgres.StringColumn("password")
-		OnColumn              = postgres.BoolColumn("on")
-		MutedColumn           = postgres.BoolColumn("muted")
-		StatusColumn          = postgres.IntegerColumn("status")
-		CheckSslColumn        = postgres.BoolColumn("check_ssl")
-		FollowRedirectsColumn = postgres.BoolColumn("follow_redirects")
-		NextCheckAtColumn     = postgres.TimestampColumn("next_check_at")
-		LastCheckedAtColumn   = postgres.TimestampColumn("last_checked_at")
-		LastFailedAtColumn    = postgres.TimestampColumn("last_failed_at")
-		CreatedByColumn       = postgres.IntegerColumn("created_by")
-		UpdatedByColumn       = postgres.IntegerColumn("updated_by")
-		MonitorGroupIDColumn  = postgres.IntegerColumn("monitor_group_id")
-		PrevIDColumn          = postgres.IntegerColumn("prev_id")
-		OrganizationIDColumn  = postgres.IntegerColumn("organization_id")
-		InsertedAtColumn      = postgres.TimestampColumn("inserted_at")
-		UpdatedAtColumn       = postgres.TimestampColumn("updated_at")
-		allColumns            = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns        = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		IDColumn                    = postgres.IntegerColumn("id")
+		NameColumn                  = postgres.StringColumn("name")
+		URLColumn                   = postgres.StringColumn("url")
+		MethodColumn                = postgres.IntegerColumn("method")
+		IntervalColumn              = postgres.IntegerColumn("interval")
+		TypeColumn                  = postgres.IntegerColumn("type")
+		BodyColumn                  = postgres.StringColumn("body")
+		BodyFormatColumn            = postgres.IntegerColumn("body_format")
+		HeadersColumn               = postgres.StringColumn("headers")
+		UsernameColumn              = postgres.StringColumn("username")
+		PasswordColumn              = postgres.StringColumn("password")
+		OnColumn                    = postgres.BoolColumn("on")
+		MutedColumn                 = postgres.BoolColumn("muted")
+		GlobalAlarmSettingsColumn   = postgres.BoolColumn("global_alarm_settings")
+		AlarmReminderIntervalColumn = postgres.IntegerColumn("alarm_reminder_interval")
+		AlarmReminderCountColumn    = postgres.IntegerColumn("alarm_reminder_count")
+		StatusColumn                = postgres.IntegerColumn("status")
+		CheckSslColumn              = postgres.BoolColumn("check_ssl")
+		FollowRedirectsColumn       = postgres.BoolColumn("follow_redirects")
+		NextCheckAtColumn           = postgres.TimestampColumn("next_check_at")
+		LastCheckedAtColumn         = postgres.TimestampColumn("last_checked_at")
+		LastFailedAtColumn          = postgres.TimestampColumn("last_failed_at")
+		CreatedByColumn             = postgres.IntegerColumn("created_by")
+		UpdatedByColumn             = postgres.IntegerColumn("updated_by")
+		MonitorGroupIDColumn        = postgres.IntegerColumn("monitor_group_id")
+		PrevIDColumn                = postgres.IntegerColumn("prev_id")
+		OrganizationIDColumn        = postgres.IntegerColumn("organization_id")
+		InsertedAtColumn            = postgres.TimestampColumn("inserted_at")
+		UpdatedAtColumn             = postgres.TimestampColumn("updated_at")
+		allColumns                  = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns              = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, PrevIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:              IDColumn,
-		Name:            NameColumn,
-		URL:             URLColumn,
-		Method:          MethodColumn,
-		Interval:        IntervalColumn,
-		Type:            TypeColumn,
-		Body:            BodyColumn,
-		BodyFormat:      BodyFormatColumn,
-		Headers:         HeadersColumn,
-		Username:        UsernameColumn,
-		Password:        PasswordColumn,
-		On:              OnColumn,
-		Muted:           MutedColumn,
-		Status:          StatusColumn,
-		CheckSsl:        CheckSslColumn,
-		FollowRedirects: FollowRedirectsColumn,
-		NextCheckAt:     NextCheckAtColumn,
-		LastCheckedAt:   LastCheckedAtColumn,
-		LastFailedAt:    LastFailedAtColumn,
-		CreatedBy:       CreatedByColumn,
-		UpdatedBy:       UpdatedByColumn,
-		MonitorGroupID:  MonitorGroupIDColumn,
-		PrevID:          PrevIDColumn,
-		OrganizationID:  OrganizationIDColumn,
-		InsertedAt:      InsertedAtColumn,
-		UpdatedAt:       UpdatedAtColumn,
+		ID:                    IDColumn,
+		Name:                  NameColumn,
+		URL:                   URLColumn,
+		Method:                MethodColumn,
+		Interval:              IntervalColumn,
+		Type:                  TypeColumn,
+		Body:                  BodyColumn,
+		BodyFormat:            BodyFormatColumn,
+		Headers:               HeadersColumn,
+		Username:              UsernameColumn,
+		Password:              PasswordColumn,
+		On:                    OnColumn,
+		Muted:                 MutedColumn,
+		GlobalAlarmSettings:   GlobalAlarmSettingsColumn,
+		AlarmReminderInterval: AlarmReminderIntervalColumn,
+		AlarmReminderCount:    AlarmReminderCountColumn,
+		Status:                StatusColumn,
+		CheckSsl:              CheckSslColumn,
+		FollowRedirects:       FollowRedirectsColumn,
+		NextCheckAt:           NextCheckAtColumn,
+		LastCheckedAt:         LastCheckedAtColumn,
+		LastFailedAt:          LastFailedAtColumn,
+		CreatedBy:             CreatedByColumn,
+		UpdatedBy:             UpdatedByColumn,
+		MonitorGroupID:        MonitorGroupIDColumn,
+		PrevID:                PrevIDColumn,
+		OrganizationID:        OrganizationIDColumn,
+		InsertedAt:            InsertedAtColumn,
+		UpdatedAt:             UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

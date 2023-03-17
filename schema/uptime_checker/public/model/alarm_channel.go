@@ -11,8 +11,9 @@ import (
 	"time"
 )
 
-type MonitorNotificationPolicy struct {
+type AlarmChannel struct {
 	ID             int64 `sql:"primary_key"`
+	On             *bool
 	UserID         *int64
 	MonitorID      *int64
 	OrganizationID *int64
