@@ -18,7 +18,7 @@ const (
 )
 
 func HandleFeatureMax(user *pkg.UserWithRoleAndSubscription, feature FeatureType, count int32) error {
-	subscriptionFeature, err := handleFeature(user, feature);
+	subscriptionFeature, err := handleFeature(user, feature)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func HandleFeatureMax(user *pkg.UserWithRoleAndSubscription, feature FeatureType
 }
 
 func HandleFeatureMin(user *pkg.UserWithRoleAndSubscription, feature FeatureType, count int32) error {
-	subscriptionFeature, err := handleFeature(user, feature);
+	subscriptionFeature, err := handleFeature(user, feature)
 	if err != nil {
 		return err
 	}
