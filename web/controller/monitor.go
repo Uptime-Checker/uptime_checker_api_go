@@ -68,7 +68,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 func (m *MonitorController) ListMonitors(c *fiber.Ctx) error {
 	user := middlelayer.GetUser(c)
 
-	monitors, err := m.monitorDomain.List(c.Context(), *user.OrganizationID)
+	monitors, err := m.monitorDomain.List(c.Context(), *user.OrganizationID, 5)
 	if err != nil {
 		return resp.ServeInternalServerError(c, err)
 	}

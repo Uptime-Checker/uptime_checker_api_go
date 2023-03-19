@@ -27,8 +27,8 @@ func (m *MonitorDomain) Count(ctx context.Context, organizationID int64) (int, e
 	return dest.count, err
 }
 
-func (m *MonitorDomain) List(ctx context.Context, organizationID int64) ([]model.Monitor, error) {
-	stmt := m.listRecursively(organizationID)
+func (m *MonitorDomain) List(ctx context.Context, organizationID int64, limit int) ([]model.Monitor, error) {
+	stmt := m.listRecursively(organizationID, limit)
 
 	var monitors []model.Monitor
 	err := stmt.QueryContext(ctx, infra.DB, &monitors)
@@ -36,14 +36,14 @@ func (m *MonitorDomain) List(ctx context.Context, organizationID int64) ([]model
 }
 
 func (m *MonitorDomain) getHead(ctx context.Context, organizationID int64) (*model.Monitor, error) {
-	stmt := m.listRecursively(organizationID)
+	stmt := m.listRecursively(organizationID, 1)
 
 	monitor := &model.Monitor{}
 	err := stmt.QueryContext(ctx, infra.DB, &monitor)
 	return monitor, err
 }
 
-func (m *MonitorDomain) listRecursively(organizationID int64) Statement {
+func (m *MonitorDomain) listRecursively(organizationID int64, limit int) Statement {
 	monitorTree := CTE("monitor_tree")
 
 	stmt := WITH_RECURSIVE(
@@ -70,6 +70,8 @@ func (m *MonitorDomain) listRecursively(organizationID int64) Statement {
 			monitorTree,
 		).WHERE(
 			Monitor.OrganizationID.From(monitorTree).EQ(Int(organizationID)),
+		).LIMIT(
+			int64(limit),
 		),
 	)
 
