@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/coocood/freecache v1.2.3
+	github.com/fatih/color v1.15.0
 	github.com/getsentry/sentry-go v0.18.0
 	github.com/go-co-op/gocron v1.18.1
 	github.com/go-jet/jet/v2 v2.9.0

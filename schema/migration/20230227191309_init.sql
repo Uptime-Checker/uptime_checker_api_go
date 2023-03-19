@@ -192,19 +192,19 @@ create index if not exists error_log_assertion_id_index on error_log (assertion_
 create table if not exists alarm_channel (
     id bigserial,
     "on" boolean default true,
-    user_id bigint,
+    user_contact_id bigint,
     monitor_id bigint,
     organization_id bigint,
     integration_id bigint,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (user_id) references "user" on delete cascade,
+    foreign key (user_contact_id) references user_contact on delete cascade,
     foreign key (monitor_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade,
     foreign key (integration_id) references monitor_integration on delete cascade
 );
-create index if not exists alarm_channel_user_id_index on alarm_channel (user_id);
+create index if not exists alarm_channel_user_contact_id_index on alarm_channel (user_contact_id);
 create index if not exists alarm_channel_monitor_id_index on alarm_channel (monitor_id);
 create index if not exists alarm_channel_integration_id_index on alarm_channel (integration_id);
 create index if not exists alarm_channel_organization_id_index on alarm_channel (organization_id);

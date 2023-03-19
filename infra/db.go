@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 
+	"github.com/fatih/color"
 	"github.com/getsentry/sentry-go"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
@@ -35,8 +36,12 @@ func ConnectDatabase(ctx context.Context, enableLogging bool) error {
 			//   - Number of rows returned for Query() and QueryContext() methods
 			//   - RowsAffected() for Exec() and ExecContext() methods
 			//   - Always 0 for Rows() method.
-			fmt.Printf("|>----------------------------------------------------- %s|> processed [%d] - in %.2fs\n",
-				queryInfo.Statement.DebugSql(), queryInfo.RowsProcessed, queryInfo.Duration.Seconds())
+			c0 := color.New(color.FgHiGreen)
+			_, _ = c0.Print("|>-----------------------------------------------------")
+			c1 := color.New(color.FgCyan)
+			_, _ = c1.Printf("%s", queryInfo.Statement.DebugSql())
+			c2 := color.New(color.FgHiRed).Add(color.Underline)
+			_, _ = c2.Printf("|> processed [%d] - in %.2fs\n", queryInfo.RowsProcessed, queryInfo.Duration.Seconds())
 		})
 	}
 
