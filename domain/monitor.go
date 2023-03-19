@@ -27,7 +27,7 @@ func (m *MonitorDomain) Count(ctx context.Context, organizationID int64) (int, e
 	return dest.count, err
 }
 
-func (m *MonitorDomain) list(ctx context.Context, organizationID int64) ([]model.Monitor, error) {
+func (m *MonitorDomain) List(ctx context.Context, organizationID int64) ([]model.Monitor, error) {
 	stmt := m.listRecursively(organizationID)
 
 	var monitors []model.Monitor
@@ -59,7 +59,7 @@ func (m *MonitorDomain) listRecursively(organizationID int64) Statement {
 					Monitor.AllColumns,
 				).FROM(
 					Monitor.
-						INNER_JOIN(monitorTree, Monitor.PrevID.From(monitorTree).EQ(Monitor.ID)),
+						INNER_JOIN(monitorTree, Monitor.ID.From(monitorTree).EQ(Monitor.PrevID)),
 				),
 			),
 		),
@@ -69,7 +69,7 @@ func (m *MonitorDomain) listRecursively(organizationID int64) Statement {
 		).FROM(
 			monitorTree,
 		).WHERE(
-			Monitor.OrganizationID.EQ(Int(organizationID)),
+			Monitor.OrganizationID.From(monitorTree).EQ(Int(organizationID)),
 		),
 	)
 
