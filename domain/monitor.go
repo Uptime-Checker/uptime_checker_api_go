@@ -60,11 +60,11 @@ func (m *MonitorDomain) GetHead(ctx context.Context, organizationID int64) (*mod
 	stmt := m.listRecursively(organizationID, 1)
 
 	monitor := &model.Monitor{}
-	err := stmt.QueryContext(ctx, infra.DB, &monitor)
+	err := stmt.QueryContext(ctx, infra.DB, monitor)
 	return monitor, err
 }
 
-func (u *MonitorDomain) UpdatePrevious(ctx context.Context, tx *sql.Tx, id, previousID int64) (*model.Monitor, error) {
+func (m *MonitorDomain) UpdatePrevious(ctx context.Context, tx *sql.Tx, id, previousID int64) (*model.Monitor, error) {
 	now := times.Now()
 	monitor := &model.Monitor{
 		PrevID:    &previousID,
