@@ -37,7 +37,7 @@ type Monitor struct {
 	CreatedBy             *int64
 	UpdatedBy             *int64
 	MonitorGroupID        *int64
-	PrevID                *int64
+	NextID                *int64
 	OrganizationID        *int64
 	InsertedAt            time.Time
 	UpdatedAt             time.Time

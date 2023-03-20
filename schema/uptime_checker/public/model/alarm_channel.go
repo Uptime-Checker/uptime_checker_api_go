@@ -14,7 +14,7 @@ import (
 type AlarmChannel struct {
 	ID             int64 `sql:"primary_key"`
 	On             *bool
-	UserID         *int64
+	UserContactID  *int64
 	MonitorID      *int64
 	OrganizationID *int64
 	IntegrationID  *int64

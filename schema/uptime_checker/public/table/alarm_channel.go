@@ -19,7 +19,7 @@ type alarmChannelTable struct {
 	//Columns
 	ID             postgres.ColumnInteger
 	On             postgres.ColumnBool
-	UserID         postgres.ColumnInteger
+	UserContactID  postgres.ColumnInteger
 	MonitorID      postgres.ColumnInteger
 	OrganizationID postgres.ColumnInteger
 	IntegrationID  postgres.ColumnInteger
@@ -67,14 +67,14 @@ func newAlarmChannelTableImpl(schemaName, tableName, alias string) alarmChannelT
 	var (
 		IDColumn             = postgres.IntegerColumn("id")
 		OnColumn             = postgres.BoolColumn("on")
-		UserIDColumn         = postgres.IntegerColumn("user_id")
+		UserContactIDColumn  = postgres.IntegerColumn("user_contact_id")
 		MonitorIDColumn      = postgres.IntegerColumn("monitor_id")
 		OrganizationIDColumn = postgres.IntegerColumn("organization_id")
 		IntegrationIDColumn  = postgres.IntegerColumn("integration_id")
 		InsertedAtColumn     = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, OnColumn, UserIDColumn, MonitorIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{OnColumn, UserIDColumn, MonitorIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns           = postgres.ColumnList{IDColumn, OnColumn, UserContactIDColumn, MonitorIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{OnColumn, UserContactIDColumn, MonitorIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return alarmChannelTable{
@@ -83,7 +83,7 @@ func newAlarmChannelTableImpl(schemaName, tableName, alias string) alarmChannelT
 		//Columns
 		ID:             IDColumn,
 		On:             OnColumn,
-		UserID:         UserIDColumn,
+		UserContactID:  UserContactIDColumn,
 		MonitorID:      MonitorIDColumn,
 		OrganizationID: OrganizationIDColumn,
 		IntegrationID:  IntegrationIDColumn,
