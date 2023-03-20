@@ -45,7 +45,7 @@ func (m *MonitorService) Create(
 		FollowRedirects:       &followRedirect,
 		CreatedBy:             &userID,
 		UpdatedBy:             &userID,
-		PrevID:                nil,
+		NextID:                nil,
 		OrganizationID:        &organizationID,
 	}
 
@@ -55,7 +55,7 @@ func (m *MonitorService) Create(
 	}
 
 	if head != nil && getHeadErr == nil {
-		_, err = m.monitorDomain.UpdatePrevious(ctx, tx, head.ID, monitor.ID)
+		_, err = m.monitorDomain.UpdateNext(ctx, tx, head.ID, monitor.ID)
 		if err != nil {
 			return nil, err
 		}

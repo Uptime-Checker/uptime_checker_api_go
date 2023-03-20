@@ -66,14 +66,14 @@ func (m *MonitorDomain) GetHead(ctx context.Context, organizationID int64) (*mod
 	return monitor, err
 }
 
-func (m *MonitorDomain) UpdatePrevious(ctx context.Context, tx *sql.Tx, id, previousID int64) (*model.Monitor, error) {
+func (m *MonitorDomain) UpdateNext(ctx context.Context, tx *sql.Tx, id, nextID int64) (*model.Monitor, error) {
 	now := times.Now()
 	monitor := &model.Monitor{
-		PrevID:    &previousID,
+		NextID:    &nextID,
 		UpdatedAt: now,
 	}
 
-	updateStmt := Monitor.UPDATE(Monitor.PrevID, Monitor.UpdatedAt).
+	updateStmt := Monitor.UPDATE(Monitor.NextID, Monitor.UpdatedAt).
 		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, tx, monitor)
@@ -90,13 +90,13 @@ func (m *MonitorDomain) listRecursively(organizationID int64, limit int) Stateme
 			).FROM(
 				Monitor,
 			).WHERE(
-				Monitor.PrevID.IS_NULL(),
+				Monitor.NextID.IS_NULL(),
 			).UNION(
 				SELECT(
 					Monitor.AllColumns,
 				).FROM(
 					Monitor.
-						INNER_JOIN(monitorTree, Monitor.ID.From(monitorTree).EQ(Monitor.PrevID)),
+						INNER_JOIN(monitorTree, Monitor.ID.From(monitorTree).EQ(Monitor.NextID)),
 				),
 			),
 		),
