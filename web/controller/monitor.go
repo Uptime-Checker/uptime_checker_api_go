@@ -29,15 +29,20 @@ type MonitorBody struct {
 	Method   string `json:"method"   validate:"required"`
 	Interval int    `json:"interval" validate:"required"`
 
-	Body       string            `json:"body"`
-	BodyFormat string            `json:"bodyFormat"`
-	Headers    map[string]string `mapstructure:"headers"`
+	Body       string `json:"body"`
+	BodyFormat string `json:"bodyFormat"`
+
+	Headers map[string]string `mapstructure:"headers"`
 
 	Username string `json:"username"`
 	Password string `json:"password"`
 
-	CheckSSL       bool `json:"checkSSL"`
-	FollowRedirect bool `json:"followRedirect"`
+	GlobalAlarmSettings   bool `json:"globalAlarmSettings"   validate:"required"`
+	AlarmReminderInterval int  `json:"alarmReminderInterval" validate:"required"`
+	AlarmReminderCount    int  `json:"alarmReminderCount"    validate:"required"`
+
+	CheckSSL       bool `json:"checkSSL"       validate:"required"`
+	FollowRedirect bool `json:"followRedirect" validate:"required"`
 }
 
 func (m *MonitorController) Create(c *fiber.Ctx) error {
