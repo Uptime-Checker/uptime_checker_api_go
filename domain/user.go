@@ -121,8 +121,7 @@ func (u *UserDomain) CreateUser(
 
 	user.Provider = &providerValue
 	user.LastLoginAt = &now
-	insertStmt := User.INSERT(User.MutableColumns).MODEL(user).
-		RETURNING(User.AllColumns)
+	insertStmt := User.INSERT(User.MutableColumns).MODEL(user).RETURNING(User.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, user)
 	return user, err
 }
