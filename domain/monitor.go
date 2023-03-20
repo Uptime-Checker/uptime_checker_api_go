@@ -51,7 +51,9 @@ func (m *MonitorDomain) Create(
 	monitorTypeValue := int32(monitorType)
 
 	monitor.Type = &monitorTypeValue
-	insertStmt := Monitor.INSERT(Monitor.MutableColumns).MODEL(monitor).RETURNING(Monitor.AllColumns)
+	insertStmt := Monitor.INSERT(Monitor.MutableColumns.Except(Monitor.InsertedAt, Monitor.UpdatedAt)).
+		MODEL(monitor).
+		RETURNING(Monitor.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, monitor)
 	return monitor, err
 }

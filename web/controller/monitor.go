@@ -40,8 +40,8 @@ type MonitorBody struct {
 
 	Headers map[string]string `mapstructure:"headers"`
 
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username *string `json:"username"`
+	Password *string `json:"password"`
 
 	GlobalAlarmSettings   bool `json:"globalAlarmSettings"   validate:"required"`
 	AlarmReminderInterval int  `json:"alarmReminderInterval" validate:"required"`

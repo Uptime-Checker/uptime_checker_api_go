@@ -21,23 +21,26 @@ func (m *MonitorService) Create(
 	ctx context.Context,
 	tx *sql.Tx,
 	userID, organizationID int64,
-	name, url, method, username, password string,
+	name, url, method string,
+	username, password *string,
 	interval, alarmReminderInterval, alarmReminderCount int32,
 	checkSSL, followRedirect, globalAlarmSettings bool,
 ) (*model.Monitor, error) {
 	head, getHeadErr := m.monitorDomain.GetHead(ctx, organizationID)
 	monitorMethod := resource.GetMonitorMethod(method)
+	status := int32(resource.MonitorStatusPending)
 
 	monitor := &model.Monitor{
 		Name:                  name,
 		URL:                   url,
 		Method:                &monitorMethod,
 		Interval:              &interval,
-		Username:              &username,
-		Password:              &password,
+		Username:              username,
+		Password:              password,
 		GlobalAlarmSettings:   &globalAlarmSettings,
 		AlarmReminderInterval: &alarmReminderInterval,
 		AlarmReminderCount:    &alarmReminderCount,
+		Status:                &status,
 		CheckSsl:              &checkSSL,
 		FollowRedirects:       &followRedirect,
 		CreatedBy:             &userID,
