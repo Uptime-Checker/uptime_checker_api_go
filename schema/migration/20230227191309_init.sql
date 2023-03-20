@@ -89,16 +89,16 @@ create table if not exists monitor (
     created_by bigint,
     updated_by bigint,
     monitor_group_id bigint,
-    prev_id bigint,
+    next_id bigint,
     organization_id bigint,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    constraint monitor_unique_previous_id unique (prev_id, organization_id) deferrable initially deferred,
+    constraint monitor_unique_next_id unique (next_id, organization_id) deferrable initially deferred,
     foreign key (created_by) references "user",
     foreign key (updated_by) references "user",
     foreign key (monitor_group_id) references monitor_group,
-    foreign key (prev_id) references monitor on delete cascade,
+    foreign key (next_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade
 );
 create unique index if not exists monitor_url_organization_id_index on monitor (url, organization_id);
