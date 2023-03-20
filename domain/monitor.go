@@ -2,9 +2,12 @@ package domain
 
 import (
 	"context"
+	"database/sql"
 
 	. "github.com/go-jet/jet/v2/postgres"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
@@ -35,7 +38,24 @@ func (m *MonitorDomain) List(ctx context.Context, organizationID int64, limit in
 	return monitors, err
 }
 
-func (m *MonitorDomain) getHead(ctx context.Context, organizationID int64) (*model.Monitor, error) {
+func (m *MonitorDomain) Create(
+	ctx context.Context,
+	tx *sql.Tx,
+	monitor *model.Monitor,
+	monitorType resource.MonitorType,
+) (*model.Monitor, error) {
+	if !monitorType.Valid() {
+		return nil, constant.ErrInvalidMonitorType
+	}
+	monitorTypeValue := int32(monitorType)
+
+	monitor.Type = &monitorTypeValue
+	insertStmt := Monitor.INSERT(Monitor.MutableColumns).MODEL(monitor).RETURNING(Monitor.AllColumns)
+	err := insertStmt.QueryContext(ctx, tx, monitor)
+	return monitor, err
+}
+
+func (m *MonitorDomain) GetHead(ctx context.Context, organizationID int64) (*model.Monitor, error) {
 	stmt := m.listRecursively(organizationID, 1)
 
 	monitor := &model.Monitor{}
