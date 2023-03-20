@@ -54,6 +54,7 @@ func (m *MonitorService) Create(
 		return nil, err
 	}
 
+	// Newly created monitor becomes the head, and we update previous head's next to the new head
 	if head != nil && getHeadErr == nil {
 		_, err = m.monitorDomain.UpdateNext(ctx, tx, head.ID, monitor.ID)
 		if err != nil {
