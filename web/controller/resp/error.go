@@ -22,6 +22,7 @@ const (
 	ErrUpdatingUser               = "failed to update user"
 	ErrDeletingGuestUser          = "failed to delete guest user"
 	ErrGuestUserLoginFailed       = "failed to login guest user"
+	ErrMonitorCreateFailed        = "failed to create monitor"
 	ErrMalformedJWT               = "missing or malformed JWT"
 )
 

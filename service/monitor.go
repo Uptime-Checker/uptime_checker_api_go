@@ -4,10 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
-
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
-	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -29,7 +27,6 @@ func (m *MonitorService) Create(
 ) (*model.Monitor, error) {
 	head, getHeadErr := m.monitorDomain.GetHead(ctx, organizationID)
 
-	now := times.Now()
 	monitor := &model.Monitor{
 		Name:                  name,
 		URL:                   url,
@@ -53,5 +50,12 @@ func (m *MonitorService) Create(
 		return nil, err
 	}
 
-	return nil, nil
+	if head != nil && getHeadErr == nil {
+		_, err = m.monitorDomain.UpdatePrevious(ctx, tx, head.ID, monitor.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return monitor, nil
 }

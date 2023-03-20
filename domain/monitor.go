@@ -9,6 +9,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -60,6 +61,20 @@ func (m *MonitorDomain) GetHead(ctx context.Context, organizationID int64) (*mod
 
 	monitor := &model.Monitor{}
 	err := stmt.QueryContext(ctx, infra.DB, &monitor)
+	return monitor, err
+}
+
+func (u *MonitorDomain) UpdatePrevious(ctx context.Context, tx *sql.Tx, id, previousID int64) (*model.Monitor, error) {
+	now := times.Now()
+	monitor := &model.Monitor{
+		PrevID:    &previousID,
+		UpdatedAt: now,
+	}
+
+	updateStmt := Monitor.UPDATE(Monitor.PrevID, Monitor.UpdatedAt).
+		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, monitor)
 	return monitor, err
 }
 
