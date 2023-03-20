@@ -2,7 +2,7 @@ package resource
 
 import "net/http"
 
-func GetMonitorMethod(method string) int {
+func GetMonitorMethod(method string) int32 {
 	switch method {
 	case http.MethodGet:
 		return 1
@@ -41,4 +41,30 @@ func (m MonitorType) Valid() bool {
 
 func (m MonitorType) String() string {
 	return [...]string{"api", "browser", "apiSnapshot"}[m-1]
+}
+
+// MonitorStatus type
+type MonitorStatus int
+
+// list of types
+const (
+	MonitorStatusPending MonitorStatus = iota + 1
+	MonitorStatusPassing
+	MonitorStatusDegraded
+	MonitorStatusFailing
+)
+
+// Valid checks if the UserLoginProvider is valid
+func (m MonitorStatus) Valid() bool {
+	statuses := []MonitorStatus{MonitorStatusPending, MonitorStatusPassing, MonitorStatusDegraded, MonitorStatusFailing}
+	for _, p := range statuses {
+		if p == m {
+			return true
+		}
+	}
+	return false
+}
+
+func (m MonitorStatus) String() string {
+	return [...]string{"pending", "passing", "degraded", "failing"}[m-1]
 }
