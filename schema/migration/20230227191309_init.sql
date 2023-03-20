@@ -41,6 +41,27 @@ create unique index if not exists user_payment_customer_id_index on "user" (paym
 create index if not exists user_role_id_index on "user" (role_id);
 create index if not exists user_organization_id_index on "user" (organization_id);
 create index if not exists user_last_login_at_index on "user" (last_login_at);
+create table if not exists user_contact (
+    id bigserial,
+    email varchar(255),
+    number varchar(255),
+    mode integer,
+    device_id varchar(255),
+    verification_code varchar(255),
+    verification_code_expires_at timestamp(0),
+    verified boolean default false not null,
+    subscribed boolean default true not null,
+    bounce_count integer default 0,
+    user_id bigint,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
+    primary key (id),
+    foreign key (user_id) references "user" on delete cascade
+);
+create index if not exists user_contact_user_id_index on user_contact (user_id);
+create unique index if not exists user_contact_email_verified_index on user_contact (email, verified);
+create unique index if not exists user_contact_number_verified_index on user_contact (number, verified);
+create unique index if not exists user_contact_device_id_index on user_contact (device_id);
 create table if not exists region (
     id bigserial,
     name varchar(255) not null,
@@ -208,8 +229,8 @@ create index if not exists alarm_channel_user_contact_id_index on alarm_channel 
 create index if not exists alarm_channel_monitor_id_index on alarm_channel (monitor_id);
 create index if not exists alarm_channel_integration_id_index on alarm_channel (integration_id);
 create index if not exists alarm_channel_organization_id_index on alarm_channel (organization_id);
-create unique index if not exists alarm_channel_user_id_monitor_id_integration_id_o on alarm_channel (
-    user_id,
+create unique index if not exists alarm_channel_user_contact_id_monitor_id_integration_id_o on alarm_channel (
+    user_contact_id,
     monitor_id,
     integration_id,
     organization_id
@@ -267,27 +288,6 @@ create table if not exists daily_report (
 create index if not exists daily_report_monitor_id_index on daily_report (monitor_id);
 create index if not exists daily_report_organization_id_index on daily_report (organization_id);
 create unique index if not exists daily_report_date_monitor_id_index on daily_report (date, monitor_id);
-create table if not exists user_contact (
-    id bigserial,
-    email varchar(255),
-    number varchar(255),
-    mode integer,
-    device_id varchar(255),
-    verification_code varchar(255),
-    verification_code_expires_at timestamp(0),
-    verified boolean default false not null,
-    subscribed boolean default true not null,
-    bounce_count integer default 0,
-    user_id bigint,
-    inserted_at timestamp(0) not null default now(),
-    updated_at timestamp(0) not null default now(),
-    primary key (id),
-    foreign key (user_id) references "user" on delete cascade
-);
-create index if not exists user_contact_user_id_index on user_contact (user_id);
-create unique index if not exists user_contact_email_verified_index on user_contact (email, verified);
-create unique index if not exists user_contact_number_verified_index on user_contact (number, verified);
-create unique index if not exists user_contact_device_id_index on user_contact (device_id);
 create table if not exists monitor_notification (
     id bigserial,
     type integer,
