@@ -38,7 +38,7 @@ type MonitorBody struct {
 	Body       string `json:"body"`
 	BodyFormat string `json:"bodyFormat"`
 
-	Headers map[string]string `mapstructure:"headers"`
+	Headers map[string]string `json:"headers"`
 
 	Username *string `json:"username"`
 	Password *string `json:"password"`
@@ -85,7 +85,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		lgr.Default.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
 		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL,
 			body.Method, body.Username, body.Password, int32(body.Interval), int32(body.AlarmReminderInterval),
-			int32(body.AlarmReminderCount), body.CheckSSL, body.FollowRedirect, body.GlobalAlarmSettings)
+			int32(body.AlarmReminderCount), body.CheckSSL, body.FollowRedirect, body.GlobalAlarmSettings, body.Headers)
 		if err != nil {
 			return err
 		}

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -25,6 +26,7 @@ func (m *MonitorService) Create(
 	username, password *string,
 	interval, alarmReminderInterval, alarmReminderCount int32,
 	checkSSL, followRedirect, globalAlarmSettings bool,
+	headers map[string]string,
 ) (*model.Monitor, error) {
 	head, getHeadErr := m.monitorDomain.GetHead(ctx, organizationID)
 	monitorMethod := resource.GetMonitorMethod(method)
@@ -47,6 +49,15 @@ func (m *MonitorService) Create(
 		UpdatedBy:             &userID,
 		NextID:                nil,
 		OrganizationID:        &organizationID,
+	}
+
+	if len(headers) > 0 {
+		jsonHeaders, err := json.Marshal(headers)
+		if err != nil {
+			return nil, err
+		}
+		stringHeaders := string(jsonHeaders)
+		monitor.Headers = &stringHeaders
 	}
 
 	monitor, err := m.monitorDomain.Create(ctx, tx, monitor, resource.MonitorTypeAPI)
