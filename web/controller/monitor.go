@@ -52,6 +52,17 @@ type MonitorBody struct {
 }
 
 func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
+	// username/password
+	if *body.Username != "" && *body.Password == "" {
+		return resp.ErrPasswordCannotBeEmpty
+	} else if *body.Username == "" && *body.Password != "" {
+		return resp.ErrUsernameCannotBeEmpty
+	}
+
+	// min: 10 seconds | max: 1 day
+	if body.Interval < 10 || body.Interval > 86_400 {
+		return resp.ErrInvalidInterval
+	}
 
 	return nil
 }
@@ -67,6 +78,9 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	}
 
 	if err := resp.Validate.Struct(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+	if err := m.validateMonitorBody(body); err != nil {
 		return resp.ServeValidationError(c, err)
 	}
 

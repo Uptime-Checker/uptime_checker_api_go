@@ -1,6 +1,8 @@
 package resp
 
 import (
+	"errors"
+	
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/go-playground/validator/v10"
@@ -24,6 +26,12 @@ const (
 	ErrGuestUserLoginFailed       = "failed to login guest user"
 	ErrMonitorCreateFailed        = "failed to create monitor"
 	ErrMalformedJWT               = "missing or malformed JWT"
+)
+
+var (
+	ErrUsernameCannotBeEmpty = errors.New("username cannot be empty")
+	ErrPasswordCannotBeEmpty = errors.New("password cannot be empty")
+	ErrInvalidInterval       = errors.New("invalid interval")
 )
 
 var Validate = validator.New()
