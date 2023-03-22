@@ -484,7 +484,6 @@ create unique index if not exists product_feature_product_id_feature_id_index on
 create table if not exists monitor_status_change (
     id bigserial,
     status integer default 1,
-    changed_at timestamp(0),
     monitor_id bigint,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),

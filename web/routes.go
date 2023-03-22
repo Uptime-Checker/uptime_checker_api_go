@@ -32,14 +32,16 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	userDomain := domain.NewUserDomain()
 	paymentDomain := domain.NewPaymentDomain()
 	organizationDomain := domain.NewOrganizationDomain()
+
 	monitorDomain := domain.NewMonitorDomain()
+	monitorStatusDomain := domain.NewMonitorStatusDomain()
 
 	// Service Registration
 	authService := service.NewAuthService(userDomain)
 	userService := service.NewUserService(userDomain)
 	paymentService := service.NewPaymentService(paymentDomain)
 	organizationService := service.NewOrganizationService(organizationDomain)
-	monitorService := service.NewMonitorService(monitorDomain)
+	monitorService := service.NewMonitorService(monitorDomain, monitorStatusDomain)
 
 	// User router for auth and user account
 	userRouter := v1.Group("/user")

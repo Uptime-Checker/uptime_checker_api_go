@@ -7,15 +7,20 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
 type MonitorService struct {
-	monitorDomain *domain.MonitorDomain
+	monitorDomain       *domain.MonitorDomain
+	monitorStatusDomain *domain.MonitorStatusDomain
 }
 
-func NewMonitorService(monitorDomain *domain.MonitorDomain) *MonitorService {
-	return &MonitorService{monitorDomain: monitorDomain}
+func NewMonitorService(
+	monitorDomain *domain.MonitorDomain,
+	monitorStatusDomain *domain.MonitorStatusDomain,
+) *MonitorService {
+	return &MonitorService{monitorDomain: monitorDomain, monitorStatusDomain: monitorStatusDomain}
 }
 
 func (m *MonitorService) Create(
@@ -39,6 +44,8 @@ func (m *MonitorService) Create(
 		Interval:              &interval,
 		Username:              username,
 		Password:              password,
+		On:                    pkg.BoolPointer(true),
+		Muted:                 pkg.BoolPointer(false),
 		GlobalAlarmSettings:   &globalAlarmSettings,
 		AlarmReminderInterval: &alarmReminderInterval,
 		AlarmReminderCount:    &alarmReminderCount,
@@ -60,6 +67,7 @@ func (m *MonitorService) Create(
 		monitor.Headers = &stringHeaders
 	}
 
+	// Create a new monitor
 	monitor, err := m.monitorDomain.Create(ctx, tx, monitor, resource.MonitorTypeAPI)
 	if err != nil {
 		return nil, err
@@ -71,6 +79,14 @@ func (m *MonitorService) Create(
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	monitorStatusChange := &model.MonitorStatusChange{MonitorID: &monitor.ID}
+
+	// Create a new monitor status change
+	_, err = m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, resource.MonitorStatusPending)
+	if err != nil {
+		return nil, err
 	}
 
 	return monitor, nil
