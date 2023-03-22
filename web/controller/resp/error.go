@@ -2,7 +2,7 @@ package resp
 
 import (
 	"errors"
-	
+
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/go-playground/validator/v10"
