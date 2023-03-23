@@ -217,8 +217,8 @@ func (u *UserDomain) CreateUserContact(
 		Mode:     &modeValue,
 		Verified: verified,
 	}
-	insertStmt := UserContact.INSERT(UserContact.MutableColumns).MODEL(userContact).
-		RETURNING(UserContact.AllColumns)
+	insertStmt := UserContact.INSERT(UserContact.MutableColumns.Except(UserContact.InsertedAt, UserContact.UpdatedAt)).
+		MODEL(userContact).RETURNING(UserContact.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, userContact)
 	return userContact, err
 }

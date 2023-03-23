@@ -12,7 +12,11 @@ const (
 
 // Valid checks if the UserLoginProvider is valid
 func (a AlarmPolicyName) Valid() bool {
-	alarmPolicies := []AlarmPolicyName{AlarmPolicyErrorThreshold, AlarmPolicyDurationThreshold, AlarmPolicyRegionThreshold}
+	alarmPolicies := []AlarmPolicyName{
+		AlarmPolicyErrorThreshold,
+		AlarmPolicyDurationThreshold,
+		AlarmPolicyRegionThreshold,
+	}
 	for _, p := range alarmPolicies {
 		if p == a {
 			return true
