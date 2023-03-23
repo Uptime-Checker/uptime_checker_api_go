@@ -28,7 +28,7 @@ const (
 	MonitorTypeAPISnapshot
 )
 
-// Valid checks if the UserLoginProvider is valid
+// Valid checks if the MonitorType is valid
 func (m MonitorType) Valid() bool {
 	providers := []MonitorType{MonitorTypeAPI, MonitorTypeBrowser, MonitorTypeAPISnapshot}
 	for _, p := range providers {
@@ -54,7 +54,7 @@ const (
 	MonitorStatusFailing
 )
 
-// Valid checks if the UserLoginProvider is valid
+// Valid checks if the MonitorStatus is valid
 func (m MonitorStatus) Valid() bool {
 	statuses := []MonitorStatus{MonitorStatusPending, MonitorStatusPassing, MonitorStatusDegraded, MonitorStatusFailing}
 	for _, p := range statuses {

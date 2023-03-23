@@ -10,7 +10,7 @@ const (
 	AlarmPolicyRegionThreshold   AlarmPolicyName = "REGION_THRESHOLD"
 )
 
-// Valid checks if the UserLoginProvider is valid
+// Valid checks if the AlarmPolicyName is valid
 func (a AlarmPolicyName) Valid() bool {
 	alarmPolicies := []AlarmPolicyName{
 		AlarmPolicyErrorThreshold,
