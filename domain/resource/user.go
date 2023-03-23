@@ -53,5 +53,5 @@ func (u UserContactMode) Valid() bool {
 }
 
 func (u UserContactMode) String() string {
-	return [...]string{"email", "sms", "phone", "smsAndPhone"}[u-1]
+	return [...]string{"email", "sms", "phone", "sms-and-phone"}[u-1]
 }
