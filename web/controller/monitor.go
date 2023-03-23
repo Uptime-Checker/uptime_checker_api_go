@@ -64,6 +64,11 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 		return resp.ErrInvalidInterval
 	}
 
+	// min: 5 minutes
+	if body.AlarmReminderInterval < 5*60 {
+		return resp.ErrInvalidInterval
+	}
+
 	return nil
 }
 

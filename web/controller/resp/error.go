@@ -29,9 +29,10 @@ const (
 )
 
 var (
-	ErrUsernameCannotBeEmpty = errors.New("username cannot be empty")
-	ErrPasswordCannotBeEmpty = errors.New("password cannot be empty")
-	ErrInvalidInterval       = errors.New("invalid interval")
+	ErrUsernameCannotBeEmpty        = errors.New("username cannot be empty")
+	ErrPasswordCannotBeEmpty        = errors.New("password cannot be empty")
+	ErrInvalidInterval              = errors.New("invalid interval")
+	ErrInvalidAlarmReminderInterval = errors.New("invalid alarm reminder interval")
 )
 
 var Validate = validator.New()

@@ -12,8 +12,8 @@ const (
 
 // Valid checks if the UserLoginProvider is valid
 func (j JobStatus) Valid() bool {
-	JobStatuses := []JobStatus{JobStatusScheduled, JobStatusRunning, JobStatusComplete}
-	for _, p := range JobStatuses {
+	jobStatuses := []JobStatus{JobStatusScheduled, JobStatusRunning, JobStatusComplete}
+	for _, p := range jobStatuses {
 		if p == j {
 			return true
 		}
