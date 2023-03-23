@@ -144,6 +144,7 @@ create table if not exists assertion (
     foreign key (monitor_id) references monitor on delete cascade
 );
 create index if not exists assertion_monitor_id_index on assertion (monitor_id);
+create index if not exists assertion_source_monitor_id_index on assertion (source, monitor_id);
 create unique index if not exists assertion_source_value_monitor_id_index on assertion (source, value, monitor_id);
 create table if not exists monitor_region (
     id bigserial,
