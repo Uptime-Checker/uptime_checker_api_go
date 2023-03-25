@@ -49,7 +49,7 @@ func Hit(
 	headers *map[string]string,
 	timeout int,
 	followRedirect bool,
-) {
+) (*HitResponse, *HitErr) {
 	tracingID := pkg.GetTracingID(ctx)
 
 	agent := fmt.Sprintf("%s_agent/%s (%s)", appName, version, website)
@@ -74,27 +74,13 @@ func Hit(
 		request.SetBody(*body)
 	}
 
-	var hitErr *HitErr
-	var hitResponse *HitResponse
-
 	lgr.Default.Print(tracingID, "Hitting =>", method, url, "timeout", timeout, "s")
 	resp, err := request.Send(method, url)
 	if err != nil {
-		hitErr = getError(err)
+		return nil, getError(err)
 	}
-	hitResponse, hitResponseErr := getResponse(resp)
-	if hitResponseErr != nil {
-		hitErr = hitResponseErr
-	}
-
-	if hitErr != nil {
-		lgr.Default.Print(hitErr.Text)
-	}
-	if hitResponse != nil {
-		lgr.Default.Print(hitResponse.StatusCode)
-	}
-
 	// Return status code, response body, response headers, response size, trace info
+	return getResponse(resp)
 }
 
 func getContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
@@ -156,14 +142,20 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	var hitErr *HitErr
 	var hitResponse *HitResponse
 
+	if resp.Body == nil {
+		return hitResponse, hitErr
+	}
+
 	traceInfo, err := json.Marshal(resp.TraceInfo())
 	if err == nil {
 		stringTraceInfo := string(traceInfo)
 		respTrace = &stringTraceInfo
 	}
 
-	if resp.Body == nil {
-		// Handle
+	hitResponse = &HitResponse{
+		StatusCode: resp.GetStatusCode(),
+		Size:       resp.ContentLength,
+		Traces:     respTrace,
 	}
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -171,12 +163,6 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		hitErr = &HitErr{
 			Type: resource.ErrorLogTypeResponseMalformed,
 			Text: constant.ErrResponseMalformed,
-		}
-		hitResponse = &HitResponse{
-			StatusCode: resp.GetStatusCode(),
-			//Headers:     ,
-			Size:   resp.ContentLength,
-			Traces: respTrace,
 		}
 		return hitResponse, hitErr
 	} else {
@@ -186,14 +172,8 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		contentType = &mimeType
 	}
 
-	hitResponse = &HitResponse{
-		StatusCode: resp.GetStatusCode(),
-		Body:       resBody,
-		//Headers:     headers,
-		Size:        resp.ContentLength,
-		ContentType: contentType,
-		Traces:      respTrace,
-	}
+	hitResponse.Body = resBody
+	hitResponse.ContentType = contentType
 
 	return hitResponse, hitErr
 }
