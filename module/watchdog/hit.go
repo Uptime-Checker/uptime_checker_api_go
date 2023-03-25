@@ -21,8 +21,6 @@ const (
 	contentTypeHeaderKey = "content-type"
 )
 
-var client = req.C()
-
 func Hit(
 	ctx context.Context,
 	url, method string, body, username, password *string,
@@ -34,7 +32,7 @@ func Hit(
 	tracingID := pkg.GetTracingID(ctx)
 
 	agent := fmt.Sprintf("%s_agent/%s (%s)", appName, version, website)
-	client = client.SetTimeout(time.Duration(timeout) * time.Second).SetUserAgent(agent)
+	client := req.C().SetTimeout(time.Duration(timeout) * time.Second).SetUserAgent(agent)
 	if followRedirect {
 		client.SetRedirectPolicy(req.MaxRedirectPolicy(maxRedirect))
 	}
