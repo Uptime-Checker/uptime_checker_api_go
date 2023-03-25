@@ -23,3 +23,7 @@ var (
 	ErrUpgradePermission   = errors.New("upgrade permission")
 	ErrSubscriptionExpired = errors.New("subscription expired")
 )
+
+const (
+	ErrRemoteServerMaxTimeout = "remote server exceeded max timeout"
+)

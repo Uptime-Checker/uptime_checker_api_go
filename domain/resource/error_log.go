@@ -12,7 +12,7 @@ const (
 	ErrorLogTypeParse
 	ErrorLogTypeUnknownNetwork
 	ErrorLogTypeSyscall
-	ErrorLogTypeUnknown = 99
+	ErrorLogTypeUnknown ErrorLogType = 99
 )
 
 // Valid checks if the ErrorLogType is valid
