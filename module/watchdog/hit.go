@@ -2,9 +2,12 @@ package watchdog
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -27,7 +30,16 @@ const (
 
 type HitErr struct {
 	Type resource.ErrorLogType
-	Text *string
+	Text string
+}
+
+type HitResponse struct {
+	StatusCode  int
+	Body        *string
+	Headers     *map[string]string
+	Size        int64
+	ContentType *string
+	Traces      *string
 }
 
 func Hit(
@@ -46,16 +58,6 @@ func Hit(
 		client.SetRedirectPolicy(req.MaxRedirectPolicy(maxRedirect))
 	}
 
-	var hitErr *HitErr
-
-	client.OnAfterResponse(func(client *req.Client, resp *req.Response) error {
-		if resp.Err != nil {
-			hitErr = getError(resp)
-			return nil
-		}
-		return nil
-	})
-
 	request := client.R().SetContext(ctx)
 
 	contentType := getContentType(bodyFormat, headers)
@@ -72,10 +74,24 @@ func Hit(
 		request.SetBody(*body)
 	}
 
+	var hitErr *HitErr
+	var hitResponse *HitResponse
+
 	lgr.Default.Print(tracingID, "Hitting =>", method, url, "timeout", timeout, "s")
-	_, err := request.Send(method, url)
+	resp, err := request.Send(method, url)
 	if err != nil {
-		return
+		hitErr = getError(err)
+	}
+	hitResponse, hitResponseErr := getResponse(resp)
+	if hitResponseErr != nil {
+		hitErr = hitResponseErr
+	}
+
+	if hitErr != nil {
+		lgr.Default.Print(hitErr.Text)
+	}
+	if hitResponse != nil {
+		lgr.Default.Print(hitResponse.StatusCode)
 	}
 
 	// Return status code, response body, response headers, response size, trace info
@@ -98,12 +114,8 @@ func getContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]
 	return contentType
 }
 
-func getError(resp *req.Response) *HitErr {
-	if resp.Err == nil {
-		return nil
-	}
-
-	clientError := errors.Unwrap(resp.Err)
+func getError(err error) *HitErr {
+	clientError := errors.Unwrap(err)
 
 	errorText := clientError.Error()
 	errorLogType := resource.ErrorLogTypeUnknown
@@ -133,5 +145,55 @@ func getError(resp *req.Response) *HitErr {
 		}
 	}
 
-	return &HitErr{Type: errorLogType, Text: &errorText}
+	return &HitErr{Type: errorLogType, Text: errorText}
+}
+
+func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
+	var resBody *string
+	var respTrace *string
+	var contentType *string
+
+	var hitErr *HitErr
+	var hitResponse *HitResponse
+
+	traceInfo, err := json.Marshal(resp.TraceInfo())
+	if err == nil {
+		stringTraceInfo := string(traceInfo)
+		respTrace = &stringTraceInfo
+	}
+
+	if resp.Body == nil {
+		// Handle
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		hitErr = &HitErr{
+			Type: resource.ErrorLogTypeResponseMalformed,
+			Text: constant.ErrResponseMalformed,
+		}
+		hitResponse = &HitResponse{
+			StatusCode: resp.GetStatusCode(),
+			//Headers:     ,
+			Size:   resp.ContentLength,
+			Traces: respTrace,
+		}
+		return hitResponse, hitErr
+	} else {
+		mimeType := http.DetectContentType(respBody)
+		stringBody := string(respBody)
+		resBody = &stringBody
+		contentType = &mimeType
+	}
+
+	hitResponse = &HitResponse{
+		StatusCode: resp.GetStatusCode(),
+		Body:       resBody,
+		//Headers:     headers,
+		Size:        resp.ContentLength,
+		ContentType: contentType,
+		Traces:      respTrace,
+	}
+
+	return hitResponse, hitErr
 }

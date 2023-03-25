@@ -26,4 +26,5 @@ var (
 
 const (
 	ErrRemoteServerMaxTimeout = "remote server exceeded max timeout"
+	ErrResponseMalformed      = "response malformed"
 )

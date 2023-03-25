@@ -12,6 +12,7 @@ const (
 	ErrorLogTypeParse
 	ErrorLogTypeUnknownNetwork
 	ErrorLogTypeSyscall
+	ErrorLogTypeResponseMalformed
 	ErrorLogTypeUnknown ErrorLogType = 99
 )
 
@@ -25,6 +26,7 @@ func (e ErrorLogType) Valid() bool {
 		ErrorLogTypeParse,
 		ErrorLogTypeUnknownNetwork,
 		ErrorLogTypeSyscall,
+		ErrorLogTypeResponseMalformed,
 		ErrorLogTypeUnknown,
 	}
 	for _, p := range errorLogTypes {
@@ -36,5 +38,6 @@ func (e ErrorLogType) Valid() bool {
 }
 
 func (e ErrorLogType) String() string {
-	return [...]string{"Timeout", "Addr", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Unknown"}[e-1]
+	return [...]string{"Timeout", "Addr", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall",
+		"Response Malformed", "Unknown"}[e-1]
 }
