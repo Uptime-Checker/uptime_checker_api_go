@@ -99,5 +99,5 @@ func (m MonitorBodyFormat) Valid() bool {
 }
 
 func (m MonitorBodyFormat) String() string {
-	return [...]string{"no-body", "json", "graphql", "form-parameters", "raw"}[m-1]
+	return [...]string{"", "application/json", "", "application/x-www-form-urlencoded", ""}[m-1]
 }

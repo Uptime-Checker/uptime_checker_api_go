@@ -3,18 +3,22 @@ package watchdog
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/imroc/req/v3"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 const (
-	appName     = "uptime_checker"
-	website     = "https://uptimecheckr.com"
-	version     = "v1.0"
-	maxRedirect = 5
+	appName              = "uptime_checker"
+	website              = "https://uptimecheckr.com"
+	version              = "v1.0"
+	maxRedirect          = 5
+	contentTypeHeaderKey = "content-type"
 )
 
 func Hit(
@@ -25,7 +29,9 @@ func Hit(
 	timeout int,
 	followRedirect bool,
 ) {
+	tracingID := pkg.GetTracingID(ctx)
 	req.DevMode()
+
 	agent := fmt.Sprintf("%s_agent/%s (%s)", appName, version, website)
 	client := req.C().SetTimeout(time.Duration(timeout) * time.Second).SetUserAgent(agent)
 	if followRedirect {
@@ -34,6 +40,10 @@ func Hit(
 
 	request := client.R().SetContext(ctx)
 
+	contentType := getContentType(bodyFormat, headers)
+	if contentType != "" {
+		request.SetContentType(contentType)
+	}
 	if username != nil && password != nil {
 		request.SetBasicAuth(*username, *password)
 	}
@@ -44,8 +54,26 @@ func Hit(
 		request.SetBody(*body)
 	}
 
+	lgr.Default.Print(tracingID, "Hitting =>", method, url, "timeout", timeout, "s")
 	_, err := request.Send(method, url)
 	if err != nil {
 		return
 	}
+}
+
+func getContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
+	contentType := resource.MonitorBodyFormatNoBody.String()
+	if bodyFormat != nil {
+		contentType = bodyFormat.String()
+	}
+
+	if headers != nil && len(*headers) > 0 {
+		for key, value := range *headers {
+			if strings.ToLower(key) == contentTypeHeaderKey {
+				contentType = value
+			}
+		}
+	}
+
+	return contentType
 }
