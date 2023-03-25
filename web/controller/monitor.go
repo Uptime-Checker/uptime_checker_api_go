@@ -33,19 +33,19 @@ type MonitorBody struct {
 	Name     string `json:"name"     validate:"required"`
 	URL      string `json:"url"      validate:"required,url"`
 	Method   string `json:"method"   validate:"required"`
-	Interval int    `json:"interval" validate:"required"`
+	Interval int32  `json:"interval" validate:"required"`
 
-	Body       string `json:"body"`
-	BodyFormat string `json:"bodyFormat"`
+	Body       *string `json:"body"`
+	BodyFormat *int32  `json:"bodyFormat"`
 
 	Headers map[string]string `json:"headers"`
 
 	Username *string `json:"username"`
 	Password *string `json:"password"`
 
-	GlobalAlarmSettings   bool `json:"globalAlarmSettings"   validate:"required"`
-	AlarmReminderInterval int  `json:"alarmReminderInterval" validate:"required"`
-	AlarmReminderCount    int  `json:"alarmReminderCount"    validate:"required"`
+	GlobalAlarmSettings   bool  `json:"globalAlarmSettings"   validate:"required"`
+	AlarmReminderInterval int32 `json:"alarmReminderInterval" validate:"required"`
+	AlarmReminderCount    int32 `json:"alarmReminderCount"    validate:"required"`
 
 	CheckSSL       bool `json:"checkSSL"       validate:"required"`
 	FollowRedirect bool `json:"followRedirect" validate:"required"`
@@ -67,6 +67,11 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 	// min: 5 minutes
 	if body.AlarmReminderInterval < 5*60 {
 		return resp.ErrInvalidInterval
+	}
+
+	// body
+	if body.Body != nil && body.BodyFormat == nil {
+		return resp.ErrInvalidBodyFormat
 	}
 
 	return nil
@@ -102,9 +107,9 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	var monitor *model.Monitor
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		lgr.Default.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
-		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL,
-			body.Method, body.Username, body.Password, int32(body.Interval), int32(body.AlarmReminderInterval),
-			int32(body.AlarmReminderCount), body.CheckSSL, body.FollowRedirect, body.GlobalAlarmSettings, body.Headers)
+		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL, body.Method,
+			body.Body, body.Username, body.Password, body.BodyFormat, body.Interval, body.AlarmReminderInterval,
+			body.AlarmReminderCount, body.CheckSSL, body.FollowRedirect, body.GlobalAlarmSettings, body.Headers)
 		if err != nil {
 			return err
 		}

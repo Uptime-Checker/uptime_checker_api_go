@@ -68,3 +68,36 @@ func (m MonitorStatus) Valid() bool {
 func (m MonitorStatus) String() string {
 	return [...]string{"pending", "passing", "degraded", "failing"}[m-1]
 }
+
+// MonitorBodyFormat type
+type MonitorBodyFormat int
+
+// list of types
+const (
+	MonitorBodyFormatNoBody MonitorBodyFormat = iota + 1
+	MonitorBodyFormatJSON
+	MonitorBodyFormatGraphQL
+	MonitorBodyFormatFormParam
+	MonitorBodyFormatRAW
+)
+
+// Valid checks if the MonitorBodyFormat is valid
+func (m MonitorBodyFormat) Valid() bool {
+	formats := []MonitorBodyFormat{
+		MonitorBodyFormatNoBody,
+		MonitorBodyFormatJSON,
+		MonitorBodyFormatGraphQL,
+		MonitorBodyFormatFormParam,
+		MonitorBodyFormatRAW,
+	}
+	for _, p := range formats {
+		if p == m {
+			return true
+		}
+	}
+	return false
+}
+
+func (m MonitorBodyFormat) String() string {
+	return [...]string{"no-body", "json", "graphql", "form-parameters", "raw"}[m-1]
+}
