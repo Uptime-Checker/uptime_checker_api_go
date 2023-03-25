@@ -60,9 +60,9 @@ func Hit(
 
 	request := client.R().SetContext(ctx)
 
-	contentType := getContentType(bodyFormat, headers)
-	if contentType != "" {
-		request.SetContentType(contentType)
+	requestContentType := getRequestContentType(bodyFormat, headers)
+	if requestContentType != "" {
+		request.SetContentType(requestContentType)
 	}
 	if username != nil && password != nil {
 		request.SetBasicAuth(*username, *password)
@@ -83,7 +83,7 @@ func Hit(
 	return getResponse(resp)
 }
 
-func getContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
+func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
 	contentType := resource.MonitorBodyFormatNoBody.String()
 	if bodyFormat != nil {
 		contentType = bodyFormat.String()
@@ -135,9 +135,7 @@ func getError(err error) *HitErr {
 }
 
 func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
-	var resBody *string
 	var respTrace *string
-	var contentType *string
 
 	var hitErr *HitErr
 	var hitResponse *HitResponse
@@ -152,10 +150,14 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		respTrace = &stringTraceInfo
 	}
 
+	headers := getResponseHeaders(resp.Header)
+	contentType := resp.GetContentType()
 	hitResponse = &HitResponse{
-		StatusCode: resp.GetStatusCode(),
-		Size:       resp.ContentLength,
-		Traces:     respTrace,
+		StatusCode:  resp.GetStatusCode(),
+		Size:        resp.ContentLength,
+		Traces:      respTrace,
+		Headers:     headers,
+		ContentType: &contentType,
 	}
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -166,14 +168,24 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		}
 		return hitResponse, hitErr
 	} else {
-		mimeType := http.DetectContentType(respBody)
 		stringBody := string(respBody)
-		resBody = &stringBody
-		contentType = &mimeType
+		hitResponse.Body = &stringBody
+
+		if hitResponse.ContentType == nil {
+			mimeType := http.DetectContentType(respBody)
+			hitResponse.ContentType = &mimeType
+		}
 	}
 
-	hitResponse.Body = resBody
-	hitResponse.ContentType = contentType
-
 	return hitResponse, hitErr
+}
+
+func getResponseHeaders(headers http.Header) *map[string]string {
+	respHeader := make(map[string]string)
+	for key, values := range headers {
+		if len(values) > 0 {
+			respHeader[key] = values[0]
+		}
+	}
+	return &respHeader
 }
