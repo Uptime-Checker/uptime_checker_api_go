@@ -76,6 +76,7 @@ type MonitorBodyFormat int
 const (
 	MonitorBodyFormatNoBody MonitorBodyFormat = iota + 1
 	MonitorBodyFormatJSON
+	MonitorBodyFormatHTML
 	MonitorBodyFormatGraphQL
 	MonitorBodyFormatFormParam
 	MonitorBodyFormatRAW
@@ -86,6 +87,7 @@ func (m MonitorBodyFormat) Valid() bool {
 	formats := []MonitorBodyFormat{
 		MonitorBodyFormatNoBody,
 		MonitorBodyFormatJSON,
+		MonitorBodyFormatHTML,
 		MonitorBodyFormatGraphQL,
 		MonitorBodyFormatFormParam,
 		MonitorBodyFormatRAW,
@@ -99,5 +101,5 @@ func (m MonitorBodyFormat) Valid() bool {
 }
 
 func (m MonitorBodyFormat) String() string {
-	return [...]string{"", "application/json", "", "application/x-www-form-urlencoded", ""}[m-1]
+	return [...]string{"", "application/json", "text/html", "application/x-www-form-urlencoded", ""}[m-1]
 }
