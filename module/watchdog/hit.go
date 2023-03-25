@@ -58,7 +58,7 @@ func Hit(
 		client.SetRedirectPolicy(req.MaxRedirectPolicy(maxRedirect))
 	}
 
-	request := client.R().SetContext(ctx)
+	request := client.R().SetContext(ctx).EnableTrace()
 
 	requestContentType := getRequestContentType(bodyFormat, headers)
 	if requestContentType != "" {
