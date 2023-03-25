@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	appName = "uptime_checker"
-	website = "https://uptimecheckr.com"
-	version = "v1.0"
+	appName     = "uptime_checker"
+	website     = "https://uptimecheckr.com"
+	version     = "v1.0"
+	maxRedirect = 5
 )
 
 func Hit(
@@ -24,12 +25,14 @@ func Hit(
 	timeout int,
 	followRedirect bool,
 ) {
+	req.DevMode()
 	agent := fmt.Sprintf("%s_agent/%s (%s)", appName, version, website)
 	client := req.C().SetTimeout(time.Duration(timeout) * time.Second).SetUserAgent(agent)
-	client.DevMode()
+	if followRedirect {
+		client.SetRedirectPolicy(req.MaxRedirectPolicy(maxRedirect))
+	}
 
-	request := client.R()
-	request.SetContext(ctx)
+	request := client.R().SetContext(ctx)
 
 	if username != nil && password != nil {
 		request.SetBasicAuth(*username, *password)
