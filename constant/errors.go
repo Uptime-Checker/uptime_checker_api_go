@@ -12,6 +12,7 @@ var (
 	ErrExpiresAtInThePast         = errors.New("expires at in the past")
 	ErrInvalidMonitorType         = errors.New("invalid monitor type")
 	ErrInvalidMonitorStatus       = errors.New("invalid monitor status")
+	ErrInvalidMonitorBodyFormat   = errors.New("invalid monitor body format")
 	ErrInvalidAlarmPolicy         = errors.New("invalid alarm policy")
 	ErrInvalidAssertionSource     = errors.New("invalid assertion source")
 	ErrInvalidAssertionComparison = errors.New("invalid assertion comparison")

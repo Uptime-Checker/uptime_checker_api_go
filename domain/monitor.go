@@ -50,6 +50,13 @@ func (m *MonitorDomain) Create(
 	}
 	monitorTypeValue := int32(monitorType)
 
+	if monitor.BodyFormat != nil {
+		format := resource.MonitorBodyFormat(*monitor.BodyFormat)
+		if !format.Valid() {
+			return nil, constant.ErrInvalidMonitorBodyFormat
+		}
+	}
+
 	monitor.Type = &monitorTypeValue
 	insertStmt := Monitor.INSERT(Monitor.MutableColumns.Except(Monitor.InsertedAt, Monitor.UpdatedAt)).
 		MODEL(monitor).

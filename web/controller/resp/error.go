@@ -32,6 +32,7 @@ var (
 	ErrUsernameCannotBeEmpty        = errors.New("username cannot be empty")
 	ErrPasswordCannotBeEmpty        = errors.New("password cannot be empty")
 	ErrInvalidInterval              = errors.New("invalid interval")
+	ErrInvalidBodyFormat            = errors.New("invalid body format")
 	ErrInvalidAlarmReminderInterval = errors.New("invalid alarm reminder interval")
 )
 
