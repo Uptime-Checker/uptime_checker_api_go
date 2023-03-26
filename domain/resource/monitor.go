@@ -2,7 +2,7 @@ package resource
 
 import "net/http"
 
-func GetMonitorMethod(method string) int32 {
+func GetMonitorHttpMethod(method string) int32 {
 	switch method {
 	case http.MethodGet:
 		return 1
@@ -16,6 +16,22 @@ func GetMonitorMethod(method string) int32 {
 		return 5
 	}
 	return 0
+}
+
+func GetMonitorMethod(method int32) string {
+	switch method {
+	case 1:
+		return http.MethodGet
+	case 2:
+		return http.MethodPost
+	case 3:
+		return http.MethodPut
+	case 4:
+		return http.MethodPatch
+	case 5:
+		return http.MethodDelete
+	}
+	return http.MethodHead
 }
 
 // MonitorType type

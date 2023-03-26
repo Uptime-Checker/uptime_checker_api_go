@@ -43,12 +43,12 @@ type HitResponse struct {
 	Traces      *string
 }
 
-func (c *WatchDog) Hit(
+func (c *WatchDog) hit(
 	ctx context.Context,
 	url, method string, body, username, password *string,
 	bodyFormat *resource.MonitorBodyFormat,
 	headers *map[string]string,
-	timeout int,
+	timeout int32,
 	followRedirect bool,
 ) (*HitResponse, *HitErr) {
 	tracingID := pkg.GetTracingID(ctx)

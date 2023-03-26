@@ -35,7 +35,7 @@ func (m *MonitorService) Create(
 	headers map[string]string,
 ) (*model.Monitor, error) {
 	head, getHeadErr := m.monitorDomain.GetHead(ctx, organizationID)
-	monitorMethod := resource.GetMonitorMethod(method)
+	monitorMethod := resource.GetMonitorHttpMethod(method)
 	status := int32(resource.MonitorStatusPending)
 
 	monitor := &model.Monitor{

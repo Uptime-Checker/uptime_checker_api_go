@@ -35,7 +35,7 @@ type MonitorBody struct {
 	URL      string `json:"url"      validate:"required,url"`
 	Method   string `json:"method"   validate:"required"`
 	Interval int32  `json:"interval" validate:"required"`
-	Timeout  int32  `json:"timeout" validate:"required"`
+	Timeout  int32  `json:"timeout"  validate:"required"`
 
 	Body       *string `json:"body"`
 	BodyFormat *int32  `json:"bodyFormat"`
