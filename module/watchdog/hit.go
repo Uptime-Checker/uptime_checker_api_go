@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/imroc/req/v3"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
@@ -161,6 +162,12 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	}
 
 	respBody, err := io.ReadAll(resp.Body)
+	defer func(body io.ReadCloser) {
+		if err := body.Close(); err != nil {
+			sentry.CaptureException(err)
+		}
+	}(resp.Body)
+
 	if err != nil {
 		hitErr = &HitErr{
 			Type: resource.ErrorLogTypeResponseMalformed,
