@@ -51,10 +51,12 @@ func (c *WatchDog) Run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 		resourceBodyFormat := resource.MonitorBodyFormat(*monitor.BodyFormat)
 		bodyFormat = &resourceBodyFormat
 	}
-	c.hit(
+
+	method := resource.GetMonitorMethod(*monitor.Method)
+	hitResponse, hitError := c.hit(
 		ctx,
 		monitor.URL,
-		resource.GetMonitorMethod(*monitor.Method),
+		method,
 		monitor.Body,
 		monitor.Username,
 		monitor.Password,
@@ -63,6 +65,10 @@ func (c *WatchDog) Run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 		*monitor.Timeout,
 		*monitor.FollowRedirects,
 	)
+	
+	if hitResponse == nil && hitError != nil {
+		lgr.Default.Print(tracingID, 3, "hit request failed", check.ID, method, monitor.URL)
+	}
 
 	return nil
 }
