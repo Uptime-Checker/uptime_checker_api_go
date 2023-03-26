@@ -74,7 +74,7 @@ func Hit(
 		request.SetBody(*body)
 	}
 
-	lgr.Default.Print(tracingID, "Hitting =>", method, url, "timeout", timeout, "s")
+	lgr.Default.Print(tracingID, "Hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
 	resp, err := request.Send(method, url)
 	if err != nil {
 		return nil, getError(err)

@@ -28,7 +28,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	v1.Use(middlelayer.Header())
 	v1.Get("/status", func(c *fiber.Ctx) error {
 		contentType := resource.MonitorBodyFormatJSON
-		watchdog.Hit(c.Context(), "https://api.textrappp.me/v1/status", http.MethodGet, nil,
+		watchdog.Hit(c.Context(), "https://api.textrapp.me/v1/status", http.MethodGet, nil,
 			nil, nil,
 			&contentType, nil, 1, true)
 		return c.JSON(fiber.Map{"status": "ok"})
