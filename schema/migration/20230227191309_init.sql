@@ -183,6 +183,9 @@ create table if not exists "check" (
     foreign key (monitor_id) references monitor on delete cascade,
     foreign key (organization_id) references organization on delete cascade
 );
+create index if not exists check_status_code_index on "check" (status_code);
+create index if not exists check_duration_index on "check" (duration);
+create index if not exists check_success_index on "check" (success);
 create index if not exists check_region_id_index on "check" (region_id);
 create index if not exists check_monitor_id_index on "check" (monitor_id);
 create index if not exists check_organization_id_index on "check" (organization_id);
