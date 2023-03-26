@@ -65,11 +65,14 @@ func (c *WatchDog) Run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 		*monitor.Timeout,
 		*monitor.FollowRedirects,
 	)
-	
+
 	if hitResponse == nil && hitError != nil {
 		lgr.Default.Print(tracingID, 3, "hit request failed", check.ID, method, monitor.URL)
 	}
 
+	// Update the check
+	// Schedule next check
+	// Send for alarm if needed
 	return nil
 }
 
