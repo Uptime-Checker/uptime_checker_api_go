@@ -2,6 +2,7 @@ package watchdog
 
 import (
 	"context"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"

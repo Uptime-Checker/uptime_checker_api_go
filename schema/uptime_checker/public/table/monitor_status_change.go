@@ -19,7 +19,6 @@ type monitorStatusChangeTable struct {
 	//Columns
 	ID         postgres.ColumnInteger
 	Status     postgres.ColumnInteger
-	ChangedAt  postgres.ColumnTimestamp
 	MonitorID  postgres.ColumnInteger
 	InsertedAt postgres.ColumnTimestamp
 	UpdatedAt  postgres.ColumnTimestamp
@@ -65,12 +64,11 @@ func newMonitorStatusChangeTableImpl(schemaName, tableName, alias string) monito
 	var (
 		IDColumn         = postgres.IntegerColumn("id")
 		StatusColumn     = postgres.IntegerColumn("status")
-		ChangedAtColumn  = postgres.TimestampColumn("changed_at")
 		MonitorIDColumn  = postgres.IntegerColumn("monitor_id")
 		InsertedAtColumn = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn  = postgres.TimestampColumn("updated_at")
-		allColumns       = postgres.ColumnList{IDColumn, StatusColumn, ChangedAtColumn, MonitorIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns   = postgres.ColumnList{StatusColumn, ChangedAtColumn, MonitorIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns       = postgres.ColumnList{IDColumn, StatusColumn, MonitorIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns   = postgres.ColumnList{StatusColumn, MonitorIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorStatusChangeTable{
@@ -79,7 +77,6 @@ func newMonitorStatusChangeTableImpl(schemaName, tableName, alias string) monito
 		//Columns
 		ID:         IDColumn,
 		Status:     StatusColumn,
-		ChangedAt:  ChangedAtColumn,
 		MonitorID:  MonitorIDColumn,
 		InsertedAt: InsertedAtColumn,
 		UpdatedAt:  UpdatedAtColumn,

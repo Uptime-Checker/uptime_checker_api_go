@@ -13,7 +13,12 @@ import (
 
 type Check struct {
 	ID             int64 `sql:"primary_key"`
+	Body           *string
+	Traces         *string
+	Headers        *string
 	StatusCode     *int32
+	ContentSize    *int32
+	ContentType    *int32
 	Duration       *int32
 	Success        bool
 	RegionID       *int64

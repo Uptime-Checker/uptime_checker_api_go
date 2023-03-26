@@ -18,7 +18,12 @@ type checkTable struct {
 
 	//Columns
 	ID             postgres.ColumnInteger
+	Body           postgres.ColumnString
+	Traces         postgres.ColumnString
+	Headers        postgres.ColumnString
 	StatusCode     postgres.ColumnInteger
+	ContentSize    postgres.ColumnInteger
+	ContentType    postgres.ColumnInteger
 	Duration       postgres.ColumnInteger
 	Success        postgres.ColumnBool
 	RegionID       postgres.ColumnInteger
@@ -67,7 +72,12 @@ func newCheckTable(schemaName, tableName, alias string) *CheckTable {
 func newCheckTableImpl(schemaName, tableName, alias string) checkTable {
 	var (
 		IDColumn             = postgres.IntegerColumn("id")
+		BodyColumn           = postgres.StringColumn("body")
+		TracesColumn         = postgres.StringColumn("traces")
+		HeadersColumn        = postgres.StringColumn("headers")
 		StatusCodeColumn     = postgres.IntegerColumn("status_code")
+		ContentSizeColumn    = postgres.IntegerColumn("content_size")
+		ContentTypeColumn    = postgres.IntegerColumn("content_type")
 		DurationColumn       = postgres.IntegerColumn("duration")
 		SuccessColumn        = postgres.BoolColumn("success")
 		RegionIDColumn       = postgres.IntegerColumn("region_id")
@@ -75,8 +85,8 @@ func newCheckTableImpl(schemaName, tableName, alias string) checkTable {
 		OrganizationIDColumn = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn     = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, StatusCodeColumn, DurationColumn, SuccessColumn, RegionIDColumn, MonitorIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{StatusCodeColumn, DurationColumn, SuccessColumn, RegionIDColumn, MonitorIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns           = postgres.ColumnList{IDColumn, BodyColumn, TracesColumn, HeadersColumn, StatusCodeColumn, ContentSizeColumn, ContentTypeColumn, DurationColumn, SuccessColumn, RegionIDColumn, MonitorIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{BodyColumn, TracesColumn, HeadersColumn, StatusCodeColumn, ContentSizeColumn, ContentTypeColumn, DurationColumn, SuccessColumn, RegionIDColumn, MonitorIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return checkTable{
@@ -84,7 +94,12 @@ func newCheckTableImpl(schemaName, tableName, alias string) checkTable {
 
 		//Columns
 		ID:             IDColumn,
+		Body:           BodyColumn,
+		Traces:         TracesColumn,
+		Headers:        HeadersColumn,
 		StatusCode:     StatusCodeColumn,
+		ContentSize:    ContentSizeColumn,
+		ContentType:    ContentTypeColumn,
 		Duration:       DurationColumn,
 		Success:        SuccessColumn,
 		RegionID:       RegionIDColumn,

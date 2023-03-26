@@ -89,6 +89,7 @@ create table if not exists monitor (
     name varchar(255) not null,
     url varchar(255) not null,
     method integer default 1,
+    timeout integer default 5,
     interval integer default 300,
     type integer default 1,
     body text,
@@ -164,8 +165,13 @@ create index if not exists monitor_region_last_checked_at_index on monitor_regio
 create unique index if not exists monitor_region_region_id_monitor_id_index on monitor_region (region_id, monitor_id);
 create table if not exists "check" (
     id bigserial,
+    body text,
+    traces json,
+    headers json,
     status_code integer,
-    duration integer default 0,
+    content_size integer,
+    content_type integer,
+    duration integer,
     success boolean default false not null,
     region_id bigint,
     monitor_id bigint,

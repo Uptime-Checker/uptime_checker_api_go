@@ -16,6 +16,7 @@ type Monitor struct {
 	Name                  string
 	URL                   string
 	Method                *int32
+	Timeout               *int32
 	Interval              *int32
 	Type                  *int32
 	Body                  *string

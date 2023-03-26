@@ -62,7 +62,7 @@ const (
 	AssertionSourceStatusCode AssertionSource = iota + 1
 	AssertionSourceTextBody
 	AssertionSourceHeaders
-	AssertionSourceTimeout
+	AssertionSourceResponseTime
 	AssertionSourceJsonBody
 )
 
@@ -72,7 +72,7 @@ func (a AssertionSource) Valid() bool {
 		AssertionSourceStatusCode,
 		AssertionSourceTextBody,
 		AssertionSourceHeaders,
-		AssertionSourceTimeout,
+		AssertionSourceResponseTime,
 		AssertionSourceJsonBody,
 	}
 	for _, p := range assertionSources {
