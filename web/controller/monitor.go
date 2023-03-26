@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
@@ -34,6 +35,7 @@ type MonitorBody struct {
 	URL      string `json:"url"      validate:"required,url"`
 	Method   string `json:"method"   validate:"required"`
 	Interval int32  `json:"interval" validate:"required"`
+	Timeout  int32  `json:"timeout" validate:"required"`
 
 	Body       *string `json:"body"`
 	BodyFormat *int32  `json:"bodyFormat"`
@@ -59,19 +61,35 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 		return resp.ErrUsernameCannotBeEmpty
 	}
 
-	// min: 10 seconds | max: 1 day
-	if body.Interval < 10 || body.Interval > 86_400 {
+	// interval [min: 10 seconds | max: 1 day]
+	if body.Interval < constant.MinMonitorIntervalInSeconds || body.Interval > constant.MaxMonitorIntervalInSeconds {
 		return resp.ErrInvalidInterval
 	}
 
 	// min: 5 minutes
-	if body.AlarmReminderInterval < 5*60 {
-		return resp.ErrInvalidInterval
+	if body.AlarmReminderInterval < constant.MinAlarmReminderIntervalInMinutes*60 {
+		return resp.ErrInvalidAlarmReminderInterval
 	}
 
 	// body
-	if body.Body != nil && body.BodyFormat == nil {
-		return resp.ErrInvalidBodyFormat
+	if body.Body != nil {
+		// valid body format
+		if body.BodyFormat == nil {
+			return resp.ErrInvalidBodyFormat
+		}
+		// max 1KB
+		if len(*body.Body) > constant.MaxMonitorBodySizeInBytes {
+			return resp.ErrMaxBodySizeExceeded
+		}
+	}
+
+	// timeout = max 30 seconds, interval/2
+	if body.Timeout > constant.MaxMonitorTimeoutInSeconds {
+		return resp.ErrMaxTimeoutExceeded
+	}
+	maxTimeoutRelativeToInterval := body.Interval / 2
+	if body.Timeout > maxTimeoutRelativeToInterval {
+		return resp.ErrMaxTimeoutExceeded
 	}
 
 	return nil

@@ -34,6 +34,8 @@ var (
 	ErrInvalidInterval              = errors.New("invalid interval")
 	ErrInvalidBodyFormat            = errors.New("invalid body format")
 	ErrInvalidAlarmReminderInterval = errors.New("invalid alarm reminder interval")
+	ErrMaxBodySizeExceeded          = errors.New("max body size exceeded")
+	ErrMaxTimeoutExceeded           = errors.New("max timeout exceeded")
 )
 
 var Validate = validator.New()
