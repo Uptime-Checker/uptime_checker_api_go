@@ -2,10 +2,6 @@ package web
 
 import (
 	"context"
-	"net/http"
-
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
-	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
@@ -27,10 +23,6 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	v1 := app.Group("/v1")
 	v1.Use(middlelayer.Header())
 	v1.Get("/status", func(c *fiber.Ctx) error {
-		contentType := resource.MonitorBodyFormatJSON
-		watchdog.Hit(c.Context(), "https://api.textrapp.me/v1/status", http.MethodGet, nil,
-			nil, nil,
-			&contentType, nil, 1, true)
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
 

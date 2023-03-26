@@ -20,7 +20,7 @@ func (s RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
 
-	lgr.Default.Print(tid, 1, "Running RunCheckTask")
+	lgr.Default.Print(tid, 1, "running RunCheckTask")
 
 	return nil
 }

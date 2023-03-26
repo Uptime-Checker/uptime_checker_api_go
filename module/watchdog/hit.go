@@ -43,7 +43,7 @@ type HitResponse struct {
 	Traces      *string
 }
 
-func Hit(
+func (c *WatchDog) Hit(
 	ctx context.Context,
 	url, method string, body, username, password *string,
 	bodyFormat *resource.MonitorBodyFormat,
@@ -75,13 +75,13 @@ func Hit(
 		request.SetBody(*body)
 	}
 
-	lgr.Default.Print(tracingID, "Hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
+	lgr.Default.Print(tracingID, "hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
 	resp, err := request.Send(method, url)
 	if err != nil {
-		return nil, getError(err)
+		return nil, c.getError(err)
 	}
 	// Return status code, response body, response headers, response size, trace info
-	return getResponse(resp)
+	return c.getResponse(resp)
 }
 
 func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
@@ -101,7 +101,7 @@ func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[
 	return contentType
 }
 
-func getError(err error) *HitErr {
+func (c *WatchDog) getError(err error) *HitErr {
 	clientError := errors.Unwrap(err)
 
 	errorText := clientError.Error()
@@ -135,7 +135,7 @@ func getError(err error) *HitErr {
 	return &HitErr{Type: errorLogType, Text: errorText}
 }
 
-func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
+func (c *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	var respTrace *string
 
 	var hitErr *HitErr
@@ -151,7 +151,7 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		respTrace = &stringTraceInfo
 	}
 
-	headers := getResponseHeaders(resp.Header)
+	headers := c.getResponseHeaders(resp.Header)
 	contentType := resp.GetContentType()
 	hitResponse = &HitResponse{
 		StatusCode:  resp.GetStatusCode(),
@@ -187,7 +187,7 @@ func getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	return hitResponse, hitErr
 }
 
-func getResponseHeaders(headers http.Header) *map[string]string {
+func (c *WatchDog) getResponseHeaders(headers http.Header) *map[string]string {
 	respHeader := make(map[string]string)
 	for key, values := range headers {
 		if len(values) > 0 {
