@@ -28,7 +28,7 @@ func newZapLogger() *zap.SugaredLogger {
 		if err != nil {
 			panic(err)
 		}
-		logger = zap.New(core)
+		logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	} else {
 		cfg := zap.NewDevelopmentConfig()
 		cfg.DisableStacktrace = true
