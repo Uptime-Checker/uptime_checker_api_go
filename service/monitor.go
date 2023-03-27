@@ -30,7 +30,7 @@ func (m *MonitorService) Create(
 	name, url, method string,
 	body, username, password *string,
 	bodyFormat *int32,
-	interval, alarmReminderInterval, alarmReminderCount int32,
+	interval, timeout, alarmReminderInterval, alarmReminderCount int32,
 	checkSSL, followRedirect, globalAlarmSettings bool,
 	headers map[string]string,
 ) (*model.Monitor, error) {
@@ -42,6 +42,7 @@ func (m *MonitorService) Create(
 		Name:                  name,
 		URL:                   url,
 		Method:                &monitorMethod,
+		Timeout:               &timeout,
 		Interval:              &interval,
 		Body:                  body,
 		BodyFormat:            bodyFormat,

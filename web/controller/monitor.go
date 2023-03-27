@@ -126,8 +126,9 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		lgr.Default.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
 		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL, body.Method,
-			body.Body, body.Username, body.Password, body.BodyFormat, body.Interval, body.AlarmReminderInterval,
-			body.AlarmReminderCount, body.CheckSSL, body.FollowRedirect, body.GlobalAlarmSettings, body.Headers)
+			body.Body, body.Username, body.Password, body.BodyFormat, body.Interval, body.Timeout,
+			body.AlarmReminderInterval, body.AlarmReminderCount, body.CheckSSL,
+			body.FollowRedirect, body.GlobalAlarmSettings, body.Headers)
 		if err != nil {
 			return err
 		}
