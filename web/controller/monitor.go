@@ -11,6 +11,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/gandalf"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
@@ -21,13 +22,23 @@ import (
 type MonitorController struct {
 	monitorDomain  *domain.MonitorDomain
 	monitorService *service.MonitorService
+
+	dog *watchdog.WatchDog
 }
 
 func NewMonitorController(
 	monitorDomain *domain.MonitorDomain,
 	monitorService *service.MonitorService,
+	dog *watchdog.WatchDog,
 ) *MonitorController {
-	return &MonitorController{monitorDomain: monitorDomain, monitorService: monitorService}
+	return &MonitorController{monitorDomain: monitorDomain, monitorService: monitorService, dog: dog}
+}
+
+type AssertionBody struct {
+	Source     int32   `json:"source"     validate:"required"`
+	Property   *string `json:"property"`
+	Comparison int32   `json:"comparison" validate:"required"`
+	Value      string  `json:"value"      validate:"required"`
 }
 
 type MonitorBody struct {
@@ -51,6 +62,8 @@ type MonitorBody struct {
 
 	CheckSSL       bool `json:"checkSSL"       validate:"required"`
 	FollowRedirect bool `json:"followRedirect" validate:"required"`
+
+	Assertions []AssertionBody `json:"assertions" validate:"required"`
 }
 
 func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
@@ -149,4 +162,24 @@ func (m *MonitorController) ListMonitors(c *fiber.Ctx) error {
 		return resp.ServeInternalServerError(c, err)
 	}
 	return resp.ServeData(c, fiber.StatusOK, monitors)
+}
+
+func (m *MonitorController) DryRun(c *fiber.Ctx) error {
+	ctx := c.Context()
+	body := new(MonitorBody)
+	tracingID := pkg.GetTracingID(ctx)
+
+	if err := c.BodyParser(body); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+
+	if err := resp.Validate.Struct(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+	if err := m.validateMonitorBody(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+
+	lgr.Default.Print(tracingID, 1, "dry running", body.Method, body.URL)
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/cron"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/worker"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
@@ -34,6 +35,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	organizationDomain := domain.NewOrganizationDomain()
 
 	monitorDomain := domain.NewMonitorDomain()
+	checkDomain := domain.NewCheckDomain()
 	monitorStatusDomain := domain.NewMonitorStatusDomain()
 
 	// Service Registration
@@ -43,6 +45,18 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	organizationService := service.NewOrganizationService(organizationDomain)
 	monitorService := service.NewMonitorService(monitorDomain, monitorStatusDomain)
 
+	//  ========== Age of the modules ==========
+	// Setup Watchdog
+	dog := watchdog.NewWatchDog(checkDomain)
+
+	// Setup Tasks
+	syncProductsTask := task.NewSyncProductsTask()
+	runCheckTask := task.NewRunCheckTask()
+
+	cogman := cron.NewCron(jobDomain, syncProductsTask)
+	wheel := worker.NewWorker(runCheckTask)
+
+	//  ========== Age of the routers ==========
 	// User router for auth and user account
 	userRouter := v1.Group("/user")
 	registerUserHandlers(userRouter, userDomain, authService, userService)
@@ -66,19 +80,13 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorDomain,
 		authService,
 		monitorService,
+		dog,
 	)
 
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
 	})
-
-	// Setup Cron
-	syncProductsTask := task.NewSyncProductsTask()
-	runCheckTask := task.NewRunCheckTask()
-
-	cogman := cron.NewCron(jobDomain, syncProductsTask)
-	wheel := worker.NewWorker(runCheckTask)
 	app.Hooks().OnListen(func() error {
 		if err := cogman.Start(ctx); err != nil {
 			return err
@@ -135,12 +143,14 @@ func registerMonitorHandlers(
 	monitorDomain *domain.MonitorDomain,
 	authService *service.AuthService,
 	monitorService *service.MonitorService,
+	dog *watchdog.WatchDog,
 ) {
 	auth := middlelayer.Protected(authService)
 
 	handler := controller.NewMonitorController(
 		monitorDomain,
 		monitorService,
+		dog,
 	)
 
 	router.Post("/", auth, handler.Create)
