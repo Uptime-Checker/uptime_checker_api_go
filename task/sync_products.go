@@ -21,5 +21,5 @@ func (s SyncProductsTask) Do(tx *sql.Tx) {
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
 
-	lgr.Default.Print(tid, 1, "running SyncProductsTask")
+	lgr.Print(tid, 1, "running SyncProductsTask")
 }

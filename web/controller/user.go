@@ -54,7 +54,7 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 	}
 
 	createUser := func() error {
-		lgr.Default.Print(tracingID, 0, "creating guest user", body.Email)
+		lgr.Print(tracingID, 0, "creating guest user", body.Email)
 
 		code := pkg.GetUniqueString()
 		user, err := u.userDomain.CreateGuest(c.Context(), body.Email, pkg.HashSha(code))
@@ -66,13 +66,13 @@ func (u *UserController) CreateGuestUser(c *fiber.Ctx) error {
 
 	latestGuestUser, err := u.userDomain.GetLatestGuestUser(c.Context(), body.Email)
 	if err != nil {
-		lgr.Default.Print(tracingID, 1, "no previous guest user", body.Email)
+		lgr.Print(tracingID, 1, "no previous guest user", body.Email)
 		return createUser()
 	}
 
 	passed := times.Now().Sub(latestGuestUser.InsertedAt).Minutes()
 	remaining := int(constant.GuestUserRateLimitInMinutes - passed)
-	lgr.Default.Print(tracingID, 2, "previous guest user exists", latestGuestUser.Email, "remaining", remaining)
+	lgr.Print(tracingID, 2, "previous guest user exists", latestGuestUser.Email, "remaining", remaining)
 	if passed <= constant.GuestUserRateLimitInMinutes {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserRateLimited,
 			fmt.Errorf("remaining %d", remaining))
@@ -102,7 +102,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserNotFound, err)
 	}
-	lgr.Default.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
+	lgr.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
 	user, userGetError := u.userDomain.GetUser(ctx, body.Email)
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
@@ -111,19 +111,19 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			lgr.Default.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
+			lgr.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
 		} else {
 			user, err = u.userDomain.UpdateProvider(ctx, tx, user.ID, nil, body.Email, resource.UserLoginProviderEmail)
 			if err != nil {
 				return err
 			}
-			lgr.Default.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
+			lgr.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
 			cache.DeleteUserWithRoleAndSubscription(user.ID)
 		}
-		lgr.Default.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
+		lgr.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
 		return u.userDomain.DeleteGuestUser(ctx, tx, guestUser.ID)
 	}); err != nil {
-		lgr.Default.Error(tracingID, 5, "failed to login guest user", err.Error())
+		lgr.Error(tracingID, 5, "failed to login guest user", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 
@@ -173,7 +173,7 @@ func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			lgr.Default.Print(tracingID, 1, "created new user", user.ID, user.Email, "provider", provider.String())
+			lgr.Print(tracingID, 1, "created new user", user.ID, user.Email, "provider", provider.String())
 		} else {
 			user, err = u.userDomain.UpdateProvider(
 				ctx, tx, user.ID, &body.Picture, body.Email, resource.UserLoginProvider(body.Provider),
@@ -181,12 +181,12 @@ func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			lgr.Default.Print(tracingID, 2, "update user provider", user.ID, user.Email, "provider", provider.String())
+			lgr.Print(tracingID, 2, "update user provider", user.ID, user.Email, "provider", provider.String())
 			cache.DeleteUserWithRoleAndSubscription(user.ID)
 		}
 		return nil
 	}); err != nil {
-		lgr.Default.Error(tracingID, 3, "failed to login provider user", body.Email, provider.String(), err.Error())
+		lgr.Error(tracingID, 3, "failed to login provider user", body.Email, provider.String(), err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrGuestUserLoginFailed, err)
 	}
 	token, err := u.authService.GenerateUserToken(user)

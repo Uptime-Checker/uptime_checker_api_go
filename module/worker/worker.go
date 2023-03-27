@@ -63,6 +63,6 @@ func (w *Worker) Start(ctx context.Context) error {
 			panic(err)
 		}
 	}()
-	lgr.Default.Print(tracingID, "worker started with", config.App.WorkerPool, "worker pool")
+	lgr.Print(tracingID, "worker started with", config.App.WorkerPool, "worker pool")
 	return nil
 }

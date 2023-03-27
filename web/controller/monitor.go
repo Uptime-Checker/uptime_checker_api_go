@@ -130,14 +130,14 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		return resp.ServeInternalServerError(c, err)
 	}
 
-	lgr.Default.Print(tracingID, 1, "monitor count", count, "org", user.Organization.Slug)
+	lgr.Print(tracingID, 1, "monitor count", count, "org", user.Organization.Slug)
 	if err := gandalf.CanCreateMonitor(user, int32(count), int32(body.Interval)); err != nil {
 		return resp.SendError(c, fiber.StatusBadRequest, err)
 	}
 
 	var monitor *model.Monitor
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-		lgr.Default.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
+		lgr.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
 		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL, body.Method,
 			body.Body, body.Username, body.Password, body.BodyFormat, body.Interval, body.Timeout,
 			body.AlarmReminderInterval, body.AlarmReminderCount, body.CheckSSL,
@@ -147,7 +147,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		}
 		return nil
 	}); err != nil {
-		lgr.Default.Error(tracingID, 3, "failed to create monitor", err.Error())
+		lgr.Error(tracingID, 3, "failed to create monitor", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
 	}
 
@@ -180,6 +180,6 @@ func (m *MonitorController) DryRun(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 
-	lgr.Default.Print(tracingID, 1, "dry running", body.Method, body.URL)
+	lgr.Print(tracingID, 1, "dry running", body.Method, body.URL)
 	return nil
 }

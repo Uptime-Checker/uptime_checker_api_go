@@ -34,7 +34,7 @@ func SetupSentry() {
 
 	err := sentry.Init(options)
 	if err != nil {
-		lgr.Default.Errorf("sentry.Init: %s", err)
+		lgr.Errorf("sentry.Init: %s", err)
 	}
 	// Flush buffered events before the program terminates.
 	// Set the timeout to the maximum duration the program can afford to wait.

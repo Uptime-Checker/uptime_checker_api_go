@@ -75,7 +75,7 @@ func (c *WatchDog) hit(
 		request.SetBody(*body)
 	}
 
-	lgr.Default.Print(tracingID, "hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
+	lgr.Print(tracingID, "hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
 	resp, err := request.Send(method, url)
 	if err != nil {
 		return nil, c.getError(err)

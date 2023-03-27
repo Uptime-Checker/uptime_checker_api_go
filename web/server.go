@@ -61,10 +61,10 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 
 	quitCh := initQuitCh()
 	sig := <-quitCh // This blocks the main thread until an interrupt is received
-	lgr.Default.Print(tracingID, "received", fmt.Sprintf("(%s)", sig.String()), "gracefully shutting down...")
+	lgr.Print(tracingID, "received", fmt.Sprintf("(%s)", sig.String()), "| gracefully shutting down...")
 	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
 	cleanup(ctx, shutdown)
-	lgr.Default.Print(tracingID, "app was successfully shutdown")
+	lgr.Print(tracingID, "app was successfully shutdown")
 }
 
 func initQuitCh() chan os.Signal {
@@ -83,7 +83,7 @@ func initQuitCh() chan os.Signal {
 
 func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 	tracingID := pkg.GetTracingID(ctx)
-	lgr.Default.Print(tracingID, "running cleanup tasks...")
+	lgr.Print(tracingID, "running cleanup tasks...")
 
 	// Shutdown the workers
 	shutdown()
@@ -92,7 +92,7 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 	_ = infra.DB.Close()
 
 	// Sync the logs
-	lgr.Default.Sync()
+	lgr.Sync()
 
 }
 

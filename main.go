@@ -20,17 +20,17 @@ func main() {
 		panic(err)
 	}
 
-	// Setup Logger
+	// Setup logger
 	lgr.SetupLogger()
 
 	// Setup Cache
 	cache.SetupCache()
-	lgr.Default.Print(tracingID, "cache started")
+	lgr.Print(tracingID, "cache started")
 
 	// Setup Database
 	if err := infra.ConnectDatabase(ctx, !config.IsProd); err != nil {
 		panic(err)
 	}
-	lgr.Default.Print(tracingID, "database connected")
+	lgr.Print(tracingID, "database connected")
 	web.Setup(ctx, shutdown)
 }

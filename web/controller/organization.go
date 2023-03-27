@@ -67,13 +67,13 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrPlanNotFound, err)
 	}
-	lgr.Default.Print(tracingID, 1, "found plan", plan.Name, "product", plan.Product.Name)
+	lgr.Print(tracingID, 1, "found plan", plan.Name, "product", plan.Product.Name)
 
 	role, err := o.organizationDomain.GetRoleByType(ctx, resource.RoleTypeSuperAdmin)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrRoleNotFound, err)
 	}
-	lgr.Default.Print(tracingID, 2, "to assign role", role.Name)
+	lgr.Print(tracingID, 2, "to assign role", role.Name)
 
 	var organization *model.Organization
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
@@ -81,21 +81,21 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		lgr.Default.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
+		lgr.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
 		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
 		if err != nil {
 			return err
 		}
-		lgr.Default.Print(tracingID, 4, "updated user role", updatedUser.ID, "organization",
+		lgr.Print(tracingID, 4, "updated user role", updatedUser.ID, "organization",
 			organization.Slug, "role", role.Name)
 
 		subscription, err := o.paymentService.CreateSubscription(ctx, tx, organization.ID, *plan)
-		lgr.Default.Print(tracingID, 5, "subscription started", subscription.ID, "plan", plan.Name,
+		lgr.Print(tracingID, 5, "subscription started", subscription.ID, "plan", plan.Name,
 			"product", plan.Product.Name)
 		return err
 	}); err != nil {
-		lgr.Default.Error(tracingID, 6, "failed to create organization", err.Error())
+		lgr.Error(tracingID, 6, "failed to create organization", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateOrganization, err)
 	}
 

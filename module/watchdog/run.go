@@ -25,7 +25,7 @@ func NewWatchDog(checkDomain *domain.CheckDomain) *WatchDog {
 func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, region *model.Region) error {
 	tracingID := pkg.GetTracingID(ctx)
 
-	lgr.Default.Print(tracingID, 1, "running =>", monitor.URL, "from", region.Name)
+	lgr.Print(tracingID, 1, "running =>", monitor.URL, "from", region.Name)
 
 	check := &model.Check{
 		Success:        false,
@@ -37,7 +37,7 @@ func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	if err != nil {
 		return err
 	}
-	lgr.Default.Print(tracingID, 2, "created check", check.ID)
+	lgr.Print(tracingID, 2, "created check", check.ID)
 
 	var headers *map[string]string
 	if monitor.Headers != nil {
@@ -67,7 +67,7 @@ func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	)
 
 	if hitResponse == nil && hitError != nil {
-		lgr.Default.Print(tracingID, 1, "hit request failed", method, monitor.URL)
+		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
 	}
 

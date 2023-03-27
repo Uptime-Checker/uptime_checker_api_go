@@ -74,13 +74,13 @@ func (c *Cron) Start(ctx context.Context) error {
 	}
 
 	s.StartAsync()
-	lgr.Default.Print(tracingID, "cron started")
+	lgr.Print(tracingID, "cron started")
 	return nil
 }
 
 func (c *Cron) checkAndRun() {
 	ctx := context.Background()
-	lgr.Default.Print("Running cron check")
+	lgr.Print("Running cron check")
 
 	jobsToRun, err := c.jobDomain.ListJobsToRun(ctx, -20, 20)
 	if err != nil {

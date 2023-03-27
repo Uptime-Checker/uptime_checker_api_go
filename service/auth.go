@@ -31,11 +31,11 @@ func (a *AuthService) VerifyGuestUser(ctx context.Context, email, code string) (
 
 	guestUser, err := a.userDomain.GetGuestUser(ctx, email, code)
 	if err != nil {
-		lgr.Default.Error(tracingID, 1, "no guest user with", email, "code:", code)
+		lgr.Error(tracingID, 1, "no guest user with", email, "code:", code)
 		return nil, err
 	}
 	if times.CompareDate(now, guestUser.ExpiresAt) == constant.Date1AfterDate2 {
-		lgr.Default.Print(tracingID, 2, "no guest expired", guestUser.ExpiresAt, "now:", now)
+		lgr.Print(tracingID, 2, "no guest expired", guestUser.ExpiresAt, "now:", now)
 		return nil, constant.ErrGuestUserCodeExpired
 	}
 	return guestUser, nil

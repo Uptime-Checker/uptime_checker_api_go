@@ -50,21 +50,21 @@ func ConnectDatabase(ctx context.Context, enableLogging bool) error {
 
 func StartTransaction(ctx context.Context) (*sql.Tx, error) {
 	tracingID := pkg.GetTracingID(ctx)
-	lgr.Default.Print(tracingID, "start transaction")
+	lgr.Print(tracingID, "start transaction")
 
 	return DB.BeginTx(ctx, nil)
 }
 
 func CommitTransaction(ctx context.Context, transaction *sql.Tx) error {
 	tracingID := pkg.GetTracingID(ctx)
-	lgr.Default.Print(tracingID, "commit transaction")
+	lgr.Print(tracingID, "commit transaction")
 
 	return transaction.Commit()
 }
 
 func RollbackTransaction(ctx context.Context, transaction *sql.Tx) error {
 	tracingID := pkg.GetTracingID(ctx)
-	lgr.Default.Print(tracingID, "rollback transaction")
+	lgr.Print(tracingID, "rollback transaction")
 
 	return transaction.Rollback()
 }
