@@ -67,7 +67,7 @@ func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	)
 
 	if hitResponse == nil && hitError != nil {
-		lgr.Default.Print(tracingID, 1, "hit request failed", method, url)
+		lgr.Default.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
 	}
 

@@ -25,6 +25,10 @@ type config struct {
 
 	NewRelicApp     string `mapstructure:"NEWRELIC_APP"`
 	NewRelicLicense string `mapstructure:"NEWRELIC_LICENSE"`
+
+	AxiomOrganizationID string `mapstructure:"AXIOM_ORG_ID"`
+	AxiomToken          string `mapstructure:"AXIOM_TOKEN"`
+	AxiomDataset        string `mapstructure:"AXIOM_DATASET"`
 }
 
 var App config

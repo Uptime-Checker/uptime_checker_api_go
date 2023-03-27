@@ -16,13 +16,12 @@ func main() {
 	ctx = pkg.NewTracingID(ctx)
 	tracingID := pkg.GetTracingID(ctx)
 
-	// Setup Logger
-	lgr.SetupLogger()
-
 	if err := config.LoadConfig(".env"); err != nil {
 		panic(err)
 	}
-	lgr.Default.Print(tracingID, "configuration loaded")
+
+	// Setup Logger
+	lgr.SetupLogger()
 
 	// Setup Cache
 	cache.SetupCache()
