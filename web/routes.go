@@ -28,7 +28,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
 
-	// Domain Registration
+	//  ========== Age of the domains ==========
 	jobDomain := domain.NewJobDomain()
 	userDomain := domain.NewUserDomain()
 	paymentDomain := domain.NewPaymentDomain()
@@ -38,7 +38,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	checkDomain := domain.NewCheckDomain()
 	monitorStatusDomain := domain.NewMonitorStatusDomain()
 
-	// Service Registration
+	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
 	userService := service.NewUserService(userDomain)
 	paymentService := service.NewPaymentService(paymentDomain)
