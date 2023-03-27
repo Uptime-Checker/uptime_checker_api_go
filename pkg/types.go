@@ -13,6 +13,13 @@ type BearerClaims struct {
 	*jwt.RegisteredClaims
 }
 
+type PreAssertion struct {
+	Source     int32
+	Property   *string
+	Comparison int32
+	Value      string
+}
+
 type SubscriptionFeature struct {
 	*model.ProductFeature
 	*model.Feature
