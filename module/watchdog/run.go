@@ -46,28 +46,21 @@ func (c *WatchDog) Run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 		}
 	}
 
-	var bodyFormat *resource.MonitorBodyFormat
-	if monitor.BodyFormat != nil {
-		resourceBodyFormat := resource.MonitorBodyFormat(*monitor.BodyFormat)
-		bodyFormat = &resourceBodyFormat
-	}
-
 	method := resource.GetMonitorMethod(*monitor.Method)
-	hitResponse, hitError := c.hit(
+	hitResponse, hitError := c.runAndAssert(
 		ctx,
 		monitor.URL,
 		method,
 		monitor.Body,
 		monitor.Username,
 		monitor.Password,
-		bodyFormat,
+		monitor.BodyFormat,
 		headers,
 		*monitor.Timeout,
 		*monitor.FollowRedirects,
 	)
 
 	if hitResponse == nil && hitError != nil {
-		lgr.Default.Print(tracingID, 3, "hit request failed", check.ID, method, monitor.URL)
 		// Create error log
 	}
 
@@ -75,6 +68,42 @@ func (c *WatchDog) Run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	// Schedule next check
 	// Send for alarm if needed
 	return nil
+}
+
+func (c *WatchDog) runAndAssert(
+	ctx context.Context,
+	url, method string, body, username, password *string,
+	monitorBodyFormat *int32,
+	headers *map[string]string,
+	timeout int32,
+	followRedirect bool,
+) (*HitResponse, *HitErr) {
+	tracingID := pkg.GetTracingID(ctx)
+
+	var bodyFormat *resource.MonitorBodyFormat
+	if monitorBodyFormat != nil {
+		resourceBodyFormat := resource.MonitorBodyFormat(*monitorBodyFormat)
+		bodyFormat = &resourceBodyFormat
+	}
+
+	hitResponse, hitError := c.hit(
+		ctx,
+		url,
+		method,
+		body,
+		username,
+		password,
+		bodyFormat,
+		headers,
+		timeout,
+		followRedirect,
+	)
+
+	if hitResponse == nil && hitError != nil {
+		lgr.Default.Print(tracingID, 1, "hit request failed", method, url)
+		return hitResponse, hitError
+	}
+	return nil, nil
 }
 
 func (c *WatchDog) gateCheck() {
