@@ -7,6 +7,7 @@ type Logger interface {
 	Error(v ...interface{})
 	Printf(format string, v ...interface{})
 	Errorf(format string, v ...interface{})
+	Sync()
 }
 
 var Default Logger

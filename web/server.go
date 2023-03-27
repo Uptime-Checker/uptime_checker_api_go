@@ -84,8 +84,16 @@ func initQuitCh() chan os.Signal {
 func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 	tracingID := pkg.GetTracingID(ctx)
 	lgr.Default.Print(tracingID, "running cleanup tasks...")
-	_ = infra.DB.Close()
+
+	// Shutdown the workers
 	shutdown()
+
+	// Close the DB connection
+	_ = infra.DB.Close()
+
+	// Sync the logs
+	lgr.Default.Sync()
+
 }
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {

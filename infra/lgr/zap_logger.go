@@ -6,7 +6,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/getsentry/sentry-go"
+	adapter "github.com/axiomhq/axiom-go/adapters/zap"
+	"github.com/axiomhq/axiom-go/axiom"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 )
@@ -35,19 +36,25 @@ func (l zapLogger) Errorf(format string, v ...interface{}) {
 	l.sugaredLogger.Errorf(format, v)
 }
 
+func (l zapLogger) Sync() {
+	_ = l.sugaredLogger.Sync()
+}
+
 func newZapLogger() *zapLogger {
 	var logger *zap.Logger
 	var err error
 	if config.IsProd {
-		cfg := zap.NewProductionConfig()
-		cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-		cfg.EncoderConfig.TimeKey = "time"
-		cfg.EncoderConfig.FunctionKey = "func"
-		cfg.DisableStacktrace = true
-		logger, err = cfg.Build(zap.AddCallerSkip(1))
+		core, err := adapter.New(
+			adapter.SetClientOptions(
+				axiom.SetOrganizationID(config.App.AxiomOrganizationID),
+				axiom.SetAPITokenConfig(config.App.AxiomToken),
+			),
+			adapter.SetDataset(config.App.AxiomDataset),
+		)
 		if err != nil {
 			panic(err)
 		}
+		logger = zap.New(core)
 	} else {
 		cfg := zap.NewDevelopmentConfig()
 		cfg.DisableStacktrace = true
@@ -58,12 +65,6 @@ func newZapLogger() *zapLogger {
 			panic(err)
 		}
 	}
-
-	defer func(logger *zap.Logger) {
-		if err := logger.Sync(); err != nil {
-			sentry.CaptureException(err)
-		}
-	}(logger)
 	return &zapLogger{
 		sugaredLogger: logger.Sugar(),
 	}
