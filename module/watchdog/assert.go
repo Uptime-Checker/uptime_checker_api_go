@@ -20,7 +20,7 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 
 	if assertionSource == resource.AssertionSourceStatusCode {
 		return assertStatusCode(assertionComparison, value, resp.StatusCode)
-	} else if assertionSource == resource.AssertionSourceStatusCode {
+	} else if assertionSource == resource.AssertionSourceResponseTime {
 		return assertResponseTime(assertionComparison, value, resp.Duration)
 	}
 
