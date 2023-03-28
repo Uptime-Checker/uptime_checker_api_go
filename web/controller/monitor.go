@@ -81,6 +81,15 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 		return resp.ErrMaxTimeoutExceeded
 	}
 
+	// assertion
+	for _, assertion := range body.Assertions {
+		if resource.AssertionSource(assertion.Source) == resource.AssertionSourceHeaders {
+			if assertion.Property == nil {
+				return resp.ErrHeaderKeyNeeded
+			}
+		}
+	}
+
 	return nil
 }
 

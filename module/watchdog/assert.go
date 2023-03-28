@@ -25,6 +25,8 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 		return assertResponseTime(assertionComparison, value, resp.Duration)
 	} else if assertionSource == resource.AssertionSourceTextBody {
 		return assertTextBody(assertionComparison, value, resp.Body)
+	} else if assertionSource == resource.AssertionSourceHeaders {
+		return assertHeader(assertionComparison, *property, value, resp.Headers)
 	}
 
 	return false
@@ -100,6 +102,27 @@ func assertTextBody(assertionComparison resource.AssertionComparison, value stri
 		return strings.Contains(responseBody, value)
 	} else if assertionComparison == resource.AssertionComparisonNotContain {
 		return !strings.Contains(responseBody, value)
+	} else if assertionComparison == resource.AssertionComparisonEmpty {
+		return value == ""
+	} else if assertionComparison == resource.AssertionComparisonNotEmpty {
+		return value != ""
+	}
+	return false
+}
+
+func assertHeader(assertionComparison resource.AssertionComparison, property, value string, headers map[string]string) bool {
+	headerValue, ok := headers[property]
+	if !ok {
+		return false
+	}
+	if assertionComparison == resource.AssertionComparisonEqual {
+		return value == headerValue
+	} else if assertionComparison == resource.AssertionComparisonNotEqual {
+		return value != headerValue
+	} else if assertionComparison == resource.AssertionComparisonContain {
+		return strings.Contains(headerValue, value)
+	} else if assertionComparison == resource.AssertionComparisonNotContain {
+		return !strings.Contains(headerValue, value)
 	} else if assertionComparison == resource.AssertionComparisonEmpty {
 		return value == ""
 	} else if assertionComparison == resource.AssertionComparisonNotEmpty {
