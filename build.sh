@@ -34,5 +34,5 @@ fi
 go mod verify
 go mod vendor
 
-golangci-lint run
+./format.sh
 go build -o bin/${PROJ}
