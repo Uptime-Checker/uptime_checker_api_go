@@ -50,7 +50,7 @@ type MonitorBody struct {
 	Interval int32  `json:"interval" validate:"required,min=10,max=86400"`
 	Timeout  int32  `json:"timeout"  validate:"required,min=1,max=30"`
 
-	Body       *string `json:"body"  validate:"required_with=bodyFormat"`
+	Body       *string `json:"body"       validate:"required_with=bodyFormat"`
 	BodyFormat *int32  `json:"bodyFormat" validate:"required_with=Body"`
 
 	Headers *map[string]string `json:"headers"`
@@ -170,5 +170,14 @@ func (m *MonitorController) DryRun(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrDryRunFailed, err)
 	}
 
-	return nil
+	for _, assertion := range body.Assertions {
+		if pass := m.dog.Assert(
+			assertion.Source, assertion.Property, assertion.Comparison, assertion.Value, *hitResponse,
+		); !pass {
+			err := fmt.Errorf("%s - value mismatch", resource.AssertionSource(assertion.Source).String())
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrDryRunFailed, err)
+		}
+	}
+
+	return resp.ServeData(c, fiber.StatusOK, body.URL)
 }
