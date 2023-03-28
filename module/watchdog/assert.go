@@ -18,30 +18,35 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 	assertionComparison := resource.AssertionComparison(comparison)
 
 	if assertionSource == resource.AssertionSourceStatusCode {
-		if value == allGoodStatusCode {
-			return checkSuccessStatusCode(resp.StatusCode)
-		}
-
-		code, _ := strconv.Atoi(value)
-		if assertionComparison == resource.AssertionComparisonEqual {
-			if code == resp.StatusCode {
-				return true
-			}
-		} else if assertionComparison == resource.AssertionComparisonNotEqual {
-			if code == resp.StatusCode {
-				return false
-			}
-		} else if assertionComparison == resource.AssertionComparisonGreater {
-			if resp.StatusCode > code {
-				return true
-			}
-		} else if assertionComparison == resource.AssertionComparisonLesser {
-			if code < resp.StatusCode {
-				return true
-			}
-		}
+		return assertStatusCode(assertionComparison, value, resp.StatusCode)
 	}
 
+	return false
+}
+
+func assertStatusCode(assertionComparison resource.AssertionComparison, value string, statusCode int) bool {
+	if value == allGoodStatusCode {
+		return checkSuccessStatusCode(statusCode)
+	}
+
+	code, _ := strconv.Atoi(value)
+	if assertionComparison == resource.AssertionComparisonEqual {
+		if code == statusCode {
+			return true
+		}
+	} else if assertionComparison == resource.AssertionComparisonNotEqual {
+		if code == statusCode {
+			return false
+		}
+	} else if assertionComparison == resource.AssertionComparisonGreater {
+		if statusCode > code {
+			return true
+		}
+	} else if assertionComparison == resource.AssertionComparisonLesser {
+		if code < statusCode {
+			return true
+		}
+	}
 	return false
 }
 
