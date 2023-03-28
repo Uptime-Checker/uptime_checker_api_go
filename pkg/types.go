@@ -13,7 +13,7 @@ type BearerClaims struct {
 	*jwt.RegisteredClaims
 }
 
-type PreAssertion struct {
+type ShadowAssertion struct {
 	Source     int32
 	Property   *string
 	Comparison int32

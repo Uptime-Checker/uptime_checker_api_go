@@ -22,7 +22,7 @@ func NewWatchDog(checkDomain *domain.CheckDomain) *WatchDog {
 	return &WatchDog{checkDomain: checkDomain}
 }
 
-func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, region *model.Region) error {
+func (w *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, region *model.Region) error {
 	tracingID := pkg.GetTracingID(ctx)
 
 	lgr.Print(tracingID, 1, "running =>", monitor.URL, "from", region.Name)
@@ -33,7 +33,7 @@ func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 		MonitorID:      &monitor.ID,
 		OrganizationID: monitor.OrganizationID,
 	}
-	check, err := c.checkDomain.Create(ctx, tx, check)
+	check, err := w.checkDomain.Create(ctx, tx, check)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	}
 
 	method := resource.GetMonitorMethod(*monitor.Method)
-	hitResponse, hitError := c.hit(
+	hitResponse, hitError := w.hit(
 		ctx,
 		monitor.URL,
 		method,
@@ -77,7 +77,7 @@ func (c *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	return nil
 }
 
-func (c *WatchDog) gateCheck() {
+func (w *WatchDog) gateCheck() {
 	// If active subscription,
 	// If monitor on,
 	// If run too quickly

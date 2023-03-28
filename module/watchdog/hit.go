@@ -43,7 +43,7 @@ type HitResponse struct {
 	Traces      *string
 }
 
-func (c *WatchDog) hit(
+func (w *WatchDog) hit(
 	ctx context.Context,
 	url, method string, body, username, password *string,
 	bodyFormat *resource.MonitorBodyFormat,
@@ -78,10 +78,10 @@ func (c *WatchDog) hit(
 	lgr.Print(tracingID, "hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
 	resp, err := request.Send(method, url)
 	if err != nil {
-		return nil, c.getError(err)
+		return nil, w.getError(err)
 	}
 	// Return status code, response body, response headers, response size, trace info
-	return c.getResponse(resp)
+	return w.getResponse(resp)
 }
 
 func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
@@ -101,7 +101,7 @@ func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[
 	return contentType
 }
 
-func (c *WatchDog) getError(err error) *HitErr {
+func (w *WatchDog) getError(err error) *HitErr {
 	clientError := errors.Unwrap(err)
 
 	errorText := clientError.Error()
@@ -135,7 +135,7 @@ func (c *WatchDog) getError(err error) *HitErr {
 	return &HitErr{Type: errorLogType, Text: errorText}
 }
 
-func (c *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
+func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	var respTrace *string
 
 	var hitErr *HitErr
@@ -151,7 +151,7 @@ func (c *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		respTrace = &stringTraceInfo
 	}
 
-	headers := c.getResponseHeaders(resp.Header)
+	headers := w.getResponseHeaders(resp.Header)
 	contentType := resp.GetContentType()
 	hitResponse = &HitResponse{
 		StatusCode:  resp.GetStatusCode(),
@@ -187,7 +187,7 @@ func (c *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	return hitResponse, hitErr
 }
 
-func (c *WatchDog) getResponseHeaders(headers http.Header) *map[string]string {
+func (w *WatchDog) getResponseHeaders(headers http.Header) *map[string]string {
 	respHeader := make(map[string]string)
 	for key, values := range headers {
 		if len(values) > 0 {
