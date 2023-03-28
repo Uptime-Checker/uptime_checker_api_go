@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -19,6 +20,8 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 
 	if assertionSource == resource.AssertionSourceStatusCode {
 		return assertStatusCode(assertionComparison, value, resp.StatusCode)
+	} else if assertionSource == resource.AssertionSourceStatusCode {
+		return assertResponseTime(assertionComparison, value, resp.Duration)
 	}
 
 	return false
@@ -29,7 +32,12 @@ func assertStatusCode(assertionComparison resource.AssertionComparison, value st
 		return checkSuccessStatusCode(statusCode)
 	}
 
-	code, _ := strconv.Atoi(value)
+	code, err := strconv.Atoi(value)
+	if err != nil {
+		sentry.CaptureException(err)
+		return false
+	}
+
 	if assertionComparison == resource.AssertionComparisonEqual {
 		if code == statusCode {
 			return true
@@ -39,11 +47,11 @@ func assertStatusCode(assertionComparison resource.AssertionComparison, value st
 			return false
 		}
 	} else if assertionComparison == resource.AssertionComparisonGreater {
-		if statusCode > code {
+		if code < statusCode {
 			return true
 		}
 	} else if assertionComparison == resource.AssertionComparisonLesser {
-		if code < statusCode {
+		if code > statusCode {
 			return true
 		}
 	}
@@ -65,4 +73,24 @@ func checkSuccessStatusCode(code int) bool {
 	}
 
 	return lo.Contains(codes, code)
+}
+
+func assertResponseTime(assertionComparison resource.AssertionComparison, value string, duration int64) bool {
+	responseTime, err := strconv.Atoi(value)
+	if err != nil {
+		sentry.CaptureException(err)
+		return false
+	}
+
+	savedResponseTime := int64(responseTime * 1000)
+	if assertionComparison == resource.AssertionComparisonGreater {
+		if savedResponseTime < duration {
+			return true
+		}
+	} else if assertionComparison == resource.AssertionComparisonLesser {
+		if savedResponseTime > duration {
+			return true
+		}
+	}
+	return false
 }
