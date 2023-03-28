@@ -3,6 +3,7 @@ package watchdog
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/samber/lo"
@@ -22,6 +23,8 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 		return assertStatusCode(assertionComparison, value, resp.StatusCode)
 	} else if assertionSource == resource.AssertionSourceResponseTime {
 		return assertResponseTime(assertionComparison, value, resp.Duration)
+	} else if assertionSource == resource.AssertionSourceTextBody {
+		return assertTextBody(assertionComparison, value, resp.Body)
 	}
 
 	return false
@@ -39,21 +42,13 @@ func assertStatusCode(assertionComparison resource.AssertionComparison, value st
 	}
 
 	if assertionComparison == resource.AssertionComparisonEqual {
-		if code == statusCode {
-			return true
-		}
+		return code == statusCode
 	} else if assertionComparison == resource.AssertionComparisonNotEqual {
-		if code == statusCode {
-			return false
-		}
+		return code != statusCode
 	} else if assertionComparison == resource.AssertionComparisonGreater {
-		if code < statusCode {
-			return true
-		}
+		return code < statusCode
 	} else if assertionComparison == resource.AssertionComparisonLesser {
-		if code > statusCode {
-			return true
-		}
+		return code > statusCode
 	}
 	return false
 }
@@ -84,13 +79,31 @@ func assertResponseTime(assertionComparison resource.AssertionComparison, value 
 
 	savedResponseTime := int64(responseTime * 1000)
 	if assertionComparison == resource.AssertionComparisonGreater {
-		if savedResponseTime < duration {
-			return true
-		}
+		return savedResponseTime < duration
 	} else if assertionComparison == resource.AssertionComparisonLesser {
-		if savedResponseTime > duration {
-			return true
-		}
+		return savedResponseTime > duration
+	}
+	return false
+}
+
+func assertTextBody(assertionComparison resource.AssertionComparison, value string, body *string) bool {
+	if body == nil {
+		return false
+	}
+	responseBody := *body
+
+	if assertionComparison == resource.AssertionComparisonEqual {
+		return value == responseBody
+	} else if assertionComparison == resource.AssertionComparisonNotEqual {
+		return value != responseBody
+	} else if assertionComparison == resource.AssertionComparisonContain {
+		return strings.Contains(responseBody, value)
+	} else if assertionComparison == resource.AssertionComparisonNotContain {
+		return !strings.Contains(responseBody, value)
+	} else if assertionComparison == resource.AssertionComparisonEmpty {
+		return value == ""
+	} else if assertionComparison == resource.AssertionComparisonNotEmpty {
+		return value != ""
 	}
 	return false
 }
