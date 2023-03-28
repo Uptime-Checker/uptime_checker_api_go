@@ -74,6 +74,10 @@ func ServeError(c *fiber.Ctx, status int, message string, err error) error {
 	return c.Status(status).JSON(processError(message, err))
 }
 
+func ServeDryRunError(c *fiber.Ctx, status int, data interface{}, err error) error {
+	return c.Status(status).JSON(fiber.Map{"error": err.Error(), "data": data})
+}
+
 func ServeInternalServerError(c *fiber.Ctx, err error) error {
 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 }

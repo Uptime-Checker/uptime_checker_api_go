@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
@@ -59,7 +58,7 @@ type MonitorBody struct {
 	Password *string `json:"password" validate:"required_with=username"`
 
 	GlobalAlarmSettings   bool  `json:"globalAlarmSettings"   validate:"required"`
-	AlarmReminderInterval int32 `json:"alarmReminderInterval" validate:"required,min=5,max=60"`
+	AlarmReminderInterval int32 `json:"alarmReminderInterval" validate:"required,min=600,max=3600"`
 	AlarmReminderCount    int32 `json:"alarmReminderCount"    validate:"required,min=0,max=30"`
 
 	CheckSSL       bool `json:"checkSSL"       validate:"required"`
@@ -175,9 +174,9 @@ func (m *MonitorController) DryRun(c *fiber.Ctx) error {
 			assertion.Source, assertion.Property, assertion.Comparison, assertion.Value, *hitResponse,
 		); !pass {
 			err := fmt.Errorf("%s - value mismatch", resource.AssertionSource(assertion.Source).String())
-			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrDryRunFailed, err)
+			return resp.ServeDryRunError(c, fiber.StatusBadRequest, hitResponse, err)
 		}
 	}
 
-	return resp.ServeData(c, fiber.StatusOK, body.URL)
+	return resp.ServeData(c, fiber.StatusOK, hitResponse)
 }

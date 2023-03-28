@@ -154,5 +154,6 @@ func registerMonitorHandlers(
 	)
 
 	router.Post("/", auth, handler.Create)
+	router.Post("/dry", auth, handler.DryRun)
 	router.Get("/list", auth, handler.ListMonitors)
 }
