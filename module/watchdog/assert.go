@@ -13,7 +13,7 @@ const (
 	allGoodStatusCode = "200..299"
 )
 
-func (w *WatchDog) assert(source int32, property *string, comparison int32, value string, resp HitResponse) bool {
+func (w *WatchDog) Assert(source int32, property *string, comparison int32, value string, resp HitResponse) bool {
 	assertionSource := resource.AssertionSource(source)
 	assertionComparison := resource.AssertionComparison(comparison)
 

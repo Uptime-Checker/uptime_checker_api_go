@@ -70,9 +70,9 @@ type MonitorBody struct {
 
 func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 	// username/password
-	if *body.Username != "" && *body.Password == "" {
+	if body.Username != nil && body.Password == nil {
 		return resp.ErrPasswordCannotBeEmpty
-	} else if *body.Username == "" && *body.Password != "" {
+	} else if body.Username == nil && body.Password != nil {
 		return resp.ErrUsernameCannotBeEmpty
 	}
 
@@ -124,7 +124,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 	if err := m.validateMonitorBody(body); err != nil {
-		return resp.ServeValidationError(c, err)
+		return resp.SendError(c, fiber.StatusUnprocessableEntity, err)
 	}
 
 	count, err := m.monitorDomain.Count(ctx, *user.OrganizationID)
