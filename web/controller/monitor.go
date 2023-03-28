@@ -47,20 +47,20 @@ type MonitorBody struct {
 	Name     string `json:"name"     validate:"required"`
 	URL      string `json:"url"      validate:"required,url"`
 	Method   string `json:"method"   validate:"required"`
-	Interval int32  `json:"interval" validate:"required"`
-	Timeout  int32  `json:"timeout"  validate:"required"`
+	Interval int32  `json:"interval" validate:"required,min=10,max=86400"`
+	Timeout  int32  `json:"timeout"  validate:"required,min=1,max=30"`
 
-	Body       *string `json:"body"`
-	BodyFormat *int32  `json:"bodyFormat"`
+	Body       *string `json:"body"  validate:"required_with=bodyFormat"`
+	BodyFormat *int32  `json:"bodyFormat" validate:"required_with=Body"`
 
 	Headers *map[string]string `json:"headers"`
 
-	Username *string `json:"username"`
-	Password *string `json:"password"`
+	Username *string `json:"username" validate:"required_with=password"`
+	Password *string `json:"password" validate:"required_with=username"`
 
 	GlobalAlarmSettings   bool  `json:"globalAlarmSettings"   validate:"required"`
-	AlarmReminderInterval int32 `json:"alarmReminderInterval" validate:"required"`
-	AlarmReminderCount    int32 `json:"alarmReminderCount"    validate:"required"`
+	AlarmReminderInterval int32 `json:"alarmReminderInterval" validate:"required,min=5,max=60"`
+	AlarmReminderCount    int32 `json:"alarmReminderCount"    validate:"required,min=0,max=30"`
 
 	CheckSSL       bool `json:"checkSSL"       validate:"required"`
 	FollowRedirect bool `json:"followRedirect" validate:"required"`
@@ -69,39 +69,13 @@ type MonitorBody struct {
 }
 
 func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
-	// username/password
-	if body.Username != nil && body.Password == nil {
-		return resp.ErrPasswordCannotBeEmpty
-	} else if body.Username == nil && body.Password != nil {
-		return resp.ErrUsernameCannotBeEmpty
-	}
-
-	// interval [min: 10 seconds | max: 1 day]
-	if body.Interval < constant.MinMonitorIntervalInSeconds || body.Interval > constant.MaxMonitorIntervalInSeconds {
-		return resp.ErrInvalidInterval
-	}
-
-	// min: 5 minutes
-	if body.AlarmReminderInterval < constant.MinAlarmReminderIntervalInMinutes*60 {
-		return resp.ErrInvalidAlarmReminderInterval
-	}
-
 	// body
-	if body.Body != nil {
-		// valid body format
-		if body.BodyFormat == nil {
-			return resp.ErrInvalidBodyFormat
-		}
+	if body.Body != nil && len(*body.Body) > constant.MaxMonitorBodySizeInBytes {
 		// max 1KB
-		if len(*body.Body) > constant.MaxMonitorBodySizeInBytes {
-			return resp.ErrMaxBodySizeExceeded
-		}
+		return resp.ErrMaxBodySizeExceeded
 	}
 
-	// timeout = max 30 seconds, interval/2
-	if body.Timeout > constant.MaxMonitorTimeoutInSeconds {
-		return resp.ErrMaxTimeoutExceeded
-	}
+	// timeout = max interval/2
 	maxTimeoutRelativeToInterval := body.Interval / 2
 	if body.Timeout > maxTimeoutRelativeToInterval {
 		return resp.ErrMaxTimeoutExceeded
