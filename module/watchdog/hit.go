@@ -2,7 +2,6 @@ package watchdog
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -36,11 +35,12 @@ type HitErr struct {
 
 type HitResponse struct {
 	StatusCode  int
-	Body        *string
-	Headers     *map[string]string
+	Duration    int64
 	Size        int64
-	ContentType *string
-	Traces      *string
+	ContentType string
+	Body        *string
+	Headers     map[string]string
+	Traces      req.TraceInfo
 }
 
 func (w *WatchDog) Hit(
@@ -136,8 +136,6 @@ func (w *WatchDog) getError(err error) *HitErr {
 }
 
 func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
-	var respTrace *string
-
 	var hitErr *HitErr
 	var hitResponse *HitResponse
 
@@ -145,20 +143,13 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		return hitResponse, hitErr
 	}
 
-	traceInfo, err := json.Marshal(resp.TraceInfo())
-	if err == nil {
-		stringTraceInfo := string(traceInfo)
-		respTrace = &stringTraceInfo
-	}
-
-	headers := w.getResponseHeaders(resp.Header)
-	contentType := resp.GetContentType()
 	hitResponse = &HitResponse{
 		StatusCode:  resp.GetStatusCode(),
+		Duration:    resp.TotalTime().Milliseconds(),
 		Size:        resp.ContentLength,
-		Traces:      respTrace,
-		Headers:     headers,
-		ContentType: &contentType,
+		ContentType: resp.GetContentType(),
+		Headers:     w.getResponseHeaders(resp.Header),
+		Traces:      resp.TraceInfo(),
 	}
 
 	respBody, err := io.ReadAll(resp.Body)
@@ -178,21 +169,20 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		stringBody := string(respBody)
 		hitResponse.Body = &stringBody
 
-		if hitResponse.ContentType == nil {
-			mimeType := http.DetectContentType(respBody)
-			hitResponse.ContentType = &mimeType
+		if hitResponse.ContentType == "" {
+			hitResponse.ContentType = http.DetectContentType(respBody)
 		}
 	}
 
 	return hitResponse, hitErr
 }
 
-func (w *WatchDog) getResponseHeaders(headers http.Header) *map[string]string {
+func (w *WatchDog) getResponseHeaders(headers http.Header) map[string]string {
 	respHeader := make(map[string]string)
 	for key, values := range headers {
 		if len(values) > 0 {
 			respHeader[key] = values[0]
 		}
 	}
-	return &respHeader
+	return respHeader
 }

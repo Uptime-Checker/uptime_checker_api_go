@@ -59,5 +59,5 @@ func checkSuccessStatusCode(code int) bool {
 		http.StatusIMUsed,
 	}
 
-	return lo.Contains[int](codes, code)
+	return lo.Contains(codes, code)
 }
