@@ -26,6 +26,7 @@ const (
 	ErrGuestUserLoginFailed       = "failed to login guest user"
 	ErrMonitorCreateFailed        = "failed to create monitor"
 	ErrMalformedJWT               = "missing or malformed JWT"
+	ErrDryRunFailed               = "dry run failed"
 )
 
 var (

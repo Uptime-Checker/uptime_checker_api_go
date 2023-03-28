@@ -3,11 +3,13 @@ package controller
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/gandalf"
@@ -51,7 +53,7 @@ type MonitorBody struct {
 	Body       *string `json:"body"`
 	BodyFormat *int32  `json:"bodyFormat"`
 
-	Headers map[string]string `json:"headers"`
+	Headers *map[string]string `json:"headers"`
 
 	Username *string `json:"username"`
 	Password *string `json:"password"`
@@ -181,5 +183,18 @@ func (m *MonitorController) DryRun(c *fiber.Ctx) error {
 	}
 
 	lgr.Print(tracingID, 1, "dry running", body.Method, body.URL)
+	var bodyFormat *resource.MonitorBodyFormat
+	if body.BodyFormat != nil {
+		resourceBodyFormat := resource.MonitorBodyFormat(*body.BodyFormat)
+		bodyFormat = &resourceBodyFormat
+	}
+	hitResponse, hitError := m.dog.Hit(ctx, body.URL, body.Method, body.Body, body.Username, body.Password, bodyFormat,
+		body.Headers, body.Timeout, body.FollowRedirect)
+
+	if hitResponse == nil && hitError != nil {
+		err := fmt.Errorf("%s - %s", hitError.Type.String(), hitError.Text)
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrDryRunFailed, err)
+	}
+
 	return nil
 }

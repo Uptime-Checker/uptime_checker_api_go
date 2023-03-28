@@ -53,7 +53,7 @@ func (w *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	}
 
 	method := resource.GetMonitorMethod(*monitor.Method)
-	hitResponse, hitError := w.hit(
+	hitResponse, hitError := w.Hit(
 		ctx,
 		monitor.URL,
 		method,

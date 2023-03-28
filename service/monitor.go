@@ -32,7 +32,7 @@ func (m *MonitorService) Create(
 	bodyFormat *int32,
 	interval, timeout, alarmReminderInterval, alarmReminderCount int32,
 	checkSSL, followRedirect, globalAlarmSettings bool,
-	headers map[string]string,
+	headers *map[string]string,
 ) (*model.Monitor, error) {
 	head, getHeadErr := m.monitorDomain.GetHead(ctx, organizationID)
 	monitorMethod := resource.GetMonitorHttpMethod(method)
@@ -62,8 +62,8 @@ func (m *MonitorService) Create(
 		OrganizationID:        &organizationID,
 	}
 
-	if len(headers) > 0 {
-		jsonHeaders, err := json.Marshal(headers)
+	if headers != nil && len(*headers) > 0 {
+		jsonHeaders, err := json.Marshal(*headers)
 		if err != nil {
 			return nil, err
 		}

@@ -43,7 +43,7 @@ type HitResponse struct {
 	Traces      *string
 }
 
-func (w *WatchDog) hit(
+func (w *WatchDog) Hit(
 	ctx context.Context,
 	url, method string, body, username, password *string,
 	bodyFormat *resource.MonitorBodyFormat,
