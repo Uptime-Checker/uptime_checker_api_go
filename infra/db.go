@@ -20,6 +20,7 @@ import (
 var DB *sql.DB
 
 func ConnectDatabase(ctx context.Context, enableLogging bool) error {
+	tracingID := pkg.GetTracingID(ctx)
 	connectString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		config.App.DatabaseHost, config.App.DatabasePort, config.App.DatabaseUser, config.App.DatabasePassword,
 		config.App.DatabaseSchema)
@@ -30,20 +31,25 @@ func ConnectDatabase(ctx context.Context, enableLogging bool) error {
 		return err
 	}
 
-	if enableLogging {
-		postgres.SetQueryLogger(func(ctx context.Context, queryInfo postgres.QueryInfo) {
-			// Depending on how the statement is executed, RowsProcessed is:
-			//   - Number of rows returned for Query() and QueryContext() methods
-			//   - RowsAffected() for Exec() and ExecContext() methods
-			//   - Always 0 for Rows() method.
+	postgres.SetQueryLogger(func(ctx context.Context, queryInfo postgres.QueryInfo) {
+		// Depending on how the statement is executed, RowsProcessed is:
+		//   - Number of rows returned for Query() and QueryContext() methods
+		//   - RowsAffected() for Exec() and ExecContext() methods
+		//   - Always 0 for Rows() method.
+		if enableLogging {
 			c0 := color.New(color.FgHiGreen)
 			_, _ = c0.Print("|>-----------------------------------------------------")
 			c1 := color.New(color.FgCyan)
 			_, _ = c1.Printf("%s", queryInfo.Statement.DebugSql())
 			c2 := color.New(color.FgHiRed).Add(color.Underline)
 			_, _ = c2.Printf("|> processed [%d] - in %.2fs\n", queryInfo.RowsProcessed, queryInfo.Duration.Seconds())
-		})
-	}
+		}
+		if queryInfo.Duration.Seconds() > 1 {
+			lgr.Warn(tracingID, "slow query, time:", fmt.Sprintf("%d ms", queryInfo.Duration.Milliseconds()),
+				"rows processed", queryInfo.RowsProcessed,
+				"sql: ", queryInfo.Statement.DebugSql())
+		}
+	})
 
 	return DB.PingContext(ctx)
 }
