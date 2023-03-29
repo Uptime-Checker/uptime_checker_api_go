@@ -349,6 +349,19 @@ linters:
     - wsl
 
 linters-settings:
+  errcheck:
+    # Report `a := b.(MyStruct)` when `a, ok := ...` should be.
+    check-type-assertions: true # Default: false
+
+    # Report skipped checks:`num, _ := strconv.Atoi(numStr)`.
+    check-blank: true # Default: false
+    
+    # Function to skip.
+    exclude-functions:
+      - io/ioutil.ReadFile
+      - io.Copy(*bytes.Buffer)
+      - io.Copy(os.Stdout)
+
   # I'm biased and I'm enabling more than 100 checks
   # Might be too much for you. See https://go-critic.com/overview.html
   gocritic:
@@ -365,19 +378,6 @@ linters-settings:
       - rangeExprCopy
       - rangeValCopy
 
-  errcheck:
-    # Report `a := b.(MyStruct)` when `a, ok := ...` should be.
-    check-type-assertions: true # Default: false
-
-    # Report skipped checks:`num, _ := strconv.Atoi(numStr)`.
-    check-blank: true # Default: false
-    
-    # Function to skip.
-    exclude-functions:
-      - io/ioutil.ReadFile
-      - io.Copy(*bytes.Buffer)
-      - io.Copy(os.Stdout)
-
   govet:
     disable:
       - fieldalignment # I'm ok to waste some bytes
@@ -385,6 +385,12 @@ linters-settings:
   nakedret:
     # No naked returns, ever.
     max-func-lines: 1 # Default: 30
+
+  staticcheck:
+    dot_import_whitelist: [
+      "github.com/go-jet/jet/v2/postgres",
+      "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
+    ]
 
   tagliatelle:
     case:
