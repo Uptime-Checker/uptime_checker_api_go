@@ -389,12 +389,12 @@ linters-settings:
   tagliatelle:
     case:
       rules:
-        json: snake # why it's not a `snake` by default?!
-        yaml: snake # why it's not a `snake` by default?!
+        json: goCamel
+        yaml: snake
         xml: camel
         bson: camel
         avro: snake
-        mapstructure: kebab
+        mapstructure: upper
 
 # See also https://gist.github.com/cristaloleg/dc29ca0ef2fb554de28d94c3c6f6dc88
 
