@@ -19,6 +19,12 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
+const (
+	checkCronFromAndToInSeconds = 20
+	cronInitDelayFromInSeconds  = 60
+	cronInitDelayToInSeconds    = 120
+)
+
 var s *gocron.Scheduler
 
 type Task interface {
@@ -47,8 +53,11 @@ func (c *Cron) Start(ctx context.Context) error {
 	now := times.Now()
 	s = gocron.NewScheduler(time.UTC)
 
-	random := pkg.RandomNumber(60, 120)
-	_, err := s.Every(30).Second().StartAt(now.Add(time.Second * time.Duration(random))).Do(c.checkAndRun)
+	random := pkg.RandomNumber(cronInitDelayFromInSeconds, cronInitDelayToInSeconds)
+	_, err := s.Every(constant.CronCheckIntervalInSeconds).
+		Second().
+		StartAt(now.Add(time.Second * time.Duration(random))).
+		Do(c.checkAndRun)
 	if err != nil {
 		return err
 	}
@@ -82,7 +91,8 @@ func (c *Cron) checkAndRun() {
 	ctx := context.Background()
 	lgr.Print("Running cron check")
 
-	jobsToRun, err := c.jobDomain.ListJobsToRun(ctx, -20, 20)
+	// Cron check runs every 30s. We look for jobs that need to be run from last 20s to next 20s from current time
+	jobsToRun, err := c.jobDomain.ListJobsToRun(ctx, -checkCronFromAndToInSeconds, checkCronFromAndToInSeconds)
 	if err != nil {
 		sentry.CaptureException(err)
 		return

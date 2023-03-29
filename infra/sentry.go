@@ -17,7 +17,7 @@ func SetupSentry() {
 		Dsn:              config.App.SentryDSN,
 		Environment:      config.App.Release,
 		Release:          config.App.Version,
-		TracesSampleRate: 0.2,
+		TracesSampleRate: constant.SentryTraceSampleRate,
 		AttachStacktrace: config.IsProd,
 		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
 			if hint.Context != nil {

@@ -160,9 +160,9 @@ linters:
     
     # Is a replacement for `golint`, similar to `revive`.
     - stylecheck
-
-    # Check struct tags.
-    - tagliatelle
+    
+    # Align struct tags
+    - tagalign
     
     # Remove unnecessary type conversions, make code cleaner
     - unconvert
@@ -322,6 +322,9 @@ linters:
      # Lint your Prometheus metrics name.
      # Don't use it
     - promlinter
+    
+    # Check struct tags. Enable it when https://github.com/ldez/tagliatelle/issues/2 is fixed
+    - tagliatelle
     
     # Often non-`_test` package is ok.
     - testpackage

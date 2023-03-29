@@ -62,7 +62,7 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	quitCh := initQuitCh()
 	sig := <-quitCh // This blocks the main thread until an interrupt is received
 	lgr.Print(tracingID, "received", fmt.Sprintf("(%s)", sig.String()), "| gracefully shutting down...")
-	if err := app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second); err != nil {
+	if err := app.ShutdownWithTimeout(constant.ServerShutdownTimeoutInSeconds * time.Second); err != nil {
 		sentry.CaptureException(err)
 	}
 	cleanup(ctx, shutdown)
