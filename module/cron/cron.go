@@ -95,7 +95,7 @@ func (c *Cron) checkAndRun() {
 	}
 }
 
-func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, task T, job model.Job) {
+func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, tsk T, job model.Job) {
 	now := times.Now()
 	nextRunAt := now
 	if *job.Recurring {
@@ -107,7 +107,7 @@ func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, task T, j
 		if err != nil {
 			return err
 		}
-		task.Do(tx)
+		tsk.Do(tx)
 		if *job.Recurring {
 			_, err = jobDomain.UpdateStatus(ctx, tx, job.ID, resource.JobStatusScheduled)
 			if err != nil {

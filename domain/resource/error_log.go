@@ -39,6 +39,7 @@ func (e ErrorLogType) Valid() bool {
 
 func (e ErrorLogType) String() string {
 	return [...]string{
-		"Timeout", "Addr", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Response Malformed", "Unknown",
+		"Timeout", "Addr", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Response Malformed",
+		"Unknown",
 	}[e-1]
 }

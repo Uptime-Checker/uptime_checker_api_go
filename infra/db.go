@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	// pq is the postgres driver needed to be imported
 	_ "github.com/lib/pq"
 
 	"github.com/go-jet/jet/v2/postgres"

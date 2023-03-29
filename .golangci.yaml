@@ -404,6 +404,8 @@ linters-settings:
         disabled: true
       - name: dot-imports
         disabled: true
+      - name: flag-parameter
+        disabled: true
       - name: function-length
         disabled: true
       - name: function-result-limit
