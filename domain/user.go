@@ -112,7 +112,6 @@ func (u *UserDomain) CreateUser(
 	user *model.User,
 	provider resource.UserLoginProvider,
 ) (*model.User, error) {
-
 	if !provider.Valid() {
 		return nil, constant.ErrInvalidProvider
 	}
@@ -136,7 +135,6 @@ func (u *UserDomain) UpdateProvider(
 	providerUID string,
 	provider resource.UserLoginProvider,
 ) (*model.User, error) {
-
 	if !provider.Valid() {
 		return nil, constant.ErrInvalidProvider
 	}
@@ -162,7 +160,6 @@ func (u *UserDomain) UpdateName(
 	id int64,
 	name string,
 ) (*model.User, error) {
-
 	now := times.Now()
 	user := &model.User{
 		Name:      &name,
@@ -181,7 +178,6 @@ func (u *UserDomain) UpdateOrganizationAndRole(
 	tx *sql.Tx,
 	id, roleID, organizationID int64,
 ) (*model.User, error) {
-
 	now := times.Now()
 	user := &model.User{
 		RoleID:         &roleID,
@@ -206,7 +202,6 @@ func (u *UserDomain) CreateUserContact(
 	mode resource.UserContactMode,
 	verified bool,
 ) (*model.UserContact, error) {
-
 	if !mode.Valid() {
 		return nil, constant.ErrInvalidUserContactMode
 	}

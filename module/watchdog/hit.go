@@ -165,7 +165,7 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	}
 	stringBody := string(respBody)
 	hitResponse.Body = &stringBody
-	if hitResponse.ContentType == "" {
+	if pkg.IsEmpty(hitResponse.ContentType) {
 		hitResponse.ContentType = http.DetectContentType(respBody)
 	}
 

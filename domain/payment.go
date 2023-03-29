@@ -40,7 +40,6 @@ func (p *PaymentDomain) CreateSubscription(
 	expiresAt time.Time,
 	planID, productID, organizationID int64,
 ) (*model.Subscription, error) {
-
 	if !status.Valid() {
 		return nil, constant.ErrInvalidSubscriptionStatus
 	}

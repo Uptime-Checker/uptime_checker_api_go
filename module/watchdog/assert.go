@@ -9,6 +9,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 const (
@@ -106,9 +107,9 @@ func assertTextBody(assertionComparison resource.AssertionComparison, value stri
 	case resource.AssertionComparisonNotContain:
 		return !strings.Contains(responseBody, value)
 	case resource.AssertionComparisonEmpty:
-		return value == ""
+		return pkg.IsEmpty(value)
 	case resource.AssertionComparisonNotEmpty:
-		return value != ""
+		return !pkg.IsEmpty(value)
 	}
 	return false
 }
@@ -132,9 +133,9 @@ func assertHeader(
 	case resource.AssertionComparisonNotContain:
 		return !strings.Contains(headerValue, value)
 	case resource.AssertionComparisonEmpty:
-		return value == ""
+		return pkg.IsEmpty(value)
 	case resource.AssertionComparisonNotEmpty:
-		return value != ""
+		return !pkg.IsEmpty(value)
 	}
 	return false
 }

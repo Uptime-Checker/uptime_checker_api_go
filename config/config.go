@@ -31,9 +31,11 @@ type config struct {
 	AxiomDataset        string `mapstructure:"AXIOM_DATASET"`
 }
 
-var App config
-var IsProd bool
-var JWTKey = []byte(App.JWTKey)
+var (
+	App    config
+	IsProd bool
+	JWTKey = []byte(App.JWTKey)
+)
 
 func LoadConfig(path string) error {
 	viper.AutomaticEnv()

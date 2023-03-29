@@ -62,7 +62,9 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	quitCh := initQuitCh()
 	sig := <-quitCh // This blocks the main thread until an interrupt is received
 	lgr.Print(tracingID, "received", fmt.Sprintf("(%s)", sig.String()), "| gracefully shutting down...")
-	_ = app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second)
+	if err := app.ShutdownWithTimeout(constant.ServerShutdownTimeout * time.Second); err != nil {
+		sentry.CaptureException(err)
+	}
 	cleanup(ctx, shutdown)
 	lgr.Print(tracingID, "app was successfully shutdown")
 }
@@ -93,16 +95,13 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 
 	// Sync the logs
 	lgr.Sync()
-
 }
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 	app.Use(cors.New())
 	app.Use(requestid.New(requestid.Config{
 		ContextKey: constant.TracingKey, // => Setting Tracing ID to the context
-		Generator: func() string {
-			return pkg.GetUniqueString()
-		},
+		Generator:  pkg.GetUniqueString,
 	}))
 	app.Use(fibersentry.New(fibersentry.Config{
 		Repanic: true,

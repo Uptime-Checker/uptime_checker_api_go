@@ -15,8 +15,8 @@ run:
 
   # In most cases this can be empty but there is a popular pattern
   # to keep integration tests under this tag. Such tests often require
-  # additional setups like Postgres, Redis etc and are run separately.
-  # (to be honest I don't find this useful but I have such tags)
+  # additional setups like Postgres, Redis etc. and are run separately.
+  # (to be honest I don't find this useful, but I have such tags)
   build-tags:
     - integration 
 

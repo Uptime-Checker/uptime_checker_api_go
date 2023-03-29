@@ -116,7 +116,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	}
 
 	lgr.Print(tracingID, 1, "monitor count", count, "org", user.Organization.Slug)
-	if err := gandalf.CanCreateMonitor(user, int32(count), int32(body.Interval)); err != nil {
+	if err := gandalf.CanCreateMonitor(user, int32(count), body.Interval); err != nil {
 		return resp.SendError(c, fiber.StatusBadRequest, err)
 	}
 

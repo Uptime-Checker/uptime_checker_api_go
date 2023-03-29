@@ -25,7 +25,6 @@ func (o *OrganizationDomain) CreateOrganization(
 	tx *sql.Tx,
 	name, slug string,
 ) (*model.Organization, error) {
-
 	org := &model.Organization{
 		Name: name,
 		Slug: slug,
@@ -41,7 +40,6 @@ func (o *OrganizationDomain) CreateOrganizationUser(
 	tx *sql.Tx,
 	organizationID, userID, roleID int64,
 ) (*model.OrganizationUser, error) {
-
 	orgUser := &model.OrganizationUser{
 		RoleID:         &roleID,
 		UserID:         &userID,

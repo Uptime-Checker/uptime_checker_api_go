@@ -2,7 +2,7 @@ package resource
 
 import "net/http"
 
-func GetMonitorHttpMethod(method string) int32 {
+func GetMonitorHTTPMethod(method string) int32 {
 	switch method {
 	case http.MethodGet:
 		return 1
@@ -119,6 +119,7 @@ func (m MonitorBodyFormat) Valid() bool {
 }
 
 func (m MonitorBodyFormat) String() string {
-	return [...]string{"", "application/xml", "application/json", "text/html",
-		"application/x-www-form-urlencoded", ""}[m-1]
+	return [...]string{
+		"", "application/xml", "application/json", "text/html", "application/x-www-form-urlencoded", "",
+	}[m-1]
 }

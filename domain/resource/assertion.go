@@ -63,7 +63,7 @@ const (
 	AssertionSourceTextBody
 	AssertionSourceHeaders
 	AssertionSourceResponseTime
-	AssertionSourceJsonBody
+	AssertionSourceJSONBody
 )
 
 // Valid checks if the AssertionSource is valid
@@ -73,7 +73,7 @@ func (a AssertionSource) Valid() bool {
 		AssertionSourceTextBody,
 		AssertionSourceHeaders,
 		AssertionSourceResponseTime,
-		AssertionSourceJsonBody,
+		AssertionSourceJSONBody,
 	}
 	for _, p := range assertionSources {
 		if p == a {
