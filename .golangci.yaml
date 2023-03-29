@@ -161,9 +161,6 @@ linters:
     # Is a replacement for `golint`, similar to `revive`.
     - stylecheck
     
-    # Align struct tags
-    - tagalign
-    
     # Remove unnecessary type conversions, make code cleaner
     - unconvert
 
@@ -424,6 +421,12 @@ linters-settings:
       - name: unused-receiver
         disabled: true
 
+  staticcheck:
+    dot_import_whitelist: [
+      "github.com/go-jet/jet/v2/postgres",
+      "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
+    ]
+
   stylecheck:
     dot-import-whitelist:
       - github.com/go-jet/jet/v2/postgres
@@ -486,3 +489,8 @@ issues:
   # Even with a recent GPT-4 release I still believe that
   # I know better how to do my job and fix the suggestions.
   fix: false
+
+  exclude-rules:
+    - path: '(.+)routes\.go'
+      linters:
+        - contextcheck
