@@ -92,7 +92,7 @@ func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[
 
 	if headers != nil && len(*headers) > 0 {
 		for key, value := range *headers {
-			if strings.ToLower(key) == contentTypeHeaderKey {
+			if strings.EqualFold(key, contentTypeHeaderKey) {
 				contentType = value
 			}
 		}
@@ -160,18 +160,13 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	}(resp.Body)
 
 	if err != nil {
-		hitErr = &HitErr{
-			Type: resource.ErrorLogTypeResponseMalformed,
-			Text: constant.ErrResponseMalformed,
-		}
+		hitErr = &HitErr{Type: resource.ErrorLogTypeResponseMalformed, Text: constant.ErrResponseMalformed}
 		return hitResponse, hitErr
-	} else {
-		stringBody := string(respBody)
-		hitResponse.Body = &stringBody
-
-		if hitResponse.ContentType == "" {
-			hitResponse.ContentType = http.DetectContentType(respBody)
-		}
+	}
+	stringBody := string(respBody)
+	hitResponse.Body = &stringBody
+	if hitResponse.ContentType == "" {
+		hitResponse.ContentType = http.DetectContentType(respBody)
 	}
 
 	return hitResponse, hitErr

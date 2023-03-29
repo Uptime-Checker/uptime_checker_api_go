@@ -19,13 +19,14 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 	assertionSource := resource.AssertionSource(source)
 	assertionComparison := resource.AssertionComparison(comparison)
 
-	if assertionSource == resource.AssertionSourceStatusCode {
+	switch assertionSource {
+	case resource.AssertionSourceStatusCode:
 		return assertStatusCode(assertionComparison, value, resp.StatusCode)
-	} else if assertionSource == resource.AssertionSourceResponseTime {
+	case resource.AssertionSourceResponseTime:
 		return assertResponseTime(assertionComparison, value, resp.Duration)
-	} else if assertionSource == resource.AssertionSourceTextBody {
+	case resource.AssertionSourceTextBody:
 		return assertTextBody(assertionComparison, value, resp.Body)
-	} else if assertionSource == resource.AssertionSourceHeaders {
+	case resource.AssertionSourceHeaders:
 		return assertHeader(assertionComparison, *property, value, resp.Headers)
 	}
 
@@ -43,13 +44,14 @@ func assertStatusCode(assertionComparison resource.AssertionComparison, value st
 		return false
 	}
 
-	if assertionComparison == resource.AssertionComparisonEqual {
+	switch assertionComparison {
+	case resource.AssertionComparisonEqual:
 		return code == statusCode
-	} else if assertionComparison == resource.AssertionComparisonNotEqual {
+	case resource.AssertionComparisonNotEqual:
 		return code != statusCode
-	} else if assertionComparison == resource.AssertionComparisonGreater {
+	case resource.AssertionComparisonGreater:
 		return code < statusCode
-	} else if assertionComparison == resource.AssertionComparisonLesser {
+	case resource.AssertionComparisonLesser:
 		return code > statusCode
 	}
 	return false
@@ -94,17 +96,18 @@ func assertTextBody(assertionComparison resource.AssertionComparison, value stri
 	}
 	responseBody := *body
 
-	if assertionComparison == resource.AssertionComparisonEqual {
+	switch assertionComparison {
+	case resource.AssertionComparisonEqual:
 		return value == responseBody
-	} else if assertionComparison == resource.AssertionComparisonNotEqual {
+	case resource.AssertionComparisonNotEqual:
 		return value != responseBody
-	} else if assertionComparison == resource.AssertionComparisonContain {
+	case resource.AssertionComparisonContain:
 		return strings.Contains(responseBody, value)
-	} else if assertionComparison == resource.AssertionComparisonNotContain {
+	case resource.AssertionComparisonNotContain:
 		return !strings.Contains(responseBody, value)
-	} else if assertionComparison == resource.AssertionComparisonEmpty {
+	case resource.AssertionComparisonEmpty:
 		return value == ""
-	} else if assertionComparison == resource.AssertionComparisonNotEmpty {
+	case resource.AssertionComparisonNotEmpty:
 		return value != ""
 	}
 	return false
@@ -119,17 +122,18 @@ func assertHeader(
 	if !ok {
 		return false
 	}
-	if assertionComparison == resource.AssertionComparisonEqual {
+	switch assertionComparison {
+	case resource.AssertionComparisonEqual:
 		return value == headerValue
-	} else if assertionComparison == resource.AssertionComparisonNotEqual {
+	case resource.AssertionComparisonNotEqual:
 		return value != headerValue
-	} else if assertionComparison == resource.AssertionComparisonContain {
+	case resource.AssertionComparisonContain:
 		return strings.Contains(headerValue, value)
-	} else if assertionComparison == resource.AssertionComparisonNotContain {
+	case resource.AssertionComparisonNotContain:
 		return !strings.Contains(headerValue, value)
-	} else if assertionComparison == resource.AssertionComparisonEmpty {
+	case resource.AssertionComparisonEmpty:
 		return value == ""
-	} else if assertionComparison == resource.AssertionComparisonNotEmpty {
+	case resource.AssertionComparisonNotEmpty:
 		return value != ""
 	}
 	return false

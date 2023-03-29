@@ -8,6 +8,7 @@ import (
 
 	adapter "github.com/axiomhq/axiom-go/adapters/zap"
 	"github.com/axiomhq/axiom-go/axiom"
+	"github.com/getsentry/sentry-go"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 )
@@ -67,5 +68,7 @@ func Errorf(format string, v ...interface{}) {
 }
 
 func Sync() {
-	_ = zapper.Sync()
+	if err := zapper.Sync(); err != nil {
+		sentry.CaptureException(err)
+	}
 }
