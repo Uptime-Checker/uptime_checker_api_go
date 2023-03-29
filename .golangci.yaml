@@ -386,11 +386,43 @@ linters-settings:
     # No naked returns, ever.
     max-func-lines: 1 # Default: 30
 
-  staticcheck:
-    dot_import_whitelist: [
-      "github.com/go-jet/jet/v2/postgres",
-      "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
-    ]
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: add-constant
+        arguments:
+          - maxLitCount: "3"
+            allowInts: "0,1,2,3,4,5,6,7,8,9"
+            ignoreFuncs: "lgr\\.*"
+      - name: argument-limit
+        disabled: true
+      - name: banned-characters
+        arguments: ["Ω", "Σ", "σ", "7"]
+      - name: cognitive-complexity
+        disabled: true
+      - name: cyclomatic
+        disabled: true
+      - name: dot-imports
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: function-result-limit
+        arguments: [3]
+      - name: file-header
+        disabled: true
+      - name: line-length-limit
+        arguments: [120]
+      - name: max-public-structs
+        disabled: true
+      - name: nested-structs
+        disabled: true
+      - name: unused-receiver
+        disabled: true
+
+  stylecheck:
+    dot-import-whitelist:
+      - github.com/go-jet/jet/v2/postgres
+      - github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table
 
   tagliatelle:
     case:
