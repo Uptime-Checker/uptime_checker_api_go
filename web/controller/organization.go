@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/Joker666/future"
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
@@ -83,14 +84,25 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		}
 		lgr.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
-		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
+		updateOrganizationAndRoleAsync := future.New(func() (*model.User, error) {
+			return o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
+		})
+
+		subscriptionAsync := future.New(func() (*model.Subscription, error) {
+			return o.paymentService.CreateSubscription(ctx, tx, organization.ID, *plan)
+		})
+
+		updatedUser, err := updateOrganizationAndRoleAsync.Await()
 		if err != nil {
 			return err
 		}
-		lgr.Print(tracingID, 4, "updated user role", updatedUser.ID, "organization",
-			organization.Slug, "role", role.Name)
+		lgr.Print(tracingID, 4, "updated user role", updatedUser.ID, "organization", organization.Slug,
+			"role", role.Name)
 
-		subscription, err := o.paymentService.CreateSubscription(ctx, tx, organization.ID, *plan)
+		subscription, err := subscriptionAsync.Await()
+		if err != nil {
+			return err
+		}
 		lgr.Print(tracingID, 5, "subscription started", subscription.ID, "plan", plan.Name,
 			"product", plan.Product.Name)
 		return err

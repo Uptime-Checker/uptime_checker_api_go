@@ -3,6 +3,7 @@ module github.com/Uptime-Checker/uptime_checker_api_go
 go 1.20
 
 require (
+	github.com/Joker666/future v0.0.0-20230329201813-8ca3f69717a2
 	github.com/axiomhq/axiom-go v0.15.0
 	github.com/coocood/freecache v1.2.3
 	github.com/fatih/color v1.15.0
