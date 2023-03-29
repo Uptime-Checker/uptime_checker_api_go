@@ -15,10 +15,7 @@ func GetTracingID(ctx context.Context) string {
 	}
 	val := ctx.Value(constant.TracingKey)
 	if val == nil {
-		val = ctx.Value(constant.TracingKey.String())
-		if val == nil {
-			return ""
-		}
+		return ""
 	}
 	s, _ := val.(string)
 	return s

@@ -7,14 +7,14 @@ require (
 	github.com/coocood/freecache v1.2.3
 	github.com/fatih/color v1.15.0
 	github.com/getsentry/sentry-go v0.19.0
-	github.com/go-co-op/gocron v1.18.1
+	github.com/go-co-op/gocron v1.19.0
 	github.com/go-jet/jet/v2 v2.9.0
-	github.com/go-playground/validator/v10 v10.11.2
+	github.com/go-playground/validator/v10 v10.12.0
 	github.com/gofiber/contrib/fibernewrelic v1.1.1
 	github.com/gofiber/contrib/fibersentry v1.0.2
 	github.com/gofiber/fiber/v2 v2.43.0
 	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
-	github.com/imroc/req/v3 v3.33.1
+	github.com/imroc/req/v3 v3.33.2
 	github.com/jinzhu/copier v0.3.5
 	github.com/lib/pq v1.10.7
 	github.com/mitchellh/mapstructure v1.5.0
@@ -49,7 +49,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
-	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect

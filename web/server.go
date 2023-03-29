@@ -99,7 +99,7 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 	app.Use(cors.New())
 	app.Use(requestid.New(requestid.Config{
-		ContextKey: string(constant.TracingKey), // => Setting Tracing ID to the context
+		ContextKey: constant.TracingKey, // => Setting Tracing ID to the context
 		Generator: func() string {
 			return pkg.GetUniqueString()
 		},
