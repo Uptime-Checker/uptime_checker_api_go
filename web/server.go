@@ -91,10 +91,15 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 	shutdown()
 
 	// Close the DB connection
-	_ = infra.DB.Close()
+	if err := infra.DB.Close(); err != nil {
+		sentry.CaptureException(err)
+	}
 
 	// Sync the logs
 	lgr.Sync()
+
+	// Sync sentry
+	infra.SyncSentry()
 }
 
 func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {

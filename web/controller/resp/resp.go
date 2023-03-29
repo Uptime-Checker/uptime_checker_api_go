@@ -5,10 +5,10 @@ import (
 )
 
 type JSONResponse struct {
-	Data interface{} `json:"data,omitempty"`
+	Data any `json:"data,omitempty"`
 }
 
-func ServeData(c *fiber.Ctx, status int, data interface{}) error {
+func ServeData(c *fiber.Ctx, status int, data any) error {
 	re := &JSONResponse{
 		Data: data,
 	}

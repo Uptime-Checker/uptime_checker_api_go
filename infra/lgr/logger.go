@@ -47,24 +47,24 @@ func SetupLogger() {
 	zapper = newZapLogger()
 }
 
-func Print(v ...interface{}) {
-	zapper.Info(v)
+func Print(v ...any) {
+	zapper.Info(v...)
 }
 
-func Warn(v ...interface{}) {
-	zapper.Warn(v)
+func Warn(v ...any) {
+	zapper.Warn(v...)
 }
 
-func Error(v ...interface{}) {
-	zapper.Error(v)
+func Error(v ...any) {
+	zapper.Error(v...)
 }
 
-func Printf(format string, v ...interface{}) {
-	zapper.Infof(format, v)
+func Printf(format string, v ...any) {
+	zapper.Infof(format, v...)
 }
 
-func Errorf(format string, v ...interface{}) {
-	zapper.Errorf(format, v)
+func Errorf(format string, v ...any) {
+	zapper.Errorf(format, v...)
 }
 
 func Sync() {

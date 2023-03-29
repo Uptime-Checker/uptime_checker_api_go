@@ -11,10 +11,10 @@ func CanCreateMonitor(user *pkg.UserWithRoleAndSubscription, count, interval int
 		return err
 	}
 	if err := HandleFeatureMax(user, FeatureAPICheckCount, count); err != nil {
-		return fmt.Errorf("%v - %s", err, FeatureAPICheckCount)
+		return fmt.Errorf("%w - %s", err, FeatureAPICheckCount)
 	}
 	if err := HandleFeatureMin(user, FeatureAPICheckInterval, interval); err != nil {
-		return fmt.Errorf("%v - %s", err, FeatureAPICheckInterval)
+		return fmt.Errorf("%w - %s", err, FeatureAPICheckInterval)
 	}
 	return nil
 }

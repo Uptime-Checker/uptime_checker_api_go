@@ -76,7 +76,7 @@ func RollbackTransaction(ctx context.Context, transaction *sql.Tx) error {
 }
 
 // Transaction creates a transaction and calls f.
-// When it is finished, it cleans up the transaction. If an error occured it
+// When it is finished, it cleans up the transaction. If an error occurred it
 // attempts to rollback, if not it commits.
 func Transaction(ctx context.Context, f func(context.Context, *sql.Tx) error) error {
 	tx, err := StartTransaction(ctx)

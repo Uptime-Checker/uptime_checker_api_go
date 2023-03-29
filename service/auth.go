@@ -61,7 +61,7 @@ func (a *AuthService) GenerateUserToken(user *model.User) (string, error) {
 
 // GetUserByToken returns user by token
 func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*pkg.UserWithRoleAndSubscription, error) {
-	token, err := jwt.Parse(tok, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tok, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, constant.ErrInvalidUserToken
 		}

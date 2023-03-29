@@ -23,7 +23,7 @@ func SetupSentry() {
 			if hint.Context != nil {
 				if c, ok := hint.Context.Value(sentry.RequestContextKey).(*fiber.Ctx); ok {
 					tracingID := pkg.GetTracingID(c.Context())
-					event.Extra = map[string]interface{}{string(constant.TracingKey): tracingID}
+					event.Extra = map[string]any{string(constant.TracingKey): tracingID}
 				}
 			}
 			return event
@@ -36,7 +36,10 @@ func SetupSentry() {
 	if err != nil {
 		lgr.Errorf("sentry.Init: %s", err)
 	}
+}
+
+func SyncSentry() {
 	// Flush buffered events before the program terminates.
 	// Set the timeout to the maximum duration the program can afford to wait.
-	defer sentry.Flush(1 * time.Second)
+	sentry.Flush(1 * time.Second)
 }

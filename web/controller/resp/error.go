@@ -43,10 +43,10 @@ var (
 var Validate = validator.New()
 
 type ValidationError struct {
-	Error  string      `json:"error"`
-	Field  string      `json:"field"`
-	Reason string      `json:"reason"`
-	Value  interface{} `json:"value"`
+	Error  string `json:"error"`
+	Field  string `json:"field"`
+	Reason string `json:"reason"`
+	Value  any    `json:"value"`
 }
 
 func processValidationError(err error) ValidationError {
@@ -63,7 +63,7 @@ func processValidationError(err error) ValidationError {
 	return validationErr
 }
 
-func processError(message string, err error) map[string]interface{} {
+func processError(message string, err error) map[string]any {
 	return fiber.Map{"message": message, "error": err.Error()}
 }
 
@@ -75,7 +75,7 @@ func ServeError(c *fiber.Ctx, status int, message string, err error) error {
 	return c.Status(status).JSON(processError(message, err))
 }
 
-func ServeDryRunError(c *fiber.Ctx, status int, data interface{}, err error) error {
+func ServeDryRunError(c *fiber.Ctx, status int, data any, err error) error {
 	return c.Status(status).JSON(fiber.Map{"error": err.Error(), "data": data})
 }
 

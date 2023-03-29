@@ -1,7 +1,7 @@
 package gandalf
 
 import (
-	. "github.com/samber/lo"
+	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -45,7 +45,7 @@ func handleFeature(user *pkg.UserWithRoleAndSubscription, feature FeatureType) (
 		return nil, constant.ErrSubscriptionExpired
 	}
 
-	subscriptionFeature, found := Find(user.Subscription.Features, func(item *pkg.SubscriptionFeature) bool {
+	subscriptionFeature, found := lo.Find(user.Subscription.Features, func(item *pkg.SubscriptionFeature) bool {
 		return item.Feature.Name == string(feature)
 	})
 	if !found {

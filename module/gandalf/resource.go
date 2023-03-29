@@ -1,7 +1,7 @@
 package gandalf
 
 import (
-	. "github.com/samber/lo"
+	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -45,7 +45,7 @@ func CanClaimDestroyOrganization(user *pkg.UserWithRoleAndSubscription) error {
 }
 
 func handleClaim(user *pkg.UserWithRoleAndSubscription, requiredClaim ClaimType) error {
-	_, found := Find(user.Role.Claims, func(item *model.RoleClaim) bool {
+	_, found := lo.Find(user.Role.Claims, func(item *model.RoleClaim) bool {
 		return item.Claim == string(requiredClaim)
 	})
 	if !found {
