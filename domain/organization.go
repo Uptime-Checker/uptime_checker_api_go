@@ -20,7 +20,7 @@ func NewOrganizationDomain() *OrganizationDomain {
 	return &OrganizationDomain{}
 }
 
-func (o *OrganizationDomain) CreateOrganization(
+func (o *OrganizationDomain) Create(
 	ctx context.Context,
 	tx *sql.Tx,
 	name, slug string,

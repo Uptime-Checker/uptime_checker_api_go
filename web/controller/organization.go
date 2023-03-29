@@ -78,36 +78,54 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 
 	var organization *model.Organization
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-		organization, err = o.organizationService.Create(ctx, tx, body.Name, body.Slug, user.User.ID, role.ID)
+		organization, err = o.organizationDomain.Create(ctx, tx, body.Name, body.Slug)
 		if err != nil {
 			return err
 		}
 		lgr.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
+		organizationUserAsync := future.New(func() (*model.OrganizationUser, error) {
+			return o.organizationDomain.CreateOrganizationUser(ctx, tx, organization.ID, user.ID, *user.RoleID)
+		})
 		updateOrganizationAndRoleAsync := future.New(func() (*model.User, error) {
 			return o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
 		})
-
 		subscriptionAsync := future.New(func() (*model.Subscription, error) {
 			return o.paymentService.CreateSubscription(ctx, tx, organization.ID, *plan)
 		})
+		alarmPolicyAsync := future.New(func() (*model.AlarmPolicy, error) {
+			return o.organizationService.CreateOrganizationAlarmPolicy(ctx, tx, organization.ID)
+		})
+
+		organizationUser, err := organizationUserAsync.Await()
+		if err != nil {
+			return err
+		}
+		lgr.Print(tracingID, 4, "organization user created", organizationUser.ID)
 
 		updatedUser, err := updateOrganizationAndRoleAsync.Await()
 		if err != nil {
 			return err
 		}
-		lgr.Print(tracingID, 4, "updated user role", updatedUser.ID, "organization", organization.Slug,
+		lgr.Print(tracingID, 5, "updated user role", updatedUser.ID, "organization", organization.Slug,
 			"role", role.Name)
 
 		subscription, err := subscriptionAsync.Await()
 		if err != nil {
 			return err
 		}
-		lgr.Print(tracingID, 5, "subscription started", subscription.ID, "plan", plan.Name,
+		lgr.Print(tracingID, 6, "subscription started", subscription.ID, "plan", plan.Name,
 			"product", plan.Product.Name)
-		return err
+
+		alarmPolicy, err := alarmPolicyAsync.Await()
+		if err != nil {
+			return err
+		}
+		lgr.Print(tracingID, 7, "organization alarm policy created", alarmPolicy.Reason, alarmPolicy.Threshold)
+
+		return nil
 	}); err != nil {
-		lgr.Error(tracingID, 6, "failed to create organization", err.Error())
+		lgr.Error(tracingID, 8, "failed to create organization", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateOrganization, err)
 	}
 

@@ -1,16 +1,17 @@
 package constant
 
 const (
-	GuestUserRateLimitInMinutes       = 5
-	GuestUserCodeExpiryInMinutes      = 10
-	BearerTokenExpirationInDays       = 180
-	FreeSubscriptionDurationInDays    = 120
-	TrialSubscriptionDurationInDays   = 14
-	MaxMonitorBodySizeInBytes         = 1024
-	MinMonitorIntervalInSeconds       = 10
-	MaxMonitorIntervalInSeconds       = 86_400
-	MinAlarmReminderIntervalInMinutes = 5
-	MaxMonitorTimeoutInSeconds        = 30
+	GuestUserRateLimitInMinutes            = 5
+	GuestUserCodeExpiryInMinutes           = 10
+	BearerTokenExpirationInDays            = 180
+	FreeSubscriptionDurationInDays         = 120
+	TrialSubscriptionDurationInDays        = 14
+	MaxMonitorBodySizeInBytes              = 1024
+	MinMonitorIntervalInSeconds            = 10
+	MaxMonitorIntervalInSeconds            = 86_400
+	MinAlarmReminderIntervalInMinutes      = 5
+	MaxMonitorTimeoutInSeconds             = 30
+	DefaultOrganizationAlarmErrorThreshold = 2
 )
 
 // DateCompare type

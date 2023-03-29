@@ -16,7 +16,7 @@ import (
 
 type AlarmPolicyDomain struct{}
 
-func NewAlarmPolicy() *AlarmPolicyDomain {
+func NewAlarmPolicyDomain() *AlarmPolicyDomain {
 	return &AlarmPolicyDomain{}
 }
 
