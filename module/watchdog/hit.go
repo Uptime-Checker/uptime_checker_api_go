@@ -54,7 +54,7 @@ func (w *WatchDog) Hit(
 	tracingID := pkg.GetTracingID(ctx)
 
 	agent := fmt.Sprintf("%s_agent/%s (%s)", appName, version, website)
-	client := req.C().SetTimeout(time.Duration(timeout) * time.Second).SetUserAgent(agent)
+	client := req.C().SetTimeout(time.Duration(timeout) * time.Second).SetUserAgent(agent).DisableAutoReadResponse()
 	if followRedirect {
 		client.SetRedirectPolicy(req.MaxRedirectPolicy(maxRedirect))
 	}
