@@ -110,7 +110,11 @@ func assertTextBody(assertionComparison resource.AssertionComparison, value stri
 	return false
 }
 
-func assertHeader(assertionComparison resource.AssertionComparison, property, value string, headers map[string]string) bool {
+func assertHeader(
+	assertionComparison resource.AssertionComparison,
+	property, value string,
+	headers map[string]string,
+) bool {
 	headerValue, ok := headers[property]
 	if !ok {
 		return false
