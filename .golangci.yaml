@@ -113,11 +113,6 @@ linters:
     # Last week I caught a bug with it.
     - ineffassign
     
-    # Even with deprecation notice I find it useful.
-    # There are situations when instead of io.ReaderCloser 
-    # I can use io.Reader. A small but good improvement.
-    - interfacer
-    
     # Fix all the misspells, amazing thing.
     - misspell
 
@@ -375,12 +370,17 @@ linters-settings:
       # These 3 will detect many cases, but they do sense
       # if it's performance oriented code
       - hugeParam
+      - ptrToRefParam
       - rangeExprCopy
       - rangeValCopy
 
   govet:
     disable:
       - fieldalignment # I'm ok to waste some bytes
+
+  gosec:
+    excludes:
+      - G404
 
   nakedret:
     # No naked returns, ever.
@@ -392,6 +392,7 @@ linters-settings:
       - name: add-constant
         arguments:
           - maxLitCount: "3"
+            allowStrs: '"","/"'
             allowInts: "0,1,2,3,4,5,6,7,8,9"
             ignoreFuncs: "lgr\\.*"
       - name: argument-limit

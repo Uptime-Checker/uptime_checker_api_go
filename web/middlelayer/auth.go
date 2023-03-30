@@ -38,6 +38,9 @@ func GetUser(c *fiber.Ctx) *pkg.UserWithRoleAndSubscription {
 	if v == nil {
 		panic("middleware: GetUser called without calling auth middleware prior")
 	}
-	u, _ := v.(*pkg.UserWithRoleAndSubscription)
+	u, ok := v.(*pkg.UserWithRoleAndSubscription)
+	if !ok {
+		return nil
+	}
 	return u
 }

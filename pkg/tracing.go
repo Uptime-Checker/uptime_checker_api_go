@@ -17,7 +17,10 @@ func GetTracingID(ctx context.Context) string {
 	if val == nil {
 		return ""
 	}
-	s, _ := val.(string)
+	s, ok := val.(string)
+	if !ok {
+		return ""
+	}
 	return s
 }
 
