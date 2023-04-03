@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -45,7 +46,7 @@ type HitResponse struct {
 
 func (w *WatchDog) Hit(
 	ctx context.Context,
-	url, method string, body, username, password *string,
+	uri, method string, body, username, password *string,
 	bodyFormat *resource.MonitorBodyFormat,
 	headers *map[string]string,
 	timeout int32,
@@ -75,8 +76,8 @@ func (w *WatchDog) Hit(
 		request.SetBody(*body)
 	}
 
-	lgr.Print(tracingID, "hitting =>", method, url, "timeout", fmt.Sprintf("%ds", timeout))
-	resp, err := request.Send(method, url)
+	lgr.Print(tracingID, "hitting =>", method, uri, "timeout", fmt.Sprintf("%ds", timeout))
+	resp, err := request.Send(method, uri)
 	if err != nil {
 		return nil, w.getError(err)
 	}
@@ -102,33 +103,46 @@ func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[
 }
 
 func (w *WatchDog) getError(err error) *HitErr {
-	clientError := errors.Unwrap(err)
-
-	errorText := clientError.Error()
+	errorText := err.Error()
 	errorLogType := resource.ErrorLogTypeUnknown
 
-	if err, ok := clientError.(net.Error); ok && err.Timeout() {
+	var netError net.Error
+	var urlError *url.Error
+	var addrError *net.AddrError
+	var dnsError *net.DNSError
+	var invalidAddrError *net.InvalidAddrError
+	var parseError *net.ParseError
+	var unknownNetworkError *net.UnknownNetworkError
+	var syscallError *os.SyscallError
+
+	if errors.As(err, &netError) && netError.Timeout() {
 		errorText = constant.ErrRemoteServerMaxTimeout
 		errorLogType = resource.ErrorLogTypeTimeout
-	} else if err != nil {
-		// This was an error, but not a timeout
-		serverError := errors.Unwrap(clientError)
-		if serverError != nil {
-			errorText = serverError.Error()
-
-			if _, ok := serverError.(*net.AddrError); ok {
-				errorLogType = resource.ErrorLogTypeAddr
-			} else if _, ok := serverError.(*net.DNSError); ok {
-				errorLogType = resource.ErrorLogTypeDNS
-			} else if _, ok := serverError.(*net.InvalidAddrError); ok {
-				errorLogType = resource.ErrorLogTypeInvalidAddr
-			} else if _, ok := serverError.(*net.ParseError); ok {
-				errorLogType = resource.ErrorLogTypeParse
-			} else if _, ok := serverError.(*net.UnknownNetworkError); ok {
-				errorLogType = resource.ErrorLogTypeUnknownNetwork
-			} else if _, ok := serverError.(*os.SyscallError); ok {
-				errorLogType = resource.ErrorLogTypeSyscall
+	} else {
+		clientError := errors.Unwrap(err)
+		if clientError != nil {
+			errorText = clientError.Error()
+			serverError := errors.Unwrap(clientError)
+			if serverError != nil {
+				errorText = serverError.Error()
 			}
+		}
+
+		switch {
+		case errors.As(err, &addrError):
+			errorLogType = resource.ErrorLogTypeAddr
+		case errors.As(err, &dnsError):
+			errorLogType = resource.ErrorLogTypeDNS
+		case errors.As(err, &invalidAddrError):
+			errorLogType = resource.ErrorLogTypeInvalidAddr
+		case errors.As(err, &parseError):
+			errorLogType = resource.ErrorLogTypeParse
+		case errors.As(err, &unknownNetworkError):
+			errorLogType = resource.ErrorLogTypeUnknownNetwork
+		case errors.As(err, &syscallError):
+			errorLogType = resource.ErrorLogTypeSyscall
+		case errors.As(err, &urlError):
+			errorLogType = resource.ErrorLogTypeURL
 		}
 	}
 

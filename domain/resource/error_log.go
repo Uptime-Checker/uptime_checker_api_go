@@ -7,6 +7,7 @@ type ErrorLogType int
 const (
 	ErrorLogTypeTimeout ErrorLogType = iota + 1
 	ErrorLogTypeAddr
+	ErrorLogTypeURL
 	ErrorLogTypeDNS
 	ErrorLogTypeInvalidAddr
 	ErrorLogTypeParse
@@ -21,6 +22,7 @@ func (e ErrorLogType) Valid() bool {
 	errorLogTypes := []ErrorLogType{
 		ErrorLogTypeTimeout,
 		ErrorLogTypeAddr,
+		ErrorLogTypeURL,
 		ErrorLogTypeDNS,
 		ErrorLogTypeInvalidAddr,
 		ErrorLogTypeParse,
@@ -42,7 +44,7 @@ func (e ErrorLogType) String() string {
 		return "Unknown"
 	}
 	all := [...]string{
-		"Timeout", "Addr", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Response Malformed",
+		"Timeout", "Addr", "URL", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Response Malformed",
 	}
 	index := e - 1
 	return all[index]
