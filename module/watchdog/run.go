@@ -22,11 +22,20 @@ func NewWatchDog(checkDomain *domain.CheckDomain) *WatchDog {
 	return &WatchDog{checkDomain: checkDomain}
 }
 
+// Launch is run by the cron
 func (w *WatchDog) Launch(
 	ctx context.Context,
 	monitor *model.Monitor,
 	region *model.Region,
 	monitorRegion *model.MonitorRegion,
+) {
+}
+
+// Start is run by the controller
+func (w *WatchDog) Start(
+	ctx context.Context,
+	monitor *model.Monitor,
+	region *model.Region,
 ) {
 }
 
