@@ -50,15 +50,19 @@ type ValidationError struct {
 }
 
 func processValidationError(err error) ValidationError {
-	validationErr := ValidationError{}
-	for _, err := range err.(validator.ValidationErrors) {
-		validationErr.Error = ErrMessageValidationFailed
-		validationErr.Field = err.Field()
-		validationErr.Reason = err.Tag()
-		validationErr.Value = err.Value()
+	var validationErr ValidationError
 
-		// Just return one validation error at once
-		break
+	var validatorError validator.ValidationErrors
+	if errors.As(err, &validatorError) {
+		for _, err := range validatorError {
+			validationErr.Error = ErrMessageValidationFailed
+			validationErr.Field = err.Field()
+			validationErr.Reason = err.Tag()
+			validationErr.Value = err.Value()
+
+			// Just return one validation error at once
+			break
+		}
 	}
 	return validationErr
 }
