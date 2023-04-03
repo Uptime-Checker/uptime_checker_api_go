@@ -130,6 +130,8 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
+
+		// insert the assertions
 		return nil
 	}); err != nil {
 		lgr.Error(tracingID, 3, "failed to create monitor", err.Error())
