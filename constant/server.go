@@ -15,6 +15,7 @@ const (
 	ServerShutdownTimeoutInSeconds = 5
 	SentryTraceSampleRate          = 0.2
 	CronCheckIntervalInSeconds     = 30
+	WatchDogCheckIntervalInSeconds = 5
 )
 
 // Environment type

@@ -54,8 +54,9 @@ func (c *Cron) Start(ctx context.Context) error {
 	s = gocron.NewScheduler(time.UTC)
 
 	random := pkg.RandomNumber(cronInitDelayFromInSeconds, cronInitDelayToInSeconds)
-	_, err := s.Every(constant.CronCheckIntervalInSeconds).
-		Second().
+
+	// start croner
+	_, err := s.Every(constant.CronCheckIntervalInSeconds).Second().
 		StartAt(now.Add(time.Second * time.Duration(random))).
 		Do(c.checkAndRun)
 	if err != nil {
@@ -80,6 +81,13 @@ func (c *Cron) Start(ctx context.Context) error {
 		}); err != nil {
 			sentry.CaptureException(err)
 		}
+	}
+
+	// start the watchdog
+	_, err = s.Every(constant.WatchDogCheckIntervalInSeconds).Second().StartAt(now.Add(time.Second * 2)).
+		Do(c.startWatchDog)
+	if err != nil {
+		return err
 	}
 
 	s.StartAsync()
