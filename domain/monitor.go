@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
 
@@ -120,4 +121,23 @@ func (m *MonitorDomain) listRecursively(organizationID int64, limit int) Stateme
 	)
 
 	return stmt
+}
+
+func (m *MonitorDomain) ListMonitorsToRun(ctx context.Context, from, to int) ([]model.Monitor, error) {
+	now := times.Now()
+	prev := now.Add(time.Second * time.Duration(from))
+	later := now.Add(time.Second * time.Duration(to))
+
+	condition := Monitor.NextCheckAt.GT(TimestampT(prev)).
+		AND(Monitor.NextCheckAt.LT(TimestampT(later))).
+		AND(Monitor.LastCheckedAt.LT(TimestampT(prev)))
+
+	condition = condition.OR(Monitor.LastCheckedAt.IS_NULL())
+	condition = condition.AND(Monitor.On.EQ(Bool(true)))
+
+	stmt := SELECT(Monitor.AllColumns).FROM(Monitor).WHERE(condition)
+
+	var monitors []model.Monitor
+	err := stmt.QueryContext(ctx, infra.DB, &monitors)
+	return monitors, err
 }
