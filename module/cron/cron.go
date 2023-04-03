@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	checkCronFromAndToInSeconds = 20
-	cronInitDelayFromInSeconds  = 60
-	cronInitDelayToInSeconds    = 120
+	checkCronFromAndToInSeconds         = 20
+	watchDogCheckCronFromAndToInSeconds = 4
+	cronInitDelayFromInSeconds          = 60
+	cronInitDelayToInSeconds            = 120
 )
 
 var s *gocron.Scheduler
@@ -39,13 +40,18 @@ const (
 )
 
 type Cron struct {
-	jobDomain *domain.JobDomain
+	jobDomain     *domain.JobDomain
+	monitorDomain *domain.MonitorDomain
 
 	syncProductsTask *task.SyncProductsTask
 }
 
-func NewCron(jobDomain *domain.JobDomain, syncProductsTask *task.SyncProductsTask) *Cron {
-	return &Cron{jobDomain: jobDomain, syncProductsTask: syncProductsTask}
+func NewCron(
+	jobDomain *domain.JobDomain,
+	monitorDomain *domain.MonitorDomain,
+	syncProductsTask *task.SyncProductsTask,
+) *Cron {
+	return &Cron{jobDomain: jobDomain, monitorDomain: monitorDomain, syncProductsTask: syncProductsTask}
 }
 
 func (c *Cron) Start(ctx context.Context) error {

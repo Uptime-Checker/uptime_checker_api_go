@@ -54,7 +54,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	syncProductsTask := task.NewSyncProductsTask()
 	runCheckTask := task.NewRunCheckTask()
 
-	cogman := cron.NewCron(jobDomain, syncProductsTask)
+	cogman := cron.NewCron(jobDomain, monitorDomain, syncProductsTask)
 	wheel := worker.NewWorker(runCheckTask)
 
 	//  ========== Age of the routers ==========
