@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	// pq is the postgres driver needed to be imported
-	_ "github.com/lib/pq"
+	// pgx is the postgres driver needed to be imported
+	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/go-jet/jet/v2/postgres"
 
@@ -27,7 +27,7 @@ func ConnectDatabase(ctx context.Context, enableLogging bool) error {
 		config.App.DatabaseSchema)
 	// Get a database handle.
 	var err error
-	DB, err = sql.Open("postgres", connectString)
+	DB, err = sql.Open("pgx", connectString)
 	if err != nil {
 		return err
 	}
@@ -79,6 +79,8 @@ func RollbackTransaction(ctx context.Context, transaction *sql.Tx) error {
 // Transaction creates a transaction and calls f.
 // When it is finished, it cleans up the transaction. If an error occurred it
 // attempts to rollback, if not it commits.
+// Queries inside the transaction cannot run concurrently
+// https://github.com/jackc/pgx/issues/1256
 func Transaction(ctx context.Context, f func(context.Context, *sql.Tx) error) error {
 	tx, err := StartTransaction(ctx)
 	if err != nil {

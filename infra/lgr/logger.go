@@ -48,23 +48,23 @@ func SetupLogger() {
 }
 
 func Print(v ...any) {
-	zapper.Info(v...)
+	zapper.Info(v)
 }
 
 func Warn(v ...any) {
-	zapper.Warn(v...)
+	zapper.Warn(v)
 }
 
 func Error(v ...any) {
-	zapper.Error(v...)
+	zapper.Error(v)
 }
 
 func Printf(format string, v ...any) {
-	zapper.Infof(format, v...)
+	zapper.Infof(format, v)
 }
 
 func Errorf(format string, v ...any) {
-	zapper.Errorf(format, v...)
+	zapper.Errorf(format, v)
 }
 
 func Sync() {

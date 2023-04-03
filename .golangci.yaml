@@ -344,6 +344,14 @@ linters:
     - wsl
 
 linters-settings:
+  asasalint:
+    exclude:
+      - \.Infof
+      - \.Errorf
+      - \.Info
+      - \.Warn
+      - \.Error
+
   errcheck:
     # Report `a := b.(MyStruct)` when `a, ok := ...` should be.
     check-type-assertions: true # Default: false

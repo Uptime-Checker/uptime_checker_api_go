@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Joker666/future"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sourcegraph/conc/pool"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
@@ -64,16 +64,30 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		return resp.ServeValidationError(c, err)
 	}
 
-	plan, err := o.paymentDomain.GetPlanWithProduct(ctx, body.PlanID)
+	var err, planErr, roleErr error
+	var role *model.Role
+	var plan *pkg.PlanWithProduct
+
+	p := pool.New().WithErrors().WithFirstError()
+	p.Go(func() error {
+		plan, planErr = o.paymentDomain.GetPlanWithProduct(ctx, body.PlanID)
+		return err
+	})
+	p.Go(func() error {
+		role, roleErr = o.organizationDomain.GetRoleByType(ctx, resource.RoleTypeSuperAdmin)
+		return err
+	})
+
+	err = p.Wait()
 	if err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrPlanNotFound, err)
+		if planErr != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrPlanNotFound, err)
+		} else if roleErr != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrRoleNotFound, err)
+		}
+		return resp.SendError(c, fiber.StatusBadRequest, err)
 	}
 	lgr.Print(tracingID, 1, "found plan", plan.Name, "product", plan.Product.Name)
-
-	role, err := o.organizationDomain.GetRoleByType(ctx, resource.RoleTypeSuperAdmin)
-	if err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrRoleNotFound, err)
-	}
 	lgr.Print(tracingID, 2, "to assign role", role.Name)
 
 	var organization *model.Organization
@@ -84,40 +98,28 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		}
 		lgr.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
-		organizationUserAsync := future.New(func() (*model.OrganizationUser, error) {
-			return o.organizationDomain.CreateOrganizationUser(ctx, tx, organization.ID, user.ID, *user.RoleID)
-		})
-		updateOrganizationAndRoleAsync := future.New(func() (*model.User, error) {
-			return o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
-		})
-		subscriptionAsync := future.New(func() (*model.Subscription, error) {
-			return o.paymentService.CreateSubscription(ctx, tx, organization.ID, *plan)
-		})
-		alarmPolicyAsync := future.New(func() (*model.AlarmPolicy, error) {
-			return o.organizationService.CreateOrganizationAlarmPolicy(ctx, tx, organization.ID)
-		})
-
-		organizationUser, err := organizationUserAsync.Await()
+		organizationUser, err := o.organizationDomain.CreateOrganizationUser(ctx, tx, organization.ID, user.ID,
+			*user.RoleID)
 		if err != nil {
 			return err
 		}
 		lgr.Print(tracingID, 4, "organization user created", organizationUser.ID)
 
-		updatedUser, err := updateOrganizationAndRoleAsync.Await()
+		updatedUser, err := o.userDomain.UpdateOrganizationAndRole(ctx, tx, user.User.ID, role.ID, organization.ID)
 		if err != nil {
 			return err
 		}
 		lgr.Print(tracingID, 5, "updated user role", updatedUser.ID, "organization", organization.Slug,
 			"role", role.Name)
 
-		subscription, err := subscriptionAsync.Await()
+		subscription, err := o.paymentService.CreateSubscription(ctx, tx, organization.ID, *plan)
 		if err != nil {
 			return err
 		}
 		lgr.Print(tracingID, 6, "subscription started", subscription.ID, "plan", plan.Name,
 			"product", plan.Product.Name)
 
-		alarmPolicy, err := alarmPolicyAsync.Await()
+		alarmPolicy, err := o.organizationService.CreateOrganizationAlarmPolicy(ctx, tx, organization.ID)
 		if err != nil {
 			return err
 		}

@@ -16,12 +16,13 @@ require (
 	github.com/gofiber/fiber/v2 v2.43.0
 	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
 	github.com/imroc/req/v3 v3.33.2
+	github.com/jackc/pgx/v5 v5.3.0
 	github.com/jinzhu/copier v0.3.5
-	github.com/lib/pq v1.10.7
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/newrelic/go-agent/v3 v3.20.4
 	github.com/samber/lo v1.38.1
 	github.com/segmentio/ksuid v1.0.4
+	github.com/sourcegraph/conc v0.3.0
 	github.com/spf13/viper v1.15.0
 	github.com/vgarvardt/gue/v5 v5.1.1
 	go.uber.org/zap v1.24.0
@@ -49,6 +50,8 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
