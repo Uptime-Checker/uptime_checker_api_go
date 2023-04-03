@@ -38,8 +38,12 @@ func (e ErrorLogType) Valid() bool {
 }
 
 func (e ErrorLogType) String() string {
-	return [...]string{
+	if e == ErrorLogTypeUnknown {
+		return "Unknown"
+	}
+	all := [...]string{
 		"Timeout", "Addr", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Response Malformed",
-		"Unknown",
-	}[e-1]
+	}
+	index := e - 1
+	return all[index]
 }
