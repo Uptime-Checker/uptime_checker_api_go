@@ -22,6 +22,7 @@ import (
 const (
 	checkCronFromAndToInSeconds         = 20
 	watchDogCheckCronFromAndToInSeconds = 4
+	watchDogCheckMaxGoroutine           = 10
 	cronInitDelayFromInSeconds          = 60
 	cronInitDelayToInSeconds            = 120
 )

@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/coocood/freecache"
 	"github.com/getsentry/sentry-go"
@@ -55,4 +56,29 @@ func DeleteUserWithRoleAndSubscription(userID int64) {
 
 func getUserCacheKey(userID int64) string {
 	return fmt.Sprintf("%s_%d", KeyUser, userID)
+}
+
+// SetMonitorToRun caches for 8 seconds
+func SetMonitorToRun(monitorID int64, nextCheckAt time.Time) {
+	serializedNextCheckAt, err := json.Marshal(nextCheckAt)
+	if err != nil {
+		sentry.CaptureException(err)
+	}
+	set(getUserCacheKey(monitorID), serializedNextCheckAt, 8)
+}
+
+func GetMonitorToRun(monitorID int64) *time.Time {
+	serializedNextCheckAt, err := cache.Get([]byte(getMonitorCacheKey(monitorID)))
+	if err != nil {
+		return nil
+	}
+	var nextCheckAt time.Time
+	if err := json.Unmarshal(serializedNextCheckAt, &nextCheckAt); err != nil {
+		sentry.CaptureException(err)
+	}
+	return &nextCheckAt
+}
+
+func getMonitorCacheKey(monitorID int64) string {
+	return fmt.Sprintf("monitor_to_run_%d", monitorID)
 }
