@@ -11,12 +11,14 @@ import (
 )
 
 type RunCheckTaskPayload struct {
-	MonitorID int64
+	MonitorID, MonitorRegionID, RegionID int64
 }
 
-func RunCheckAsync(ctx context.Context, monitorID int64, runAt time.Time) error {
+func RunCheckAsync(ctx context.Context, monitorID, monitorRegionID, regionID int64, runAt time.Time) error {
 	body := RunCheckTaskPayload{
-		MonitorID: monitorID,
+		MonitorID:       monitorID,
+		MonitorRegionID: monitorRegionID,
+		RegionID:        regionID,
 	}
 
 	payload, err := json.Marshal(body)

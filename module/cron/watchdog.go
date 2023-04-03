@@ -7,9 +7,11 @@ import (
 	"github.com/sourcegraph/conc/iter"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
+	"github.com/Uptime-Checker/uptime_checker_api_go/task/client"
 )
 
 func (c *Cron) startWatchDog() {
@@ -18,6 +20,12 @@ func (c *Cron) startWatchDog() {
 	defer sentry.RecoverWithContext(ctx)
 
 	lgr.Print(tid, 1, "running startWatchDog")
+
+	region, err := c.regionDomain.Get(ctx, config.App.FlyRegion)
+	if err != nil {
+		sentry.CaptureException(err)
+		return
+	}
 
 	monitors, err := c.monitorDomain.ListMonitorsToRun(
 		ctx,
@@ -37,6 +45,17 @@ func (c *Cron) startWatchDog() {
 		cachedMonitorNextCheckAt := cache.GetMonitorToRun(monitor.ID)
 		if cachedMonitorNextCheckAt == nil {
 			// schedule the monitor
+			monitorRegion, err := c.monitorRegionDomain.GetOldestChecked(ctx, monitor.ID, region.ID)
+			if err != nil {
+				sentry.CaptureException(err)
+				return
+			}
+			if err := client.RunCheckAsync(ctx, monitor.ID, monitorRegion.ID, region.ID,
+				*monitor.NextCheckAt); err != nil {
+				sentry.CaptureException(err)
+				return
+			}
+			cache.SetMonitorToRun(monitor.ID, *monitor.NextCheckAt)
 		}
 	})
 }

@@ -22,6 +22,14 @@ func NewWatchDog(checkDomain *domain.CheckDomain) *WatchDog {
 	return &WatchDog{checkDomain: checkDomain}
 }
 
+func (w *WatchDog) Launch(
+	ctx context.Context,
+	monitor *model.Monitor,
+	region *model.Region,
+	monitorRegion *model.MonitorRegion,
+) {
+}
+
 func (w *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, region *model.Region) error {
 	tracingID := pkg.GetTracingID(ctx)
 

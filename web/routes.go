@@ -38,6 +38,8 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	checkDomain := domain.NewCheckDomain()
 	monitorStatusDomain := domain.NewMonitorStatusDomain()
 	alarmPolicyDomain := domain.NewAlarmPolicyDomain()
+	monitorRegionDomain := domain.NewMonitorRegionDomain()
+	regionDomain := domain.NewRegionDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -54,7 +56,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	syncProductsTask := task.NewSyncProductsTask()
 	runCheckTask := task.NewRunCheckTask()
 
-	cogman := cron.NewCron(jobDomain, monitorDomain, syncProductsTask)
+	cogman := cron.NewCron(jobDomain, regionDomain, monitorDomain, monitorRegionDomain, syncProductsTask)
 	wheel := worker.NewWorker(runCheckTask)
 
 	//  ========== Age of the routers ==========

@@ -41,18 +41,28 @@ const (
 )
 
 type Cron struct {
-	jobDomain     *domain.JobDomain
-	monitorDomain *domain.MonitorDomain
+	jobDomain           *domain.JobDomain
+	regionDomain        *domain.RegionDomain
+	monitorDomain       *domain.MonitorDomain
+	monitorRegionDomain *domain.MonitorRegionDomain
 
 	syncProductsTask *task.SyncProductsTask
 }
 
 func NewCron(
 	jobDomain *domain.JobDomain,
+	regionDomain *domain.RegionDomain,
 	monitorDomain *domain.MonitorDomain,
+	monitorRegionDomain *domain.MonitorRegionDomain,
 	syncProductsTask *task.SyncProductsTask,
 ) *Cron {
-	return &Cron{jobDomain: jobDomain, monitorDomain: monitorDomain, syncProductsTask: syncProductsTask}
+	return &Cron{
+		jobDomain:           jobDomain,
+		regionDomain:        regionDomain,
+		monitorDomain:       monitorDomain,
+		monitorRegionDomain: monitorRegionDomain,
+		syncProductsTask:    syncProductsTask,
+	}
 }
 
 func (c *Cron) Start(ctx context.Context) error {

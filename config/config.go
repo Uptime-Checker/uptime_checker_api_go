@@ -12,6 +12,7 @@ type config struct {
 	APIKey     string `mapstructure:"X_API_KEY"`
 	JWTKey     string `mapstructure:"JWT_KEY"`
 	WorkerPool int    `mapstructure:"WORKER_POOL"`
+	FlyRegion  string `mapstructure:"FLY_REGION"`
 
 	Version string `mapstructure:"VERSION"`
 
