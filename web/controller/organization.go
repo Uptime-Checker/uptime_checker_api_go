@@ -98,8 +98,7 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		}
 		lgr.Print(tracingID, 3, "created organization", organization.Name, "slug", organization.Slug)
 
-		organizationUser, err := o.organizationDomain.CreateOrganizationUser(ctx, tx, organization.ID, user.ID,
-			*user.RoleID)
+		organizationUser, err := o.organizationDomain.CreateOrganizationUser(ctx, tx, organization.ID, user.ID, role.ID)
 		if err != nil {
 			return err
 		}

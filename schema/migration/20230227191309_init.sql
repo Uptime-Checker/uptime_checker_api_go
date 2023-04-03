@@ -32,8 +32,9 @@ create table if not exists "user" (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (role_id) references role,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (role_id) references role on delete
+    set null,
+        foreign key (organization_id) references organization on delete cascade
 );
 create unique index if not exists user_email_index on "user" (email);
 create unique index if not exists user_provider_uid_index on "user" (provider_uid);
@@ -117,11 +118,13 @@ create table if not exists monitor (
     updated_at timestamp(0) not null default now(),
     primary key (id),
     constraint monitor_unique_next_id unique (next_id, organization_id) deferrable initially deferred,
-    foreign key (created_by) references "user",
-    foreign key (updated_by) references "user",
-    foreign key (monitor_group_id) references monitor_group,
-    foreign key (next_id) references monitor on delete cascade,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (created_by) references "user" on delete
+    set null,
+        foreign key (updated_by) references "user" on delete
+    set null,
+        foreign key (monitor_group_id) references monitor_group,
+        foreign key (next_id) references monitor on delete cascade,
+        foreign key (organization_id) references organization on delete cascade
 );
 create unique index if not exists monitor_url_organization_id_index on monitor (url, organization_id);
 create index if not exists monitor_on_index on monitor ("on");
@@ -179,9 +182,10 @@ create table if not exists "check" (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (region_id) references region,
-    foreign key (monitor_id) references monitor on delete cascade,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (region_id) references region on delete
+    set null,
+        foreign key (monitor_id) references monitor on delete cascade,
+        foreign key (organization_id) references organization on delete cascade
 );
 create index if not exists check_status_code_index on "check" (status_code);
 create index if not exists check_duration_index on "check" (duration);
@@ -215,7 +219,8 @@ create table if not exists error_log (
     primary key (id),
     foreign key (check_id) references "check" on delete cascade,
     foreign key (monitor_id) references monitor on delete cascade,
-    foreign key (assertion_id) references assertion
+    foreign key (assertion_id) references assertion on delete
+    set null
 );
 create index if not exists error_log_check_id_index on error_log (check_id);
 create index if not exists error_log_monitor_id_index on error_log (monitor_id);
@@ -256,10 +261,12 @@ create table if not exists alarm (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (triggered_by_check_id) references "check",
-    foreign key (resolved_by_check_id) references "check",
-    foreign key (monitor_id) references monitor on delete cascade,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (triggered_by_check_id) references "check" on delete
+    set null,
+        foreign key (resolved_by_check_id) references "check" on delete
+    set null,
+        foreign key (monitor_id) references monitor on delete cascade,
+        foreign key (organization_id) references organization on delete cascade
 );
 create index if not exists alarm_monitor_id_index on alarm (monitor_id);
 create index if not exists alarm_organization_id_index on alarm (organization_id);
@@ -345,9 +352,11 @@ create table if not exists invitation (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (invited_by_user_id) references "user",
-    foreign key (role_id) references role,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (invited_by_user_id) references "user" on delete
+    set null,
+        foreign key (role_id) references role on delete
+    set null,
+        foreign key (organization_id) references organization on delete cascade
 );
 create unique index if not exists invitation_code_index on invitation (code);
 create unique index if not exists invitation_email_organization_id_index on invitation (email, organization_id);
@@ -365,9 +374,10 @@ create table if not exists organization_user (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (role_id) references role,
-    foreign key (user_id) references "user" on delete cascade,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (role_id) references role on delete
+    set null,
+        foreign key (user_id) references "user" on delete cascade,
+        foreign key (organization_id) references organization on delete cascade
 );
 create unique index if not exists organization_user_user_id_organization_id_index on organization_user (user_id, organization_id);
 create index if not exists organization_user_role_id_index on organization_user (role_id);
@@ -417,9 +427,11 @@ create table if not exists subscription (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (plan_id) references plan,
-    foreign key (product_id) references product,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (plan_id) references plan on delete
+    set null,
+        foreign key (product_id) references product on delete
+    set null,
+        foreign key (organization_id) references organization on delete cascade
 );
 create index if not exists subscription_status_index on subscription (status);
 create index if not exists subscription_expires_at_index on subscription (expires_at);
@@ -447,10 +459,12 @@ create table if not exists receipt (
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
-    foreign key (plan_id) references plan,
-    foreign key (product_id) references product,
-    foreign key (subscription_id) references subscription on delete cascade,
-    foreign key (organization_id) references organization on delete cascade
+    foreign key (plan_id) references plan on delete
+    set null,
+        foreign key (product_id) references product on delete
+    set null,
+        foreign key (subscription_id) references subscription on delete cascade,
+        foreign key (organization_id) references organization on delete cascade
 );
 create unique index if not exists receipt_external_id_index on receipt (external_id);
 create index if not exists receipt_plan_id_index on receipt (plan_id);
