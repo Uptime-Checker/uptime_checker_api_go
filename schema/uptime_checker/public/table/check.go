@@ -23,7 +23,7 @@ type checkTable struct {
 	Headers        postgres.ColumnString
 	StatusCode     postgres.ColumnInteger
 	ContentSize    postgres.ColumnInteger
-	ContentType    postgres.ColumnInteger
+	ContentType    postgres.ColumnString
 	Duration       postgres.ColumnInteger
 	Success        postgres.ColumnBool
 	RegionID       postgres.ColumnInteger
@@ -77,7 +77,7 @@ func newCheckTableImpl(schemaName, tableName, alias string) checkTable {
 		HeadersColumn        = postgres.StringColumn("headers")
 		StatusCodeColumn     = postgres.IntegerColumn("status_code")
 		ContentSizeColumn    = postgres.IntegerColumn("content_size")
-		ContentTypeColumn    = postgres.IntegerColumn("content_type")
+		ContentTypeColumn    = postgres.StringColumn("content_type")
 		DurationColumn       = postgres.IntegerColumn("duration")
 		SuccessColumn        = postgres.BoolColumn("success")
 		RegionIDColumn       = postgres.IntegerColumn("region_id")

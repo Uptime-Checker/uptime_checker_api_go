@@ -18,7 +18,7 @@ type Check struct {
 	Headers        *string
 	StatusCode     *int32
 	ContentSize    *int32
-	ContentType    *int32
+	ContentType    *string
 	Duration       *int32
 	Success        bool
 	RegionID       *int64

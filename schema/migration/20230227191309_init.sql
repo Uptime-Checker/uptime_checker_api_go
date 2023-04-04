@@ -173,7 +173,7 @@ create table if not exists "check" (
     headers json,
     status_code integer,
     content_size integer,
-    content_type integer,
+    content_type varchar(100),
     duration integer,
     success boolean default false not null,
     region_id bigint,
