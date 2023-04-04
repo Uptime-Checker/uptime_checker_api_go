@@ -45,7 +45,7 @@ func (a *AssertionDomain) Create(
 	return assertion, err
 }
 
-func (a *AlarmPolicyDomain) ListAssertions(ctx context.Context, monitorID int64) ([]model.Assertion, error) {
+func (a *AssertionDomain) ListAssertions(ctx context.Context, monitorID int64) ([]model.Assertion, error) {
 	stmt := SELECT(Assertion.AllColumns).FROM(Assertion).WHERE(Assertion.MonitorID.EQ(Int(monitorID)))
 
 	var assertions []model.Assertion

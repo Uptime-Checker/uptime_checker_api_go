@@ -20,6 +20,7 @@ import (
 type WatchDog struct {
 	checkDomain         *domain.CheckDomain
 	regionDomain        *domain.RegionDomain
+	assertionDomain     *domain.AssertionDomain
 	monitorRegionDomain *domain.MonitorRegionDomain
 	monitorStatusDomain *domain.MonitorStatusDomain
 
@@ -31,6 +32,7 @@ type WatchDog struct {
 func NewWatchDog(
 	checkDomain *domain.CheckDomain,
 	regionDomain *domain.RegionDomain,
+	assertionDomain *domain.AssertionDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
 	checkService *service.CheckService,
@@ -40,6 +42,7 @@ func NewWatchDog(
 	return &WatchDog{
 		checkDomain:          checkDomain,
 		regionDomain:         regionDomain,
+		assertionDomain:      assertionDomain,
 		monitorRegionDomain:  monitorRegionDomain,
 		monitorStatusDomain:  monitorStatusDomain,
 		checkService:         checkService,
@@ -154,10 +157,34 @@ func (w *WatchDog) run(
 		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
 	} else {
+		checkSuccess := true
 		// assertion test
+		var failedAssertion *model.Assertion
+		if hitError == nil {
+			assertions, err := w.assertionDomain.ListAssertions(ctx, monitor.ID)
+			if err != nil {
+				return nil, err
+			}
+			for i, assertion := range assertions {
+				if pass := w.Assert(
+					*assertion.Source, assertion.Property, *assertion.Comparison, *assertion.Value, *hitResponse,
+				); !pass {
+					failedAssertion = &assertions[i]
+					break
+				}
+			}
+		} else {
+			checkSuccess = false
+			// Create error log
+		}
+
+		if failedAssertion != nil {
+			checkSuccess = false
+			// Create error log
+		}
 
 		// Update the check
-		check, err = w.checkService.Update(ctx, tx, check, true, hitResponse.Duration, hitResponse.Size,
+		check, err = w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
 			hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
 		if err != nil {
 			return nil, err
