@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -161,6 +162,9 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		lgr.Error(tracingID, 4, "failed to create monitor", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
 	}
+
+	// start the monitor asynchronously
+	go m.dog.Start(ctx, monitor, config.Region)
 
 	return resp.ServeData(c, fiber.StatusOK, monitor)
 }

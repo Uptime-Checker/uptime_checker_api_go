@@ -7,7 +7,9 @@ import (
 
 	"github.com/vgarvardt/gue/v5"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/worker"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
 type RunCheckTaskPayload struct {
@@ -20,6 +22,9 @@ func RunCheckAsync(ctx context.Context, monitorID, monitorRegionID, regionID int
 		MonitorRegionID: monitorRegionID,
 		RegionID:        regionID,
 	}
+
+	tid := pkg.GetTracingID(ctx)
+	lgr.Print(tid, "scheduling check run for monitor", monitorID, "region", regionID, "monitor region", monitorRegionID)
 
 	payload, err := json.Marshal(body)
 	if err != nil {

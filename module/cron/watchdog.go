@@ -20,12 +20,16 @@ func (c *Cron) watchDog() {
 	defer sentry.RecoverWithContext(ctx)
 
 	lgr.Print(tid, 1, "running watchDog")
+	if err := c.watchTheDog(ctx, tid); err != nil {
+		sentry.CaptureException(err)
+	}
+}
 
+func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 	if config.Region == nil {
 		region, err := c.regionDomain.Get(ctx, config.App.FlyRegion)
 		if err != nil {
-			sentry.CaptureException(err)
-			return
+			return err
 		}
 		config.Region = region
 	}
@@ -36,8 +40,7 @@ func (c *Cron) watchDog() {
 		+watchDogCheckCronFromAndToInSeconds,
 	)
 	if err != nil {
-		sentry.CaptureException(err)
-		return
+		return err
 	}
 	lgr.Print(tid, 2, "number of monitors to run:", len(monitors))
 
@@ -50,15 +53,16 @@ func (c *Cron) watchDog() {
 			// schedule the monitor
 			monitorRegion, err := c.monitorRegionDomain.GetOldestChecked(ctx, monitor.ID, config.Region.ID)
 			if err != nil {
-				sentry.CaptureException(err)
+				lgr.Error(tid, 3, "failed to get monitor region", err)
 				return
 			}
 			if err := client.RunCheckAsync(ctx, monitor.ID, monitorRegion.ID, config.Region.ID,
 				*monitor.NextCheckAt); err != nil {
-				sentry.CaptureException(err)
+				lgr.Error(tid, 4, "failed to schedule monitor check run, monitor", monitor.ID, err)
 				return
 			}
 			cache.SetMonitorToRun(monitor.ID, *monitor.NextCheckAt)
 		}
 	})
+	return nil
 }

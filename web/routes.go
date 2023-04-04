@@ -52,7 +52,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
-	dog := watchdog.NewWatchDog(checkDomain)
+	dog := watchdog.NewWatchDog(checkDomain, regionDomain, monitorRegionDomain, monitorStatusDomain)
 
 	// Setup Tasks
 	syncProductsTask := task.NewSyncProductsTask()
