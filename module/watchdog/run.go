@@ -23,7 +23,8 @@ type WatchDog struct {
 	monitorRegionDomain *domain.MonitorRegionDomain
 	monitorStatusDomain *domain.MonitorStatusDomain
 
-	monitorService *service.MonitorService
+	monitorService       *service.MonitorService
+	monitorRegionService *service.MonitorRegionService
 }
 
 func NewWatchDog(
@@ -32,13 +33,15 @@ func NewWatchDog(
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
 	monitorService *service.MonitorService,
+	monitorRegionService *service.MonitorRegionService,
 ) *WatchDog {
 	return &WatchDog{
-		checkDomain:         checkDomain,
-		regionDomain:        regionDomain,
-		monitorRegionDomain: monitorRegionDomain,
-		monitorStatusDomain: monitorStatusDomain,
-		monitorService:      monitorService,
+		checkDomain:          checkDomain,
+		regionDomain:         regionDomain,
+		monitorRegionDomain:  monitorRegionDomain,
+		monitorStatusDomain:  monitorStatusDomain,
+		monitorService:       monitorService,
+		monitorRegionService: monitorRegionService,
 	}
 }
 
@@ -86,6 +89,10 @@ func (w *WatchDog) startMonitor(
 				return err
 			}
 			lgr.Print(tracingID, 1, "starting monitor for", monitor.URL)
+			_, err = w.monitorRegionService.FirstOrCreate(ctx, tx, monitor.ID, region.ID)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -107,7 +114,7 @@ func (w *WatchDog) run(
 		MonitorID:      &monitor.ID,
 		OrganizationID: monitor.OrganizationID,
 	}
-	check, err := w.checkDomain.Create(ctx, check)
+	check, err := w.checkDomain.Create(ctx, tx, check)
 	if err != nil {
 		return nil, err
 	}
