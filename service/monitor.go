@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"time"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -48,7 +51,7 @@ func (m *MonitorService) Create(
 		BodyFormat:            bodyFormat,
 		Username:              username,
 		Password:              password,
-		On:                    pkg.BoolPointer(true),
+		On:                    pkg.BoolPointer(false),
 		Muted:                 pkg.BoolPointer(false),
 		GlobalAlarmSettings:   &globalAlarmSettings,
 		AlarmReminderInterval: &alarmReminderInterval,
@@ -94,4 +97,25 @@ func (m *MonitorService) Create(
 	}
 
 	return monitor, nil
+}
+
+func (m *MonitorService) Start(
+	ctx context.Context,
+	tx *sql.Tx,
+	monitor *model.Monitor,
+	on bool,
+) (*model.Monitor, error) {
+	monitorStatusChange := &model.MonitorStatusChange{MonitorID: &monitor.ID}
+	_, err := m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, resource.MonitorStatusPassing)
+	if err != nil {
+		return nil, err
+	}
+
+	now := times.Now()
+	var nextCheckAt time.Time
+	if on {
+		nextCheckAt = now.Add(time.Second * constant.MonitorStartDelayInSeconds)
+	}
+
+	return m.monitorDomain.UpdateNextCheckAt(ctx, tx, monitor.ID, on, &nextCheckAt)
 }

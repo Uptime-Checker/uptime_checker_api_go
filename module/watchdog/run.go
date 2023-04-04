@@ -7,19 +7,39 @@ import (
 
 	"github.com/getsentry/sentry-go"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
+	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 )
 
 type WatchDog struct {
-	checkDomain *domain.CheckDomain
+	checkDomain         *domain.CheckDomain
+	regionDomain        *domain.RegionDomain
+	monitorRegionDomain *domain.MonitorRegionDomain
+	monitorStatusDomain *domain.MonitorStatusDomain
+
+	monitorService *service.MonitorService
 }
 
-func NewWatchDog(checkDomain *domain.CheckDomain) *WatchDog {
-	return &WatchDog{checkDomain: checkDomain}
+func NewWatchDog(
+	checkDomain *domain.CheckDomain,
+	regionDomain *domain.RegionDomain,
+	monitorRegionDomain *domain.MonitorRegionDomain,
+	monitorStatusDomain *domain.MonitorStatusDomain,
+	monitorService *service.MonitorService,
+) *WatchDog {
+	return &WatchDog{
+		checkDomain:         checkDomain,
+		regionDomain:        regionDomain,
+		monitorRegionDomain: monitorRegionDomain,
+		monitorStatusDomain: monitorStatusDomain,
+		monitorService:      monitorService,
+	}
 }
 
 // Launch is run by the cron
@@ -37,6 +57,38 @@ func (w *WatchDog) Start(
 	monitor *model.Monitor,
 	region *model.Region,
 ) {
+	if err := w.start(ctx, monitor, region); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func (w *WatchDog) start(
+	ctx context.Context,
+	monitor *model.Monitor,
+	region *model.Region,
+) error {
+	tracingID := pkg.GetTracingID(ctx)
+	if region == nil {
+		region, err := w.regionDomain.Get(ctx, config.App.FlyRegion)
+		if err != nil {
+			return err
+		}
+		config.Region = region
+	}
+	return infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		check, err := w.run(ctx, tx, monitor, config.Region)
+		if err != nil {
+			return err
+		}
+		if check.Success {
+			monitor, err := w.monitorService.Start(ctx, tx, monitor, true)
+			if err != nil {
+				return err
+			}
+			lgr.Print(tracingID, 1, "starting monitor for", monitor.URL)
+		}
+		return nil
+	})
 }
 
 func (w *WatchDog) run(
@@ -55,7 +107,7 @@ func (w *WatchDog) run(
 		MonitorID:      &monitor.ID,
 		OrganizationID: monitor.OrganizationID,
 	}
-	check, err := w.checkDomain.Create(ctx, tx, check)
+	check, err := w.checkDomain.Create(ctx, check)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +116,7 @@ func (w *WatchDog) run(
 	var headers *map[string]string
 	if monitor.Headers != nil {
 		if err := json.Unmarshal([]byte(*monitor.Headers), headers); err != nil {
-			sentry.CaptureException(err)
+			return nil, err
 		}
 	}
 

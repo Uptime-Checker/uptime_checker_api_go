@@ -16,6 +16,7 @@ const (
 	SentryTraceSampleRate          = 0.2
 	CronCheckIntervalInSeconds     = 30
 	WatchDogCheckIntervalInSeconds = 5
+	MonitorStartDelayInSeconds     = 10
 )
 
 // Environment type
