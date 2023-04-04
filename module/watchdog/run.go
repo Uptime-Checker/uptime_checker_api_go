@@ -23,6 +23,7 @@ type WatchDog struct {
 	monitorRegionDomain *domain.MonitorRegionDomain
 	monitorStatusDomain *domain.MonitorStatusDomain
 
+	checkService         *service.CheckService
 	monitorService       *service.MonitorService
 	monitorRegionService *service.MonitorRegionService
 }
@@ -32,6 +33,7 @@ func NewWatchDog(
 	regionDomain *domain.RegionDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
+	checkService *service.CheckService,
 	monitorService *service.MonitorService,
 	monitorRegionService *service.MonitorRegionService,
 ) *WatchDog {
@@ -40,6 +42,7 @@ func NewWatchDog(
 		regionDomain:         regionDomain,
 		monitorRegionDomain:  monitorRegionDomain,
 		monitorStatusDomain:  monitorStatusDomain,
+		checkService:         checkService,
 		monitorService:       monitorService,
 		monitorRegionService: monitorRegionService,
 	}
@@ -150,9 +153,17 @@ func (w *WatchDog) run(
 	if hitResponse == nil && hitError != nil {
 		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
+	} else {
+		// assertion test
+
+		// Update the check
+		check, err = w.checkService.Update(ctx, tx, check, true, hitResponse.Duration, hitResponse.Size,
+			hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// Update the check
 	// Schedule next check
 	// Send for alarm if needed
 	return check, nil

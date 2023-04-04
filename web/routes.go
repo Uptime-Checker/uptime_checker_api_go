@@ -49,10 +49,20 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	organizationService := service.NewOrganizationService(organizationDomain, alarmPolicyDomain)
 	monitorService := service.NewMonitorService(monitorDomain, monitorStatusDomain)
 	assertionService := service.NewAssertionService(assertionDomain)
+	monitorRegionService := service.NewMonitorRegionService(monitorRegionDomain)
+	checkService := service.NewCheckService(checkDomain)
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
-	dog := watchdog.NewWatchDog(checkDomain, regionDomain, monitorRegionDomain, monitorStatusDomain, monitorService)
+	dog := watchdog.NewWatchDog(
+		checkDomain,
+		regionDomain,
+		monitorRegionDomain,
+		monitorStatusDomain,
+		checkService,
+		monitorService,
+		monitorRegionService,
+	)
 
 	// Setup Tasks
 	syncProductsTask := task.NewSyncProductsTask()

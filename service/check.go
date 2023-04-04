@@ -25,7 +25,7 @@ func (c *CheckService) Update(
 	tx *sql.Tx,
 	check *model.Check,
 	success bool,
-	duration, size int32,
+	duration, size *int32,
 	contentType *string,
 	body *string,
 	headers *map[string]string,
@@ -41,8 +41,8 @@ func (c *CheckService) Update(
 
 	check.Body = body
 	check.Success = success
-	check.Duration = &duration
-	check.ContentSize = &size
+	check.Duration = duration
+	check.ContentSize = size
 	check.ContentType = contentType
 
 	traceInfo := make(map[string]string)
