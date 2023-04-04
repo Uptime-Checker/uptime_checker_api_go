@@ -102,7 +102,7 @@ func (c *Cron) Start(ctx context.Context) error {
 
 	// start the watchdog
 	_, err = s.Every(constant.WatchDogCheckIntervalInSeconds).Second().StartAt(now.Add(time.Second * 2)).
-		Do(c.startWatchDog)
+		Do(c.watchDog)
 	if err != nil {
 		return err
 	}

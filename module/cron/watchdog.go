@@ -14,12 +14,12 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/task/client"
 )
 
-func (c *Cron) startWatchDog() {
+func (c *Cron) watchDog() {
 	ctx := pkg.NewTracingID(context.Background())
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
 
-	lgr.Print(tid, 1, "running startWatchDog")
+	lgr.Print(tid, 1, "running watchDog")
 
 	region, err := c.regionDomain.Get(ctx, config.App.FlyRegion)
 	if err != nil {

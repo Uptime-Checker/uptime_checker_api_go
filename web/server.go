@@ -96,7 +96,9 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 	}
 
 	// Sync the logs
-	lgr.Sync()
+	if config.IsProd {
+		lgr.Sync()
+	}
 
 	// Sync sentry
 	infra.SyncSentry()
