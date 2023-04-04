@@ -149,8 +149,8 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 
 		// insert the assertions
 		for _, assertion := range body.Assertions {
-			ass, err := m.assertionService.Create(ctx, tx, assertion.Source, assertion.Property, assertion.Comparison,
-				assertion.Value)
+			ass, err := m.assertionService.Create(ctx, tx, monitor.ID, assertion.Source, assertion.Property,
+				assertion.Comparison, assertion.Value)
 			if err != nil {
 				return err
 			}
