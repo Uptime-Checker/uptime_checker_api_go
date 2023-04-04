@@ -22,8 +22,10 @@ import (
 )
 
 type MonitorController struct {
-	monitorDomain  *domain.MonitorDomain
-	monitorService *service.MonitorService
+	monitorDomain *domain.MonitorDomain
+
+	monitorService   *service.MonitorService
+	assertionService *service.AssertionService
 
 	dog *watchdog.WatchDog
 }
@@ -31,9 +33,15 @@ type MonitorController struct {
 func NewMonitorController(
 	monitorDomain *domain.MonitorDomain,
 	monitorService *service.MonitorService,
+	assertionService *service.AssertionService,
 	dog *watchdog.WatchDog,
 ) *MonitorController {
-	return &MonitorController{monitorDomain: monitorDomain, monitorService: monitorService, dog: dog}
+	return &MonitorController{
+		monitorDomain:    monitorDomain,
+		assertionService: assertionService,
+		monitorService:   monitorService,
+		dog:              dog,
+	}
 }
 
 type AssertionBody struct {
@@ -82,13 +90,21 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 	}
 
 	// assertion
+	statusCodeAssertionExists := false
 	for _, assertion := range body.Assertions {
 		if resource.AssertionSource(assertion.Source) == resource.AssertionSourceHeaders {
 			if assertion.Property == nil {
 				return resp.ErrHeaderKeyNeeded
 			}
 		}
+		if resource.AssertionSource(assertion.Source) == resource.AssertionSourceStatusCode {
+			statusCodeAssertionExists = true
+		}
 	}
+	if !statusCodeAssertionExists {
+		return resp.ErrStatusCodeAssertionRequired
+	}
+	// validate the status code
 
 	return nil
 }
@@ -132,9 +148,17 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		}
 
 		// insert the assertions
+		for _, assertion := range body.Assertions {
+			ass, err := m.assertionService.Create(ctx, tx, assertion.Source, assertion.Property, assertion.Comparison,
+				assertion.Value)
+			if err != nil {
+				return err
+			}
+			lgr.Print(tracingID, 3, "assertion created", resource.AssertionSource(*ass.Source).String(), *ass.Value)
+		}
 		return nil
 	}); err != nil {
-		lgr.Error(tracingID, 3, "failed to create monitor", err.Error())
+		lgr.Error(tracingID, 4, "failed to create monitor", err.Error())
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
 	}
 

@@ -38,6 +38,7 @@ var (
 	ErrMaxBodySizeExceeded          = errors.New("max body size exceeded")
 	ErrMaxTimeoutExceeded           = errors.New("max timeout exceeded")
 	ErrHeaderKeyNeeded              = errors.New("header key needed")
+	ErrStatusCodeAssertionRequired  = errors.New("status code assertion required")
 )
 
 var Validate = validator.New()

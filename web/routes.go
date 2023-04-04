@@ -40,6 +40,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	alarmPolicyDomain := domain.NewAlarmPolicyDomain()
 	monitorRegionDomain := domain.NewMonitorRegionDomain()
 	regionDomain := domain.NewRegionDomain()
+	assertionDomain := domain.NewAssertionDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -47,6 +48,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	paymentService := service.NewPaymentService(paymentDomain)
 	organizationService := service.NewOrganizationService(organizationDomain, alarmPolicyDomain)
 	monitorService := service.NewMonitorService(monitorDomain, monitorStatusDomain)
+	assertionService := service.NewAssertionService(assertionDomain)
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
@@ -83,6 +85,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorDomain,
 		authService,
 		monitorService,
+		assertionService,
 		dog,
 	)
 
@@ -143,6 +146,7 @@ func registerMonitorHandlers(
 	monitorDomain *domain.MonitorDomain,
 	authService *service.AuthService,
 	monitorService *service.MonitorService,
+	assertionService *service.AssertionService,
 	dog *watchdog.WatchDog,
 ) {
 	auth := middlelayer.Protected(authService)
@@ -150,6 +154,7 @@ func registerMonitorHandlers(
 	handler := controller.NewMonitorController(
 		monitorDomain,
 		monitorService,
+		assertionService,
 		dog,
 	)
 

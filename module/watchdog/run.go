@@ -39,7 +39,12 @@ func (w *WatchDog) Start(
 ) {
 }
 
-func (w *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, region *model.Region) error {
+func (w *WatchDog) run(
+	ctx context.Context,
+	tx *sql.Tx,
+	monitor *model.Monitor,
+	region *model.Region,
+) (*model.Check, error) {
 	tracingID := pkg.GetTracingID(ctx)
 
 	lgr.Print(tracingID, 1, "running =>", monitor.URL, "from", region.Name)
@@ -52,7 +57,7 @@ func (w *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	}
 	check, err := w.checkDomain.Create(ctx, tx, check)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	lgr.Print(tracingID, 2, "created check", check.ID)
 
@@ -91,7 +96,7 @@ func (w *WatchDog) run(ctx context.Context, tx *sql.Tx, monitor *model.Monitor, 
 	// Update the check
 	// Schedule next check
 	// Send for alarm if needed
-	return nil
+	return check, nil
 }
 
 func (w *WatchDog) gateCheck() {
