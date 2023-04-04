@@ -57,12 +57,12 @@ func (w *WatchDog) Start(
 	monitor *model.Monitor,
 	region *model.Region,
 ) {
-	if err := w.start(ctx, monitor, region); err != nil {
+	if err := w.startMonitor(ctx, monitor, region); err != nil {
 		sentry.CaptureException(err)
 	}
 }
 
-func (w *WatchDog) start(
+func (w *WatchDog) startMonitor(
 	ctx context.Context,
 	monitor *model.Monitor,
 	region *model.Region,
