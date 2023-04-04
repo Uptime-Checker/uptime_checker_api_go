@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
+	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
 type config struct {
@@ -36,6 +37,7 @@ var (
 	App    config
 	IsProd bool
 	JWTKey = []byte(App.JWTKey)
+	Region *model.Region
 )
 
 func LoadConfig(path string) error {
