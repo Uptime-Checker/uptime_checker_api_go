@@ -36,7 +36,8 @@ func (m *MonitorRegionDomain) Create(
 	tx *sql.Tx,
 	monitorRegion *model.MonitorRegion,
 ) (*model.MonitorRegion, error) {
-	insertStmt := MonitorRegion.INSERT(MonitorRegion.MutableColumns.Except(MonitorRegion.InsertedAt, MonitorRegion.UpdatedAt)).
+	insertStmt := MonitorRegion.INSERT(MonitorRegion.MutableColumns.
+		Except(MonitorRegion.InsertedAt, MonitorRegion.UpdatedAt)).
 		MODEL(monitorRegion).
 		RETURNING(MonitorRegion.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, monitorRegion)

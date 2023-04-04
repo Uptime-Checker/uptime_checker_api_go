@@ -36,11 +36,11 @@ type HitErr struct {
 
 type HitResponse struct {
 	StatusCode  int
-	Duration    int64
-	Size        int64
-	ContentType string
+	Duration    *int32
+	Size        *int32
+	ContentType *string
 	Body        *string
-	Headers     map[string]string
+	Headers     *map[string]string
 	Traces      req.TraceInfo
 }
 
@@ -157,11 +157,13 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 		return hitResponse, hitErr
 	}
 
+	size := int32(resp.ContentLength)
+	duration := int32(resp.TotalTime().Milliseconds())
 	hitResponse = &HitResponse{
 		StatusCode:  resp.GetStatusCode(),
-		Duration:    resp.TotalTime().Milliseconds(),
-		Size:        resp.ContentLength,
-		ContentType: resp.GetContentType(),
+		Duration:    &duration,
+		Size:        &size,
+		ContentType: pkg.StringPointer(resp.GetContentType()),
 		Headers:     w.getResponseHeaders(resp.Header),
 		Traces:      resp.TraceInfo(),
 	}
@@ -179,19 +181,19 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	}
 	stringBody := string(respBody)
 	hitResponse.Body = &stringBody
-	if pkg.IsEmpty(hitResponse.ContentType) {
-		hitResponse.ContentType = http.DetectContentType(respBody)
+	if pkg.IsEmpty(*hitResponse.ContentType) {
+		hitResponse.ContentType = pkg.StringPointer(http.DetectContentType(respBody))
 	}
 
 	return hitResponse, hitErr
 }
 
-func (w *WatchDog) getResponseHeaders(headers http.Header) map[string]string {
+func (w *WatchDog) getResponseHeaders(headers http.Header) *map[string]string {
 	respHeader := make(map[string]string)
 	for key, values := range headers {
 		if len(values) > 0 {
 			respHeader[key] = values[0]
 		}
 	}
-	return respHeader
+	return &respHeader
 }

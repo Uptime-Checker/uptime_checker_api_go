@@ -75,18 +75,18 @@ func checkSuccessStatusCode(code int) bool {
 	return lo.Contains(codes, code)
 }
 
-func assertResponseTime(assertionComparison resource.AssertionComparison, value string, duration int64) bool {
+func assertResponseTime(assertionComparison resource.AssertionComparison, value string, duration *int32) bool {
 	responseTime, err := strconv.Atoi(value)
 	if err != nil {
 		sentry.CaptureException(err)
 		return false
 	}
 
-	savedResponseTime := int64(responseTime * 1000)
+	savedResponseTime := int32(responseTime * 1000)
 	if assertionComparison == resource.AssertionComparisonGreater {
-		return savedResponseTime < duration
+		return savedResponseTime < *duration
 	} else if assertionComparison == resource.AssertionComparisonLesser {
-		return savedResponseTime > duration
+		return savedResponseTime > *duration
 	}
 	return false
 }
@@ -117,9 +117,13 @@ func assertTextBody(assertionComparison resource.AssertionComparison, value stri
 func assertHeader(
 	assertionComparison resource.AssertionComparison,
 	property, value string,
-	headers map[string]string,
+	headers *map[string]string,
 ) bool {
-	headerValue, ok := headers[property]
+	if headers == nil || len(*headers) == 0 {
+		return false
+	}
+	respHeaders := *headers
+	headerValue, ok := respHeaders[property]
 	if !ok {
 		return false
 	}

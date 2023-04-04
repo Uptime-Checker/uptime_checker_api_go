@@ -70,8 +70,7 @@ func (m *MonitorService) Create(
 		if err != nil {
 			return nil, err
 		}
-		stringHeaders := string(jsonHeaders)
-		monitor.Headers = &stringHeaders
+		monitor.Headers = pkg.StringPointer(string(jsonHeaders))
 	}
 
 	// Create a new monitor
