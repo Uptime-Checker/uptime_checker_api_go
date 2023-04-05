@@ -30,6 +30,7 @@ func (e ErrorLogType) Valid() bool {
 		ErrorLogTypeUnknownNetwork,
 		ErrorLogTypeSyscall,
 		ErrorLogTypeResponseMalformed,
+		ErrorLogTypeAssertionFailure,
 		ErrorLogTypeUnknown,
 	}
 	for _, p := range errorLogTypes {
@@ -46,6 +47,7 @@ func (e ErrorLogType) String() string {
 	}
 	all := [...]string{
 		"Timeout", "Addr", "URL", "DNS", "Invalid Addr", "Parse", "Unknown Network", "Syscall", "Response Malformed",
+		"Assertion Failure",
 	}
 	index := e - 1
 	return all[index]
