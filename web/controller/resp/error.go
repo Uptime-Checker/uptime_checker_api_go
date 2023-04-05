@@ -25,6 +25,7 @@ const (
 	ErrDeletingGuestUser          = "failed to delete guest user"
 	ErrGuestUserLoginFailed       = "failed to login guest user"
 	ErrMonitorCreateFailed        = "failed to create monitor"
+	ErrMonitorNotFound            = "monitor not found"
 	ErrMalformedJWT               = "missing or malformed JWT"
 	ErrDryRunFailed               = "dry run failed"
 )

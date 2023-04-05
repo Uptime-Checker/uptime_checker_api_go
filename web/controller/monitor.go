@@ -23,7 +23,9 @@ import (
 )
 
 type MonitorController struct {
-	monitorDomain *domain.MonitorDomain
+	monitorDomain       *domain.MonitorDomain
+	regionDomain        *domain.RegionDomain
+	monitorRegionDomain *domain.MonitorRegionDomain
 
 	monitorService   *service.MonitorService
 	assertionService *service.AssertionService
@@ -32,16 +34,20 @@ type MonitorController struct {
 }
 
 func NewMonitorController(
+	dog *watchdog.WatchDog,
 	monitorDomain *domain.MonitorDomain,
+	regionDomain *domain.RegionDomain,
+	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorService *service.MonitorService,
 	assertionService *service.AssertionService,
-	dog *watchdog.WatchDog,
 ) *MonitorController {
 	return &MonitorController{
-		monitorDomain:    monitorDomain,
-		assertionService: assertionService,
-		monitorService:   monitorService,
-		dog:              dog,
+		dog:                 dog,
+		monitorDomain:       monitorDomain,
+		regionDomain:        regionDomain,
+		monitorRegionDomain: monitorRegionDomain,
+		assertionService:    assertionService,
+		monitorService:      monitorService,
 	}
 }
 
@@ -138,7 +144,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	}
 
 	var monitor *model.Monitor
-	var assertions []model.Assertion
+	var assertions []*model.Assertion
 
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		lgr.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
@@ -158,7 +164,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 				return err
 			}
 			lgr.Print(tracingID, 3, "assertion created", resource.AssertionSource(*ass.Source).String(), *ass.Value)
-			assertions = append(assertions, *ass)
+			assertions = append(assertions, ass)
 		}
 		return nil
 	}); err != nil {
@@ -180,6 +186,54 @@ func (m *MonitorController) ListMonitors(c *fiber.Ctx) error {
 		return resp.ServeInternalServerError(c, err)
 	}
 	return resp.ServeData(c, fiber.StatusOK, monitors)
+}
+
+type MonitorStartBody struct {
+	MonitorID int64 `json:"monitorID" validate:"required"`
+	On        bool  `json:"on"        validate:"required"`
+}
+
+func (m *MonitorController) Start(c *fiber.Ctx) error {
+	ctx := c.Context()
+
+	body := new(MonitorStartBody)
+	if err := c.BodyParser(body); err != nil {
+		return resp.ServeInternalServerError(c, err)
+	}
+	if err := resp.Validate.Struct(body); err != nil {
+		return resp.ServeValidationError(c, err)
+	}
+
+	if config.Region == nil {
+		region, err := m.regionDomain.Get(ctx, config.App.FlyRegion)
+		if err != nil {
+			return err
+		}
+		config.Region = region
+	}
+
+	if body.On {
+		monitorRegion, err := m.monitorRegionDomain.GetMonitorRegion(ctx, body.MonitorID, config.Region.ID)
+		if err != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorNotFound, err)
+		}
+		monitorRegionWithAssertions, err := m.monitorRegionDomain.GetWithAllAssoc(ctx, monitorRegion.ID)
+		if err != nil {
+			return resp.ServeInternalServerError(c, err)
+		}
+		monitorWithAssertions := monitorRegionWithAssertions.Monitor
+		assertions := monitorWithAssertions.Assertions
+		m.dog.Start(ctx, monitorWithAssertions.Monitor, monitorRegionWithAssertions.Region, assertions)
+	} else {
+		if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+			_, err := m.monitorDomain.UpdateNextCheckAt(ctx, tx, body.MonitorID, body.On, nil)
+			return err
+		}); err != nil {
+			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
+		}
+	}
+
+	return resp.ServeNoContent(c, fiber.StatusNoContent)
 }
 
 func (m *MonitorController) DryRun(c *fiber.Ctx) error {

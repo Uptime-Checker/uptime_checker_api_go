@@ -14,3 +14,7 @@ func ServeData(c *fiber.Ctx, status int, data any) error {
 	}
 	return c.Status(status).JSON(re)
 }
+
+func ServeNoContent(c *fiber.Ctx, status int) error {
+	return c.SendStatus(status)
+}
