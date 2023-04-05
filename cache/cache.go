@@ -3,7 +3,6 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/coocood/freecache"
 	"github.com/getsentry/sentry-go"
@@ -59,24 +58,24 @@ func getUserCacheKey(userID int64) string {
 }
 
 // SetMonitorToRun caches for 8 seconds
-func SetMonitorToRun(monitorID int64, nextCheckAt time.Time) {
-	serializedNextCheckAt, err := json.Marshal(nextCheckAt)
+func SetMonitorToRun(monitorID, regionID int64) {
+	serializedNextCheckAt, err := json.Marshal(regionID)
 	if err != nil {
 		sentry.CaptureException(err)
 	}
-	set(getUserCacheKey(monitorID), serializedNextCheckAt, 8)
+	set(getMonitorCacheKey(monitorID), serializedNextCheckAt, 8)
 }
 
-func GetMonitorToRun(monitorID int64) *time.Time {
+func GetMonitorToRun(monitorID int64) *int64 {
 	serializedNextCheckAt, err := cache.Get([]byte(getMonitorCacheKey(monitorID)))
 	if err != nil {
 		return nil
 	}
-	var nextCheckAt time.Time
-	if err := json.Unmarshal(serializedNextCheckAt, &nextCheckAt); err != nil {
+	var regionID int64
+	if err := json.Unmarshal(serializedNextCheckAt, &regionID); err != nil {
 		sentry.CaptureException(err)
 	}
-	return &nextCheckAt
+	return &regionID
 }
 
 func getMonitorCacheKey(monitorID int64) string {
