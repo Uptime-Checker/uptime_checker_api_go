@@ -58,12 +58,12 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 			}
 			oldestCheckedMonitorRegion, err := c.monitorRegionDomain.GetOldestChecked(ctx, monitor.ID)
 			if err != nil {
-				lgr.Error(tid, 3, "failed to get monitor region", err)
+				lgr.Error(tid, 4, "failed to get monitor region", err)
 				return
 			}
 			if currentMonitorRegion.ID == oldestCheckedMonitorRegion.ID {
 				if err := client.RunCheckAsync(ctx, currentMonitorRegion.ID, *monitor.NextCheckAt); err != nil {
-					lgr.Error(tid, 4, "failed to schedule monitor check run, monitor", monitor.ID, err)
+					lgr.Error(tid, 5, "failed to schedule monitor check run, monitor", monitor.ID, err)
 					return
 				}
 				cache.SetMonitorToRun(monitor.ID, *monitor.NextCheckAt)
