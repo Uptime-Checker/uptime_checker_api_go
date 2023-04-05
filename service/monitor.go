@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -113,7 +112,7 @@ func (m *MonitorService) Start(
 	now := times.Now()
 	var nextCheckAt time.Time
 	if on {
-		nextCheckAt = now.Add(time.Second * constant.MonitorStartDelayInSeconds)
+		nextCheckAt = now.Add(time.Second * time.Duration(*monitor.Interval))
 	}
 
 	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, &nextCheckAt)
