@@ -7,6 +7,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -55,4 +56,27 @@ func (m *MonitorRegionDomain) GetMonitorRegion(
 	monitorRegion := &model.MonitorRegion{}
 	err := stmt.QueryContext(ctx, infra.DB, monitorRegion)
 	return monitorRegion, err
+}
+
+func (m *MonitorRegionDomain) GetWithAllAssoc(
+	ctx context.Context,
+	monitorRegionID int64,
+) (*pkg.MonitorRegionWithAssertions, error) {
+	stmt := SELECT(
+		MonitorRegion.AllColumns,
+		Monitor.AllColumns,
+		Region.AllColumns,
+		Assertion.AllColumns,
+	).
+		FROM(
+			MonitorRegion.
+				LEFT_JOIN(Monitor, MonitorRegion.MonitorID.EQ(Monitor.ID)).
+				LEFT_JOIN(Region, MonitorRegion.RegionID.EQ(Region.ID)).
+				LEFT_JOIN(Assertion, MonitorRegion.MonitorID.EQ(Assertion.MonitorID)),
+		).
+		WHERE(MonitorRegion.ID.EQ(Int(monitorRegionID)))
+
+	monitorRegionWithAssertions := &pkg.MonitorRegionWithAssertions{}
+	err := stmt.QueryContext(ctx, infra.DB, monitorRegionWithAssertions)
+	return monitorRegionWithAssertions, err
 }

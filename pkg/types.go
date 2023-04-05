@@ -42,6 +42,16 @@ type UserWithRoleAndSubscription struct {
 	}
 }
 
+type MonitorRegionWithAssertions struct {
+	*model.MonitorRegion
+	Region *model.Region
+
+	Monitor struct {
+		*model.Monitor
+		Assertions []*model.Assertion
+	}
+}
+
 type OrganizationUserRole struct {
 	*model.OrganizationUser
 	Role         *model.Role

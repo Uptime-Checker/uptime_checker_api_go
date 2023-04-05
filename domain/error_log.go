@@ -17,7 +17,12 @@ func NewErrorLogDomain() *ErrorLogDomain {
 	return &ErrorLogDomain{}
 }
 
-func (e *ErrorLogDomain) Create(ctx context.Context, tx *sql.Tx, errorLog *model.ErrorLog, errorLogType resource.ErrorLogType) (*model.ErrorLog, error) {
+func (e *ErrorLogDomain) Create(
+	ctx context.Context,
+	tx *sql.Tx,
+	errorLog *model.ErrorLog,
+	errorLogType resource.ErrorLogType,
+) (*model.ErrorLog, error) {
 	if !errorLogType.Valid() {
 		return nil, constant.ErrInvalidErrorLogType
 	}

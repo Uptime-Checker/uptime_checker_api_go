@@ -138,6 +138,8 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	}
 
 	var monitor *model.Monitor
+	var assertions []model.Assertion
+
 	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
 		lgr.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
 		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL, body.Method,
@@ -156,6 +158,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 				return err
 			}
 			lgr.Print(tracingID, 3, "assertion created", resource.AssertionSource(*ass.Source).String(), *ass.Value)
+			assertions = append(assertions, *ass)
 		}
 		return nil
 	}); err != nil {
@@ -164,7 +167,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	}
 
 	// Start the monitor asynchronously
-	go m.dog.Start(ctx, monitor, config.Region)
+	go m.dog.Start(ctx, monitor, config.Region, assertions)
 
 	return resp.ServeData(c, fiber.StatusOK, monitor)
 }

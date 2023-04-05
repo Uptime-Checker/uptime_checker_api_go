@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"

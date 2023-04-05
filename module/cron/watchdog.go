@@ -56,8 +56,7 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 				lgr.Error(tid, 3, "failed to get monitor region", err)
 				return
 			}
-			if err := client.RunCheckAsync(ctx, monitor.ID, monitorRegion.ID, config.Region.ID,
-				*monitor.NextCheckAt); err != nil {
+			if err := client.RunCheckAsync(ctx, monitorRegion.ID, *monitor.NextCheckAt); err != nil {
 				lgr.Error(tid, 4, "failed to schedule monitor check run, monitor", monitor.ID, err)
 				return
 			}

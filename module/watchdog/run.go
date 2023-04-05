@@ -59,9 +59,7 @@ func NewWatchDog(
 // Launch is run by the cron
 func (w *WatchDog) Launch(
 	ctx context.Context,
-	monitor *model.Monitor,
-	region *model.Region,
-	monitorRegion *model.MonitorRegion,
+	monitorRegionWithAssertions *pkg.MonitorRegionWithAssertions,
 ) {
 }
 
@@ -70,8 +68,9 @@ func (w *WatchDog) Start(
 	ctx context.Context,
 	monitor *model.Monitor,
 	region *model.Region,
+	assertions []model.Assertion,
 ) {
-	if err := w.startMonitor(ctx, monitor, region); err != nil {
+	if err := w.startMonitor(ctx, monitor, region, assertions); err != nil {
 		sentry.CaptureException(err)
 	}
 }
@@ -80,6 +79,7 @@ func (w *WatchDog) startMonitor(
 	ctx context.Context,
 	monitor *model.Monitor,
 	region *model.Region,
+	assertions []model.Assertion,
 ) error {
 	tracingID := pkg.GetTracingID(ctx)
 	if region == nil {
@@ -90,7 +90,7 @@ func (w *WatchDog) startMonitor(
 		config.Region = region
 	}
 	return infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-		check, err := w.run(ctx, tx, monitor, config.Region)
+		check, err := w.run(ctx, tx, monitor, config.Region, assertions)
 		if err != nil {
 			return err
 		}
@@ -114,6 +114,7 @@ func (w *WatchDog) run(
 	tx *sql.Tx,
 	monitor *model.Monitor,
 	region *model.Region,
+	assertions []model.Assertion,
 ) (*model.Check, error) {
 	tracingID := pkg.GetTracingID(ctx)
 
@@ -170,10 +171,6 @@ func (w *WatchDog) run(
 		// Assertion test
 		var failedAssertion *model.Assertion
 		if hitError == nil {
-			assertions, err := w.assertionDomain.ListAssertions(ctx, monitor.ID)
-			if err != nil {
-				return nil, err
-			}
 			for i, assertion := range assertions {
 				if pass := w.Assert(
 					*assertion.Source, assertion.Property, *assertion.Comparison, *assertion.Value, *hitResponse,
@@ -194,7 +191,8 @@ func (w *WatchDog) run(
 		if failedAssertion != nil {
 			checkSuccess = false
 			// Create error log
-			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID), hitError.Text, hitError.Type)
+			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID),
+				hitError.Text, hitError.Type)
 			if err != nil {
 				return check, err
 			}

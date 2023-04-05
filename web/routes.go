@@ -70,7 +70,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 
 	// Setup Tasks
 	syncProductsTask := task.NewSyncProductsTask()
-	runCheckTask := task.NewRunCheckTask()
+	runCheckTask := task.NewRunCheckTask(dog, monitorRegionDomain)
 
 	cogman := cron.NewCron(jobDomain, regionDomain, monitorDomain, monitorRegionDomain, syncProductsTask)
 	wheel := worker.NewWorker(runCheckTask)
@@ -96,11 +96,11 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	monitorRouter := v1.Group("/monitor")
 	registerMonitorHandlers(
 		monitorRouter,
+		dog,
 		monitorDomain,
 		authService,
 		monitorService,
 		assertionService,
-		dog,
 	)
 
 	// 404 Handler
@@ -157,11 +157,11 @@ func registerOrganizationHandlers(
 
 func registerMonitorHandlers(
 	router fiber.Router,
+	dog *watchdog.WatchDog,
 	monitorDomain *domain.MonitorDomain,
 	authService *service.AuthService,
 	monitorService *service.MonitorService,
 	assertionService *service.AssertionService,
-	dog *watchdog.WatchDog,
 ) {
 	auth := middlelayer.Protected(authService)
 
