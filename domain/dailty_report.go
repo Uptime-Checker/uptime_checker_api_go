@@ -8,7 +8,7 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
-	
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
 )
@@ -35,7 +35,8 @@ func (u *DailyReportDomain) Create(
 	dailyReport *model.DailyReport,
 ) (*model.DailyReport, error) {
 	insertStmt := DailyReport.INSERT(DailyReport.MutableColumns.Except(DailyReport.InsertedAt, DailyReport.UpdatedAt)).
-		MODEL(dailyReport).RETURNING(DailyReport.AllColumns)
+		MODEL(dailyReport).ON_CONFLICT(DailyReport.Date, DailyReport.MonitorID).DO_NOTHING().
+		RETURNING(DailyReport.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, dailyReport)
 	return dailyReport, err
 }

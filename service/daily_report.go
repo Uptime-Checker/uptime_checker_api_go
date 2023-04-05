@@ -43,14 +43,13 @@ func (d *DailyReportService) Add(
 			OrganizationID:   &organizationID,
 		}
 		return d.dailyReportDomain.Create(ctx, tx, dailyReport)
-	} else {
-		// Update
-		if success {
-			dailyReport.SuccessfulChecks = lo.ToPtr(*dailyReport.SuccessfulChecks + 1)
-		} else {
-			dailyReport.ErrorChecks = lo.ToPtr(*dailyReport.ErrorChecks + 1)
-		}
-		dailyReport.UpdatedAt = now
-		return d.dailyReportDomain.Update(ctx, tx, dailyReport.ID, dailyReport)
 	}
+	// Update
+	if success {
+		dailyReport.SuccessfulChecks = lo.ToPtr(*dailyReport.SuccessfulChecks + 1)
+	} else {
+		dailyReport.ErrorChecks = lo.ToPtr(*dailyReport.ErrorChecks + 1)
+	}
+	dailyReport.UpdatedAt = now
+	return d.dailyReportDomain.Update(ctx, tx, dailyReport.ID, dailyReport)
 }
