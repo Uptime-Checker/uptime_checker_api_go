@@ -3,7 +3,7 @@ package resource
 // RoleType type
 type RoleType int
 
-// list of role types
+// List of role types
 const (
 	RoleTypeSuperAdmin RoleType = iota + 1
 	RoleTypeAdmin

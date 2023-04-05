@@ -3,7 +3,7 @@ package resource
 // AlarmPolicyName type
 type AlarmPolicyName string
 
-// list of alarm policies
+// List of alarm policies
 const (
 	AlarmPolicyErrorThreshold    AlarmPolicyName = "MAX_ERROR_THRESHOLD"
 	AlarmPolicyDurationThreshold AlarmPolicyName = "MAX_DURATION_THRESHOLD"

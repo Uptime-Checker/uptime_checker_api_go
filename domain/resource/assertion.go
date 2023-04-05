@@ -3,7 +3,7 @@ package resource
 // AssertionComparison type
 type AssertionComparison int
 
-// list of assertion comparisons
+// List of assertion comparisons
 const (
 	AssertionComparisonEqual AssertionComparison = iota + 1
 	AssertionComparisonNotEqual
@@ -57,7 +57,7 @@ func (a AssertionComparison) String() string {
 // AssertionSource type
 type AssertionSource int
 
-// list of assertion sources
+// List of assertion sources
 const (
 	AssertionSourceStatusCode AssertionSource = iota + 1
 	AssertionSourceTextBody

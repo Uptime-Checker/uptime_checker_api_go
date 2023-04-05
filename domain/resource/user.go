@@ -3,7 +3,7 @@ package resource
 // UserLoginProvider type
 type UserLoginProvider int
 
-// list of providers
+// List of providers
 const (
 	UserLoginProviderEmail UserLoginProvider = iota + 1
 	UserLoginProviderGoogle
@@ -28,7 +28,7 @@ func (u UserLoginProvider) String() string {
 // UserContactMode type
 type UserContactMode int
 
-// list of contact modes
+// List of contact modes
 const (
 	UserContactModeEmail UserContactMode = iota + 1
 	UserContactModeSMS

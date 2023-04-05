@@ -3,7 +3,7 @@ package resource
 // SubscriptionStatus type
 type SubscriptionStatus int
 
-// list of subscription statuses
+// List of subscription statuses
 const (
 	SubscriptionStatusIncomplete SubscriptionStatus = iota + 1
 	SubscriptionStatusIncompleteExpired
@@ -40,7 +40,7 @@ func (s SubscriptionStatus) String() string {
 // ProductTier type
 type ProductTier int
 
-// list of product tiers
+// List of product tiers
 const (
 	ProductTierFree ProductTier = iota + 1
 	ProductTierDeveloper

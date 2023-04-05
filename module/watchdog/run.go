@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 
+	"github.com/samber/lo"
+
 	"github.com/getsentry/sentry-go"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
@@ -27,6 +29,7 @@ type WatchDog struct {
 	checkService         *service.CheckService
 	monitorService       *service.MonitorService
 	monitorRegionService *service.MonitorRegionService
+	errorLogService      *service.ErrorLogService
 }
 
 func NewWatchDog(
@@ -38,6 +41,7 @@ func NewWatchDog(
 	checkService *service.CheckService,
 	monitorService *service.MonitorService,
 	monitorRegionService *service.MonitorRegionService,
+	errorLogService *service.ErrorLogService,
 ) *WatchDog {
 	return &WatchDog{
 		checkDomain:          checkDomain,
@@ -48,6 +52,7 @@ func NewWatchDog(
 		checkService:         checkService,
 		monitorService:       monitorService,
 		monitorRegionService: monitorRegionService,
+		errorLogService:      errorLogService,
 	}
 }
 
@@ -156,9 +161,13 @@ func (w *WatchDog) run(
 	if hitResponse == nil && hitError != nil {
 		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
+		_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, hitError.Text, hitError.Type)
+		if err != nil {
+			return check, err
+		}
 	} else {
 		checkSuccess := true
-		// assertion test
+		// Assertion test
 		var failedAssertion *model.Assertion
 		if hitError == nil {
 			assertions, err := w.assertionDomain.ListAssertions(ctx, monitor.ID)
@@ -176,14 +185,22 @@ func (w *WatchDog) run(
 		} else {
 			checkSuccess = false
 			// Create error log
+			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, hitError.Text, hitError.Type)
+			if err != nil {
+				return check, err
+			}
 		}
 
 		if failedAssertion != nil {
 			checkSuccess = false
 			// Create error log
+			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID), hitError.Text, hitError.Type)
+			if err != nil {
+				return check, err
+			}
 		}
 
-		// Update the check
+		// update the check
 		check, err = w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
 			hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
 		if err != nil {

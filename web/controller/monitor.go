@@ -78,19 +78,19 @@ type MonitorBody struct {
 }
 
 func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
-	// body
+	// Body
 	if body.Body != nil && len(*body.Body) > constant.MaxMonitorBodySizeInBytes {
-		// max 1KB
+		// Max 1KB
 		return resp.ErrMaxBodySizeExceeded
 	}
 
-	// timeout = max interval/2
+	// Timeout = max interval/2
 	maxTimeoutRelativeToInterval := body.Interval / 2
 	if body.Timeout > maxTimeoutRelativeToInterval {
 		return resp.ErrMaxTimeoutExceeded
 	}
 
-	// assertion
+	// Assertion
 	statusCodeAssertionExists := false
 	for _, assertion := range body.Assertions {
 		if resource.AssertionSource(assertion.Source) == resource.AssertionSourceHeaders {
@@ -105,7 +105,7 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 	if !statusCodeAssertionExists {
 		return resp.ErrStatusCodeAssertionRequired
 	}
-	// validate the status code
+	// Validate the status code
 
 	return nil
 }
@@ -148,7 +148,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 			return err
 		}
 
-		// insert the assertions
+		// Insert the assertions
 		for _, assertion := range body.Assertions {
 			ass, err := m.assertionService.Create(ctx, tx, monitor.ID, assertion.Source, assertion.Property,
 				assertion.Comparison, assertion.Value)
@@ -163,7 +163,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
 	}
 
-	// start the monitor asynchronously
+	// Start the monitor asynchronously
 	go m.dog.Start(ctx, monitor, config.Region)
 
 	return resp.ServeData(c, fiber.StatusOK, monitor)

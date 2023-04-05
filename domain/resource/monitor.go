@@ -37,7 +37,7 @@ func GetMonitorMethod(method int32) string {
 // MonitorType type
 type MonitorType int
 
-// list of types
+// List of types
 const (
 	MonitorTypeAPI MonitorType = iota + 1
 	MonitorTypeBrowser
@@ -62,7 +62,7 @@ func (m MonitorType) String() string {
 // MonitorStatus type
 type MonitorStatus int
 
-// list of types
+// List of types
 const (
 	MonitorStatusPending MonitorStatus = iota + 1
 	MonitorStatusPassing
@@ -88,7 +88,7 @@ func (m MonitorStatus) String() string {
 // MonitorBodyFormat type
 type MonitorBodyFormat int
 
-// list of types
+// List of types
 const (
 	MonitorBodyFormatNoBody MonitorBodyFormat = iota + 1
 	MonitorBodyFormatXML

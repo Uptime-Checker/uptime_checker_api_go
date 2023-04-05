@@ -25,6 +25,7 @@ func NewUserDomain() *UserDomain {
 
 // Guest User
 
+// CreateGuest does not need transaction
 func (u *UserDomain) CreateGuest(ctx context.Context, email, code string) (*model.GuestUser, error) {
 	now := times.Now()
 	user := &model.GuestUser{
@@ -155,6 +156,7 @@ func (u *UserDomain) UpdateProvider(
 	return user, err
 }
 
+// UpdateName does not need transaction
 func (u *UserDomain) UpdateName(
 	ctx context.Context,
 	id int64,

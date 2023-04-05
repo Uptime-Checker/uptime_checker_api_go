@@ -3,7 +3,7 @@ package resource
 // ErrorLogType type
 type ErrorLogType int
 
-// list of error log types
+// List of error log types
 const (
 	ErrorLogTypeTimeout ErrorLogType = iota + 1
 	ErrorLogTypeAddr

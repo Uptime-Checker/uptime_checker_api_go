@@ -3,7 +3,7 @@ package resource
 // JobStatus type
 type JobStatus int
 
-// list of providers
+// List of providers
 const (
 	JobStatusScheduled JobStatus = iota + 1
 	JobStatusRunning
