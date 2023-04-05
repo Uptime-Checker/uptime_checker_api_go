@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 
+	"github.com/samber/lo"
+
 	"github.com/imroc/req/v3"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
@@ -26,6 +28,7 @@ func (c *CheckService) Update(
 	check *model.Check,
 	success bool,
 	duration, size *int32,
+	statusCode int,
 	contentType *string,
 	body *string,
 	headers *map[string]string,
@@ -44,15 +47,16 @@ func (c *CheckService) Update(
 	check.Duration = duration
 	check.ContentSize = size
 	check.ContentType = contentType
+	check.StatusCode = lo.ToPtr(int32(statusCode))
 
 	traceInfo := make(map[string]string)
 
 	traceInfo["TotalTime"] = traces.TotalTime.String()
-	traceInfo["DNSLookupTime"] = traces.TotalTime.String()
-	traceInfo["TCPConnectTime"] = traces.TotalTime.String()
-	traceInfo["TLSHandshakeTime"] = traces.TotalTime.String()
-	traceInfo["FirstResponseTime"] = traces.TotalTime.String()
-	traceInfo["ResponseTime"] = traces.TotalTime.String()
+	traceInfo["DNSLookupTime"] = traces.DNSLookupTime.String()
+	traceInfo["TCPConnectTime"] = traces.TCPConnectTime.String()
+	traceInfo["TLSHandshakeTime"] = traces.TLSHandshakeTime.String()
+	traceInfo["FirstResponseTime"] = traces.FirstResponseTime.String()
+	traceInfo["ResponseTime"] = traces.ResponseTime.String()
 
 	jsonTraces, err := json.Marshal(traceInfo)
 	if err != nil {
@@ -60,5 +64,5 @@ func (c *CheckService) Update(
 	}
 	check.Traces = pkg.StringPointer(string(jsonTraces))
 
-	return c.checkDomain.Update(ctx, tx, check)
+	return c.checkDomain.Update(ctx, tx, check.ID, check)
 }

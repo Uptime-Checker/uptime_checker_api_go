@@ -32,14 +32,15 @@ func (c *CheckDomain) Create(
 func (c *CheckDomain) Update(
 	ctx context.Context,
 	tx *sql.Tx,
+	id int64,
 	check *model.Check,
 ) (*model.Check, error) {
 	updateStmt := Check.UPDATE(
 		Check.Success, Check.Body, Check.Traces, Check.Headers, Check.StatusCode, Check.ContentSize, Check.ContentType,
 		Check.Duration, Check.UpdatedAt,
 	).MODEL(check).
-		WHERE(Check.ID.EQ(Int(check.ID))).
-		RETURNING(User.AllColumns)
+		WHERE(Check.ID.EQ(Int(id))).
+		RETURNING(Check.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, tx, check)
 	return check, err

@@ -100,7 +100,7 @@ func (w *WatchDog) startMonitor(
 				return err
 			}
 			lgr.Print(tracingID, 1, "starting monitor for", monitor.URL)
-			_, err = w.monitorRegionService.FirstOrCreate(ctx, tx, monitor.ID, region.ID)
+			_, err = w.monitorRegionService.FirstOrCreate(ctx, tx, monitor.ID, config.Region.ID)
 			if err != nil {
 				return err
 			}
@@ -132,9 +132,9 @@ func (w *WatchDog) run(
 	}
 	lgr.Print(tracingID, 2, "created check", check.ID)
 
-	var headers *map[string]string
+	var headers map[string]string
 	if monitor.Headers != nil {
-		if err := json.Unmarshal([]byte(*monitor.Headers), headers); err != nil {
+		if err := json.Unmarshal([]byte(*monitor.Headers), &headers); err != nil {
 			return nil, err
 		}
 	}
@@ -154,7 +154,7 @@ func (w *WatchDog) run(
 		monitor.Username,
 		monitor.Password,
 		bodyFormat,
-		headers,
+		&headers,
 		*monitor.Timeout,
 		*monitor.FollowRedirects,
 	)
@@ -200,7 +200,7 @@ func (w *WatchDog) run(
 
 		// update the check
 		check, err = w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
-			hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
+			hitResponse.StatusCode, hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
 		if err != nil {
 			return nil, err
 		}
