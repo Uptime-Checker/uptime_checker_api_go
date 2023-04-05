@@ -98,6 +98,8 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorRouter,
 		dog,
 		monitorDomain,
+		regionDomain,
+		monitorRegionDomain,
 		authService,
 		monitorService,
 		assertionService,
@@ -159,6 +161,8 @@ func registerMonitorHandlers(
 	router fiber.Router,
 	dog *watchdog.WatchDog,
 	monitorDomain *domain.MonitorDomain,
+	regionDomain *domain.RegionDomain,
+	monitorRegionDomain *domain.MonitorRegionDomain,
 	authService *service.AuthService,
 	monitorService *service.MonitorService,
 	assertionService *service.AssertionService,
@@ -166,10 +170,12 @@ func registerMonitorHandlers(
 	auth := middlelayer.Protected(authService)
 
 	handler := controller.NewMonitorController(
+		dog,
 		monitorDomain,
+		regionDomain,
+		monitorRegionDomain,
 		monitorService,
 		assertionService,
-		dog,
 	)
 
 	router.Post("/", auth, handler.Create)
