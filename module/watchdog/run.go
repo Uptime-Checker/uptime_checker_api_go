@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 
 	"github.com/samber/lo"
 
@@ -64,12 +65,15 @@ func (w *WatchDog) Launch(
 	ctx context.Context,
 	monitorRegionWithAssertions *pkg.MonitorRegionWithAssertions,
 ) {
+	tracingID := pkg.GetTracingID(ctx)
 	monitor := monitorRegionWithAssertions.Monitor
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		check, err := w.run(ctx, tx, monitor.Monitor, monitorRegionWithAssertions.Region, monitor.Assertions)
 		if err != nil {
 			return err
 		}
+		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
+			"duration:", fmt.Sprintf("%dms", check.Duration))
 		// Send for alarm
 		// Insert to the daily report
 		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, *monitor.OrganizationID, check.Success)

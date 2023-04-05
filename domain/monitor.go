@@ -134,11 +134,7 @@ func (m *MonitorDomain) listRecursively(organizationID int64, limit int) Stateme
 	return stmt
 }
 
-func (m *MonitorDomain) ListMonitorsToRun(ctx context.Context, from, to int) ([]model.Monitor, error) {
-	now := times.Now()
-	prev := now.Add(time.Second * time.Duration(from))
-	later := now.Add(time.Second * time.Duration(to))
-
+func (m *MonitorDomain) ListMonitorsToRun(ctx context.Context, prev, later time.Time) ([]model.Monitor, error) {
 	condition := Monitor.NextCheckAt.GT(TimestampT(prev)).
 		AND(Monitor.NextCheckAt.LT(TimestampT(later))).
 		AND(Monitor.LastCheckedAt.LT(TimestampT(prev)))
@@ -174,9 +170,9 @@ func (m *MonitorDomain) UpdateOn(
 	return monitor, err
 }
 
+// UpdateNextCheckAt does not need transaction
 func (m *MonitorDomain) UpdateNextCheckAt(
 	ctx context.Context,
-	tx *sql.Tx,
 	id int64,
 	lastCheckedAt, nextCheckAt *time.Time,
 ) (*model.Monitor, error) {
@@ -190,6 +186,6 @@ func (m *MonitorDomain) UpdateNextCheckAt(
 	updateStmt := Monitor.UPDATE(Monitor.LastCheckedAt, Monitor.NextCheckAt, Monitor.UpdatedAt).
 		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
 
-	err := updateStmt.QueryContext(ctx, tx, monitor)
+	err := updateStmt.QueryContext(ctx, infra.DB, monitor)
 	return monitor, err
 }

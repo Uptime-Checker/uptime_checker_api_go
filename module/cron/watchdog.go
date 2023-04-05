@@ -2,6 +2,7 @@ package cron
 
 import (
 	"context"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/sourcegraph/conc/iter"
@@ -10,6 +11,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task/client"
 )
@@ -34,15 +36,15 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 		config.Region = region
 	}
 
-	monitors, err := c.monitorDomain.ListMonitorsToRun(
-		ctx,
-		-watchDogCheckCronFromAndToInSeconds,
-		+watchDogCheckCronFromAndToInSeconds,
-	)
+	now := times.Now()
+	prev := now.Add(time.Second * time.Duration(-watchDogCheckCronFromAndToInSeconds))
+	later := now.Add(time.Second * time.Duration(+watchDogCheckCronFromAndToInSeconds))
+	monitors, err := c.monitorDomain.ListMonitorsToRun(ctx, prev, later)
 	if err != nil {
 		return err
 	}
-	lgr.Print(tid, 2, "number of monitors to run:", len(monitors))
+	lgr.Print(tid, 2, "number of monitors to run:", len(monitors), "from", times.Format(prev),
+		"to", times.Format(later), "region:", config.Region.Key)
 
 	iterator := iter.Iterator[model.Monitor]{
 		MaxGoroutines: watchDogCheckMaxGoroutine,

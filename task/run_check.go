@@ -2,7 +2,6 @@ package task
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -40,6 +38,7 @@ func NewRunCheckTask(
 }
 
 func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
+	ctx = pkg.NewTracingID(ctx)
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
 
@@ -60,10 +59,9 @@ func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 	monitor := monitorRegionWithAssertions.Monitor
 	nextCheckAt := now.Add(time.Duration(*monitor.Interval) * time.Second)
 
-	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
-		_, err := r.monitorDomain.UpdateNextCheckAt(ctx, tx, monitor.ID, &now, &nextCheckAt)
-		return err
-	}); err != nil {
+	lgr.Print(tid, 2, "updating next check for monitor", monitor.ID, "==>", times.Format(nextCheckAt))
+	_, err = r.monitorDomain.UpdateNextCheckAt(ctx, monitor.ID, &now, &nextCheckAt)
+	if err != nil {
 		sentry.CaptureException(err)
 	}
 	return nil

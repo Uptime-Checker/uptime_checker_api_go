@@ -41,6 +41,7 @@ func NewStartMonitorTask(
 }
 
 func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
+	ctx = pkg.NewTracingID(ctx)
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
 

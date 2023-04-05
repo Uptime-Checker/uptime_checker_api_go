@@ -64,11 +64,6 @@ func DaysBetween(a, b time.Time) int {
 	return days
 }
 
-func ParseAdaptyDate(unparsedTime string) (*time.Time, error) {
-	layout := "2006-01-02T15:04:05-0700"
-	parsedTime, err := time.Parse(layout, unparsedTime)
-	if err != nil {
-		return nil, err
-	}
-	return &parsedTime, nil
+func Format(a time.Time) string {
+	return a.Format(time.RFC3339)
 }
