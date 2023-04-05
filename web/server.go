@@ -19,6 +19,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
@@ -131,6 +132,7 @@ func setupMiddlewares(app *fiber.App, newRelicApp *newrelic.Application) {
 			},
 		}))
 	} else {
+		app.Use(pprof.New())
 		app.Get("/metrics", monitor.New(monitor.Config{Title: "Metrics"}))
 	}
 }
