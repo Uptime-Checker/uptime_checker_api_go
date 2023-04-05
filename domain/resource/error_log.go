@@ -14,6 +14,7 @@ const (
 	ErrorLogTypeUnknownNetwork
 	ErrorLogTypeSyscall
 	ErrorLogTypeResponseMalformed
+	ErrorLogTypeAssertionFailure
 	ErrorLogTypeUnknown ErrorLogType = 99
 )
 

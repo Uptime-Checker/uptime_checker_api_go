@@ -162,7 +162,7 @@ func (w *WatchDog) run(
 	if hitResponse == nil && hitError != nil {
 		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
-		_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, hitError.Text, hitError.Type)
+		_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
 		if err != nil {
 			return check, err
 		}
@@ -182,7 +182,7 @@ func (w *WatchDog) run(
 		} else {
 			checkSuccess = false
 			// Create error log
-			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, hitError.Text, hitError.Type)
+			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
 			if err != nil {
 				return check, err
 			}
@@ -192,7 +192,7 @@ func (w *WatchDog) run(
 			checkSuccess = false
 			// Create error log
 			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID),
-				hitError.Text, hitError.Type)
+				nil, resource.ErrorLogTypeAssertionFailure)
 			if err != nil {
 				return check, err
 			}

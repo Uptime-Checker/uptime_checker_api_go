@@ -20,13 +20,13 @@ func NewErrorLogService(errorLogDomain *domain.ErrorLogDomain) *ErrorLogService 
 
 func (e *ErrorLogService) Create(
 	ctx context.Context,
-	tx *sql.Tx, monitorID, checkID int64, assertionID *int64, text string, errorLogType resource.ErrorLogType,
+	tx *sql.Tx, monitorID, checkID int64, assertionID *int64, text *string, errorLogType resource.ErrorLogType,
 ) (*model.ErrorLog, error) {
 	errorLog := model.ErrorLog{
 		MonitorID:   &monitorID,
 		CheckID:     &checkID,
 		AssertionID: assertionID,
-		Text:        &text,
+		Text:        text,
 	}
 
 	return e.errorLogDomain.Create(ctx, tx, &errorLog, errorLogType)
