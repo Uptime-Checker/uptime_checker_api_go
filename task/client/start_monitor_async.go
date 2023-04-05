@@ -13,19 +13,19 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
-func RunCheckAsync(ctx context.Context, monitorRegionID int64, runAt time.Time) error {
-	body := task.RunCheckTaskPayload{
-		MonitorRegionID: monitorRegionID,
+func StartMonitor(ctx context.Context, monitorID int64, runAt time.Time) error {
+	body := task.StartMonitorTaskPayload{
+		MonitorID: monitorID,
 	}
 
 	tid := pkg.GetTracingID(ctx)
-	lgr.Print(tid, "scheduling check run for monitor region", monitorRegionID)
+	lgr.Print(tid, "scheduling start monitor for monitor", monitorID)
 
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return err
 	}
 
-	job := &gue.Job{Type: worker.TaskRunCheck, RunAt: runAt, Args: payload}
+	job := &gue.Job{Type: worker.TaskStartMonitor, RunAt: runAt, Args: payload}
 	return worker.Wheel.Enqueue(ctx, job)
 }

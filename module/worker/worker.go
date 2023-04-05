@@ -21,6 +21,7 @@ var Wheel *gue.Client
 const (
 	TaskDeleteAccount = "user:delete"
 	TaskRunCheck      = "check:run"
+	TaskStartMonitor  = "monitor:start"
 )
 
 type Worker struct {
