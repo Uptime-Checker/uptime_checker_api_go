@@ -43,8 +43,8 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 	if err != nil {
 		return err
 	}
-	lgr.Print(tid, 2, "number of monitors to run:", len(monitors), "from", times.Format(prev),
-		"to", times.Format(later), "region:", config.Region.Key)
+	lgr.Print(tid, 2, "number of monitors to run:", len(monitors), "from", times.Format(prev), "to",
+		times.Format(later), "region:", config.Region.Key)
 
 	iterator := iter.Iterator[model.Monitor]{
 		MaxGoroutines: watchDogCheckMaxGoroutine,
