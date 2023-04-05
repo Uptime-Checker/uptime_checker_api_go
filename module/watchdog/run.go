@@ -30,6 +30,7 @@ type WatchDog struct {
 	monitorService       *service.MonitorService
 	monitorRegionService *service.MonitorRegionService
 	errorLogService      *service.ErrorLogService
+	dailyReportService   *service.DailyReportService
 }
 
 func NewWatchDog(
@@ -42,6 +43,7 @@ func NewWatchDog(
 	monitorService *service.MonitorService,
 	monitorRegionService *service.MonitorRegionService,
 	errorLogService *service.ErrorLogService,
+	dailyReportService *service.DailyReportService,
 ) *WatchDog {
 	return &WatchDog{
 		checkDomain:          checkDomain,
@@ -53,6 +55,7 @@ func NewWatchDog(
 		monitorService:       monitorService,
 		monitorRegionService: monitorRegionService,
 		errorLogService:      errorLogService,
+		dailyReportService:   dailyReportService,
 	}
 }
 
@@ -69,6 +72,10 @@ func (w *WatchDog) Launch(
 		}
 		// Send for alarm
 		// Insert to the daily report
+		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, *monitor.OrganizationID, check.Success)
+		if err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		sentry.CaptureException(err)

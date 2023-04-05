@@ -49,9 +49,9 @@ func (u *UserDomain) GetLatestGuestUser(ctx context.Context, email string) (*mod
 }
 
 func (u *UserDomain) GetGuestUser(ctx context.Context, email, code string) (*model.GuestUser, error) {
-	stmt := SELECT(GuestUser.AllColumns).FROM(GuestUser).WHERE(GuestUser.Email.EQ(String(email))).
-		WHERE(GuestUser.Code.EQ(String(code))).
-		ORDER_BY(GuestUser.ExpiresAt.DESC()).LIMIT(1)
+	stmt := SELECT(GuestUser.AllColumns).FROM(GuestUser).WHERE(
+		GuestUser.Email.EQ(String(email)).AND(GuestUser.Code.EQ(String(code))),
+	).ORDER_BY(GuestUser.ExpiresAt.DESC()).LIMIT(1)
 
 	user := &model.GuestUser{}
 	err := stmt.QueryContext(ctx, infra.DB, user)

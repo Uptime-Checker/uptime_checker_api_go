@@ -42,6 +42,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	regionDomain := domain.NewRegionDomain()
 	assertionDomain := domain.NewAssertionDomain()
 	errorLogDomain := domain.NewErrorLogDomain()
+	dailyReportDomain := domain.NewDailyReportDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -53,6 +54,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	monitorRegionService := service.NewMonitorRegionService(monitorRegionDomain)
 	checkService := service.NewCheckService(checkDomain)
 	errorLogService := service.NewErrorLogService(errorLogDomain)
+	dailyReportService := service.NewDailyReportService(dailyReportDomain)
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
@@ -66,6 +68,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorService,
 		monitorRegionService,
 		errorLogService,
+		dailyReportService,
 	)
 
 	// Setup Tasks
