@@ -27,7 +27,7 @@ func (m *MonitorRegionService) FirstOrCreate(
 	tracingID := pkg.GetTracingID(ctx)
 	monitorRegion, err := m.monitorRegionDomain.GetMonitorRegion(ctx, monitorID, regionID)
 	if err == nil {
-		lgr.Print(tracingID, 1, "got monitor region, monitor:", monitorID, "region", regionID)
+		lgr.Print(tracingID, 1, "got monitor region, monitor", monitorID, "region", regionID)
 		return monitorRegion, nil
 	}
 	now := times.Now()
@@ -37,6 +37,6 @@ func (m *MonitorRegionService) FirstOrCreate(
 		MonitorID:     &monitorID,
 		RegionID:      &regionID,
 	}
-	lgr.Print(tracingID, 2, "creating monitor region, monitor:", monitorID, "region", regionID)
+	lgr.Print(tracingID, 2, "creating monitor region, monitor", monitorID, "region", regionID)
 	return m.monitorRegionDomain.Create(ctx, tx, monitorRegion)
 }

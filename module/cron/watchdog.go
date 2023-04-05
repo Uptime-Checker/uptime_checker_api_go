@@ -48,8 +48,8 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 		MaxGoroutines: watchDogCheckMaxGoroutine,
 	}
 	iterator.ForEach(monitors, func(monitor *model.Monitor) {
-		cachedMonitorNextCheckAt := cache.GetMonitorToRun(monitor.ID)
-		if cachedMonitorNextCheckAt == nil {
+		cachedRegionID := cache.GetMonitorToRun(monitor.ID)
+		if cachedRegionID == nil {
 			// schedule the monitor
 			currentMonitorRegion, err := c.monitorRegionDomain.GetMonitorRegion(ctx, monitor.ID, config.Region.ID)
 			if err != nil {
@@ -69,7 +69,7 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 					sentry.CaptureException(err)
 					return
 				}
-				cache.SetMonitorToRun(monitor.ID, *monitor.NextCheckAt)
+				cache.SetMonitorToRun(monitor.ID, config.Region.ID)
 			}
 		}
 	})
