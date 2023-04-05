@@ -19,7 +19,7 @@ func RunCheckAsync(ctx context.Context, monitorRegionID int64, runAt time.Time) 
 	}
 
 	tid := pkg.GetTracingID(ctx)
-	lgr.Print(tid, "scheduling check run for monitor region", monitorRegionID)
+	lgr.Print(tid, "scheduling check run for monitor region:", monitorRegionID)
 
 	payload, err := json.Marshal(body)
 	if err != nil {
