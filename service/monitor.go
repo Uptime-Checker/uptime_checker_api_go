@@ -116,5 +116,5 @@ func (m *MonitorService) Start(
 		nextCheckAt = now.Add(time.Second * constant.MonitorStartDelayInSeconds)
 	}
 
-	return m.monitorDomain.UpdateNextCheckAt(ctx, tx, monitor.ID, on, &nextCheckAt)
+	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, &nextCheckAt)
 }

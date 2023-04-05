@@ -142,7 +142,7 @@ func (m *MonitorDomain) ListMonitorsToRun(ctx context.Context, from, to int) ([]
 	return monitors, err
 }
 
-func (m *MonitorDomain) UpdateNextCheckAt(
+func (m *MonitorDomain) UpdateOn(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,
@@ -157,6 +157,26 @@ func (m *MonitorDomain) UpdateNextCheckAt(
 	}
 
 	updateStmt := Monitor.UPDATE(Monitor.On, Monitor.NextCheckAt, Monitor.UpdatedAt).
+		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, monitor)
+	return monitor, err
+}
+
+func (m *MonitorDomain) UpdateNextCheckAt(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+	lastCheckedAt, nextCheckAt *time.Time,
+) (*model.Monitor, error) {
+	now := times.Now()
+	monitor := &model.Monitor{
+		LastCheckedAt: lastCheckedAt,
+		NextCheckAt:   nextCheckAt,
+		UpdatedAt:     now,
+	}
+
+	updateStmt := Monitor.UPDATE(Monitor.LastCheckedAt, Monitor.NextCheckAt, Monitor.UpdatedAt).
 		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, tx, monitor)

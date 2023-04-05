@@ -70,7 +70,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 
 	// Setup Tasks
 	syncProductsTask := task.NewSyncProductsTask()
-	runCheckTask := task.NewRunCheckTask(dog, monitorRegionDomain)
+	runCheckTask := task.NewRunCheckTask(dog, monitorDomain, monitorRegionDomain)
 
 	cogman := cron.NewCron(jobDomain, regionDomain, monitorDomain, monitorRegionDomain, syncProductsTask)
 	wheel := worker.NewWorker(runCheckTask)

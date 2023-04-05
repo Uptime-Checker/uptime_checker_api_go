@@ -226,7 +226,7 @@ func (m *MonitorController) Start(c *fiber.Ctx) error {
 		m.dog.Start(ctx, monitorWithAssertions.Monitor, monitorRegionWithAssertions.Region, assertions)
 	} else {
 		if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
-			_, err := m.monitorDomain.UpdateNextCheckAt(ctx, tx, body.MonitorID, body.On, nil)
+			_, err := m.monitorDomain.UpdateOn(ctx, tx, body.MonitorID, body.On, nil)
 			return err
 		}); err != nil {
 			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
