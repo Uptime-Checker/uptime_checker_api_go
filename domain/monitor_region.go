@@ -19,12 +19,9 @@ func NewMonitorRegionDomain() *MonitorRegionDomain {
 	return &MonitorRegionDomain{}
 }
 
-func (m *MonitorRegionDomain) GetOldestChecked(
-	ctx context.Context,
-	monitorID, regionID int64,
-) (*model.MonitorRegion, error) {
+func (m *MonitorRegionDomain) GetOldestChecked(ctx context.Context, monitorID int64) (*model.MonitorRegion, error) {
 	stmt := SELECT(MonitorRegion.AllColumns).FROM(MonitorRegion).WHERE(
-		MonitorRegion.MonitorID.EQ(Int(monitorID)).AND(MonitorRegion.RegionID.EQ(Int(regionID))),
+		MonitorRegion.MonitorID.EQ(Int(monitorID)),
 	).ORDER_BY(MonitorRegion.LastCheckedAt.DESC()).LIMIT(1)
 
 	monitorRegion := &model.MonitorRegion{}
