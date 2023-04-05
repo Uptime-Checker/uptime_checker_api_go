@@ -74,9 +74,10 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	// Setup Tasks
 	syncProductsTask := task.NewSyncProductsTask()
 	runCheckTask := task.NewRunCheckTask(dog, monitorDomain, monitorRegionDomain)
+	startMonitorTask := task.NewStartMonitorTask(dog, monitorDomain, regionDomain, assertionDomain)
 
 	cogman := cron.NewCron(jobDomain, regionDomain, monitorDomain, monitorRegionDomain, syncProductsTask)
-	wheel := worker.NewWorker(runCheckTask)
+	wheel := worker.NewWorker(runCheckTask, startMonitorTask)
 
 	//  ========== Age of the routers ==========
 	// User router for auth and user account

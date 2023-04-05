@@ -32,6 +32,17 @@ func (m *MonitorDomain) Count(ctx context.Context, organizationID int64) (int, e
 	return dest.count, err
 }
 
+func (m *MonitorDomain) Get(
+	ctx context.Context,
+	monitorID int64,
+) (*model.Monitor, error) {
+	stmt := SELECT(Monitor.AllColumns).FROM(Monitor).WHERE(Monitor.ID.EQ(Int(monitorID))).LIMIT(1)
+
+	monitor := &model.Monitor{}
+	err := stmt.QueryContext(ctx, infra.DB, monitor)
+	return monitor, err
+}
+
 func (m *MonitorDomain) List(ctx context.Context, organizationID int64, limit int) ([]model.Monitor, error) {
 	stmt := m.listRecursively(organizationID, limit)
 

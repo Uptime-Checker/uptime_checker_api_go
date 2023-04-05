@@ -87,7 +87,7 @@ func (w *WatchDog) Start(
 	ctx context.Context,
 	monitor *model.Monitor,
 	region *model.Region,
-	assertions []*model.Assertion,
+	assertions []model.Assertion,
 ) {
 	if err := w.startMonitor(ctx, monitor, region, assertions); err != nil {
 		sentry.CaptureException(err)
@@ -98,7 +98,7 @@ func (w *WatchDog) startMonitor(
 	ctx context.Context,
 	monitor *model.Monitor,
 	region *model.Region,
-	assertions []*model.Assertion,
+	assertions []model.Assertion,
 ) error {
 	tracingID := pkg.GetTracingID(ctx)
 	if region == nil {
@@ -133,7 +133,7 @@ func (w *WatchDog) run(
 	tx *sql.Tx,
 	monitor *model.Monitor,
 	region *model.Region,
-	assertions []*model.Assertion,
+	assertions []model.Assertion,
 ) (*model.Check, error) {
 	tracingID := pkg.GetTracingID(ctx)
 
@@ -194,7 +194,7 @@ func (w *WatchDog) run(
 				if pass := w.Assert(
 					*assertion.Source, assertion.Property, *assertion.Comparison, *assertion.Value, *hitResponse,
 				); !pass {
-					failedAssertion = assertions[i]
+					failedAssertion = &assertions[i]
 					break
 				}
 			}

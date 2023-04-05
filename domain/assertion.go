@@ -49,6 +49,6 @@ func (a *AssertionDomain) ListAssertions(ctx context.Context, monitorID int64) (
 	stmt := SELECT(Assertion.AllColumns).FROM(Assertion).WHERE(Assertion.MonitorID.EQ(Int(monitorID)))
 
 	var assertions []model.Assertion
-	err := stmt.QueryContext(ctx, infra.DB, assertions)
+	err := stmt.QueryContext(ctx, infra.DB, &assertions)
 	return assertions, err
 }

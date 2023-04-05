@@ -25,11 +25,12 @@ const (
 )
 
 type Worker struct {
-	runCheckTask *task.RunCheckTask
+	runCheckTask     *task.RunCheckTask
+	startMonitorTask *task.StartMonitorTask
 }
 
-func NewWorker(runCheckTask *task.RunCheckTask) *Worker {
-	return &Worker{runCheckTask: runCheckTask}
+func NewWorker(runCheckTask *task.RunCheckTask, startMonitorTask *task.StartMonitorTask) *Worker {
+	return &Worker{runCheckTask: runCheckTask, startMonitorTask: startMonitorTask}
 }
 
 func (w *Worker) Start(ctx context.Context) error {
@@ -43,7 +44,8 @@ func (w *Worker) Start(ctx context.Context) error {
 	}
 
 	workMap := gue.WorkMap{
-		TaskRunCheck: w.runCheckTask.Do,
+		TaskRunCheck:     w.runCheckTask.Do,
+		TaskStartMonitor: w.startMonitorTask.Do,
 	}
 
 	// create a pool of workers

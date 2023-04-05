@@ -48,7 +48,7 @@ type MonitorRegionWithAssertions struct {
 
 	Monitor struct {
 		*model.Monitor
-		Assertions []*model.Assertion
+		Assertions []model.Assertion
 	}
 }
 
