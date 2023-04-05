@@ -47,6 +47,6 @@ func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 	if err != nil {
 		sentry.CaptureException(err)
 	}
-	r.dog.Launch(ctx, monitorRegionWithAssertions)
+	go r.dog.Launch(ctx, monitorRegionWithAssertions)
 	return nil
 }
