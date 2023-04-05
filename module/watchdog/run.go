@@ -61,6 +61,18 @@ func (w *WatchDog) Launch(
 	ctx context.Context,
 	monitorRegionWithAssertions *pkg.MonitorRegionWithAssertions,
 ) {
+	monitor := monitorRegionWithAssertions.Monitor
+	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		check, err := w.run(ctx, tx, monitor.Monitor, monitorRegionWithAssertions.Region, monitor.Assertions)
+		if err != nil {
+			return err
+		}
+		// Send for alarm
+		// Insert to the daily report
+		return nil
+	}); err != nil {
+		sentry.CaptureException(err)
+	}
 }
 
 // Start is run by the controller
@@ -205,9 +217,6 @@ func (w *WatchDog) run(
 			return nil, err
 		}
 	}
-
-	// Schedule next check
-	// Send for alarm if needed
 	return check, nil
 }
 
