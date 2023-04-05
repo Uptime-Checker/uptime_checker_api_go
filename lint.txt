@@ -1,4 +1,0 @@
-module/watchdog/run.go:25:20: func `(*WatchDog).run` is unused (unused)
-module/watchdog/run.go:80:20: func `(*WatchDog).gateCheck` is unused (unused)
-task/run_check.go:19:47: unused-parameter: parameter 'job' seems to be unused, consider removing or renaming it as _ (revive)
-task/sync_products.go:19:30: unused-parameter: parameter 'tx' seems to be unused, consider removing or renaming it as _ (revive)
