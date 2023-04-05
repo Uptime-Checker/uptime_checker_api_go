@@ -84,7 +84,7 @@ func (c *Cron) Start(ctx context.Context) error {
 	if err != nil {
 		sentry.CaptureException(err)
 	} else {
-		if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 			for _, job := range recurringJobs {
 				if job.NextRunAt == nil || times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
 					nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval))
@@ -137,7 +137,7 @@ func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, tsk T, jo
 		nextRunAt = now.Add(time.Minute * time.Duration(*job.Interval))
 	}
 
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		_, err := jobDomain.UpdateRunning(ctx, tx, job.ID, &now, &nextRunAt, resource.JobStatusRunning)
 		if err != nil {
 			return err

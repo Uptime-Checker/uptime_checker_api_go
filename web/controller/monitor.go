@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 
@@ -146,7 +145,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	var monitor *model.Monitor
 	var assertions []*model.Assertion
 
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		lgr.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
 		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL, body.Method,
 			body.Body, body.Username, body.Password, body.BodyFormat, body.Interval, body.Timeout,
@@ -225,7 +224,7 @@ func (m *MonitorController) Start(c *fiber.Ctx) error {
 		assertions := monitorWithAssertions.Assertions
 		m.dog.Start(ctx, monitorWithAssertions.Monitor, monitorRegionWithAssertions.Region, assertions)
 	} else {
-		if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 			_, err := m.monitorDomain.UpdateOn(ctx, tx, body.MonitorID, body.On, nil)
 			return err
 		}); err != nil {

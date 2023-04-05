@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"database/sql"
 
 	"github.com/gofiber/fiber/v2"
@@ -91,7 +90,7 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 	lgr.Print(tracingID, 2, "to assign role", role.Name)
 
 	var organization *model.Organization
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		organization, err = o.organizationDomain.Create(ctx, tx, body.Name, body.Slug)
 		if err != nil {
 			return err

@@ -65,7 +65,7 @@ func (w *WatchDog) Launch(
 	monitorRegionWithAssertions *pkg.MonitorRegionWithAssertions,
 ) {
 	monitor := monitorRegionWithAssertions.Monitor
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		check, err := w.run(ctx, tx, monitor.Monitor, monitorRegionWithAssertions.Region, monitor.Assertions)
 		if err != nil {
 			return err
@@ -108,7 +108,7 @@ func (w *WatchDog) startMonitor(
 		}
 		config.Region = region
 	}
-	return infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	return infra.Transaction(ctx, func(tx *sql.Tx) error {
 		check, err := w.run(ctx, tx, monitor, config.Region, assertions)
 		if err != nil {
 			return err

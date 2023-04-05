@@ -60,7 +60,7 @@ func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 	monitor := monitorRegionWithAssertions.Monitor
 	nextCheckAt := now.Add(time.Duration(*monitor.Interval) * time.Second)
 
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		_, err := r.monitorDomain.UpdateNextCheckAt(ctx, tx, monitor.ID, &now, &nextCheckAt)
 		return err
 	}); err != nil {

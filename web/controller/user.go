@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 
@@ -105,7 +104,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 	lgr.Print(tracingID, 1, "found guest user", guestUser.ID, guestUser.Email, guestUser.ExpiresAt)
 
 	user, userGetError := u.userDomain.GetUser(ctx, body.Email)
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		if userGetError != nil {
 			user, err = u.userService.CreateNewUserAndContact(ctx, tx, body.Email)
 			if err != nil {
@@ -165,7 +164,7 @@ func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
 	provider := resource.UserLoginProvider(body.Provider)
 
 	user, err = u.userDomain.GetUser(ctx, body.Email)
-	if err := infra.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		if err != nil {
 			user, err = u.userService.CreateNewProviderUserAndContact(
 				ctx, tx, body.Name, body.Email, body.Provider, body.ProviderUID, body.Picture,

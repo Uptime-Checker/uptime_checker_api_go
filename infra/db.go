@@ -81,13 +81,13 @@ func RollbackTransaction(ctx context.Context, transaction *sql.Tx) error {
 // attempts to rollback, if not it commits.
 // Queries inside the transaction cannot run concurrently
 // https://github.com/jackc/pgx/issues/1256
-func Transaction(ctx context.Context, f func(context.Context, *sql.Tx) error) error {
+func Transaction(ctx context.Context, f func(*sql.Tx) error) error {
 	tx, err := StartTransaction(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = f(ctx, tx)
+	err = f(tx)
 	if err != nil {
 		rollbackError := RollbackTransaction(ctx, tx)
 		if rollbackError != nil {
