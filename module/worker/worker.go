@@ -16,8 +16,10 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
-var SlowWheel *gue.Client
-var FastWheel *asynq.Client
+var (
+	SlowWheel *gue.Client
+	FastWheel *asynq.Client
+)
 
 // Task list
 const (
@@ -74,12 +76,12 @@ func (w *Worker) StartGue(ctx context.Context) error {
 
 func (w *Worker) StartAsynq(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
-	FastWheel = asynq.NewClient(asynq.RedisClientOpt{Addr: config.App.RedisQueue})
 
-	srv := asynq.NewServer(
-		asynq.RedisClientOpt{Addr: config.App.RedisQueue},
-		asynq.Config{Concurrency: config.App.WorkerPool},
-	)
+	redisClientOpt := asynq.RedisClientOpt{
+		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
+	}
+	FastWheel = asynq.NewClient(redisClientOpt)
+	srv := asynq.NewServer(redisClientOpt, asynq.Config{Concurrency: config.App.WorkerPool})
 
 	mux := asynq.NewServeMux()
 	mux.Handle(TaskStartMonitor, w.startMonitorTask)

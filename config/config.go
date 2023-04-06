@@ -23,8 +23,10 @@ type config struct {
 	DatabasePassword string `mapstructure:"DB_PASSWORD"`
 	DatabaseSchema   string `mapstructure:"DB_SCHEMA"`
 
-	RedisCache string `mapstructure:"REDIS_CACHE"`
-	RedisQueue string `mapstructure:"REDIS_QUEUE"`
+	RedisCache     string `mapstructure:"REDIS_CACHE"`
+	RedisQueue     string `mapstructure:"REDIS_QUEUE"`
+	RedisQueueUser string `mapstructure:"REDIS_QUEUE_USER"`
+	RedisQueuePass string `mapstructure:"REDIS_QUEUE_PASS"`
 
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
 
