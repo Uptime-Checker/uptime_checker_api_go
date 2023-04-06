@@ -85,6 +85,7 @@ func (w *Worker) StartAsynq(ctx context.Context) error {
 
 	mux := asynq.NewServeMux()
 	mux.Handle(TaskStartMonitor, w.startMonitorTask)
+	mux.Handle(TaskRunCheck, w.runCheckTask)
 
 	go func() {
 		if err := srv.Run(mux); err != nil {
