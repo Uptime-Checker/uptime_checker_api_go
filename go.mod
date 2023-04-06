@@ -17,6 +17,7 @@ require (
 	github.com/imroc/req/v3 v3.33.2
 	github.com/jackc/pgx/v5 v5.3.0
 	github.com/jinzhu/copier v0.3.5
+	github.com/mdaliyan/icache/v2 v2.1.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/newrelic/go-agent/v3 v3.20.4
 	github.com/samber/lo v1.38.1
