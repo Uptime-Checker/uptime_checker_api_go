@@ -2,9 +2,14 @@ package web
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/hibiken/asynq"
+	"github.com/hibiken/asynqmon"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/cron"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
@@ -108,6 +113,15 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorService,
 		assertionService,
 	)
+
+	redisClientOpt := asynq.RedisClientOpt{
+		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
+	}
+	fastWheelMonitoring := asynqmon.New(asynqmon.Options{
+		RootPath:     "/monitoring/tasks", // RootPath specifies the root for asynqmon app
+		RedisConnOpt: redisClientOpt,
+	})
+	app.All(fmt.Sprintf("%s/*", fastWheelMonitoring.RootPath()), adaptor.HTTPHandler(fastWheelMonitoring))
 
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {

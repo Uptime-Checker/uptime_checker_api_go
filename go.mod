@@ -10,11 +10,13 @@ require (
 	github.com/go-jet/jet/v2 v2.9.0
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/go-redis/cache/v9 v9.0.0
+	github.com/gofiber/adaptor/v2 v2.2.0
 	github.com/gofiber/contrib/fibernewrelic v1.1.1
 	github.com/gofiber/contrib/fibersentry v1.0.2
 	github.com/gofiber/fiber/v2 v2.43.0
 	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
 	github.com/hibiken/asynq v0.24.0
+	github.com/hibiken/asynqmon v0.7.1
 	github.com/imroc/req/v3 v3.33.2
 	github.com/jackc/pgx/v5 v5.3.0
 	github.com/jinzhu/copier v0.3.5
@@ -51,16 +53,17 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20230323073829-e72429f035bd // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/klauspost/compress v1.16.3 // indirect
+	github.com/klauspost/compress v1.16.4 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.9.2 // indirect
