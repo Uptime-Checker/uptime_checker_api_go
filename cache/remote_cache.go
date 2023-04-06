@@ -23,7 +23,8 @@ func SetupRemoteCache() {
 
 	rdb := redis.NewClient(opt)
 	remoteCache = cache.New(&cache.Options{
-		Redis: rdb,
+		Redis:      rdb,
+		LocalCache: cache.NewTinyLFU(1000, 10*time.Minute),
 	})
 }
 

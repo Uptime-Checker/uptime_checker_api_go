@@ -7,9 +7,7 @@ import (
 	"github.com/mdaliyan/icache/v2"
 )
 
-var (
-	monitorCheckPot icache.Pot[int64]
-)
+var monitorCheckPot icache.Pot[int64]
 
 func SetupLocalCache() {
 	monitorCheckPot = icache.NewPot[int64](icache.WithTTL(8 * time.Second))
