@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/hibiken/asynq"
 	"github.com/vgarvardt/gue/v5"
 	"github.com/vgarvardt/gue/v5/adapter"
 	"github.com/vgarvardt/gue/v5/adapter/libpq"
@@ -15,7 +16,8 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
-var Wheel *gue.Client
+var SlowWheel *gue.Client
+var FastWheel *asynq.Client
 
 // Task list
 const (
@@ -33,12 +35,12 @@ func NewWorker(runCheckTask *task.RunCheckTask, startMonitorTask *task.StartMoni
 	return &Worker{runCheckTask: runCheckTask, startMonitorTask: startMonitorTask}
 }
 
-func (w *Worker) Start(ctx context.Context) error {
+func (w *Worker) StartGue(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
 	poolAdapter := libpq.NewConnPool(infra.DB)
 
 	var err error
-	Wheel, err = gue.NewClient(poolAdapter)
+	SlowWheel, err = gue.NewClient(poolAdapter)
 	if err != nil {
 		return err
 	}
@@ -50,7 +52,7 @@ func (w *Worker) Start(ctx context.Context) error {
 
 	// create a pool of workers
 	workers, err := gue.NewWorkerPool(
-		Wheel, workMap,
+		SlowWheel, workMap,
 		config.App.WorkerPool,
 		gue.WithPoolLogger(adapter.NewStdLogger()),
 		gue.WithPoolPollInterval(500*time.Millisecond),
@@ -66,6 +68,27 @@ func (w *Worker) Start(ctx context.Context) error {
 			panic(err)
 		}
 	}()
-	lgr.Print(tracingID, "worker started with", config.App.WorkerPool, "worker pool")
+	lgr.Print(tracingID, "slow worker started with", config.App.WorkerPool, "worker pool")
+	return nil
+}
+
+func (w *Worker) StartAsynq(ctx context.Context) error {
+	tracingID := pkg.GetTracingID(ctx)
+	FastWheel = asynq.NewClient(asynq.RedisClientOpt{Addr: config.App.RedisQueue})
+
+	srv := asynq.NewServer(
+		asynq.RedisClientOpt{Addr: config.App.RedisQueue},
+		asynq.Config{Concurrency: config.App.WorkerPool},
+	)
+
+	mux := asynq.NewServeMux()
+	mux.Handle(TaskStartMonitor, w.startMonitorTask)
+
+	go func() {
+		if err := srv.Run(mux); err != nil {
+			panic(err)
+		}
+	}()
+	lgr.Print(tracingID, "fast worker started with", config.App.WorkerPool, "worker pool")
 	return nil
 }

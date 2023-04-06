@@ -117,7 +117,10 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		if err := cogman.Start(ctx); err != nil {
 			return err
 		}
-		return wheel.Start(ctx)
+		if err := wheel.StartGue(ctx); err != nil {
+			return err
+		}
+		return wheel.StartAsynq(ctx)
 	})
 }
 

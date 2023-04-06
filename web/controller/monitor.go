@@ -15,7 +15,6 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/gandalf"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
-	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task/client"
@@ -120,7 +119,6 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 func (m *MonitorController) Create(c *fiber.Ctx) error {
 	ctx := c.Context()
 	body := new(MonitorBody)
-	now := times.Now()
 	tracingID := pkg.GetTracingID(ctx)
 	user := middlelayer.GetUser(c)
 
@@ -175,7 +173,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 	}
 
 	// Start the monitor asynchronously
-	if err := client.StartMonitor(ctx, monitor.ID, now); err != nil {
+	if err := client.StartMonitorAsyncFast(ctx, monitor.ID); err != nil {
 		return resp.SendError(c, fiber.StatusInternalServerError, err)
 	}
 

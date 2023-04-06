@@ -27,6 +27,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/worker"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
@@ -90,6 +91,9 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 
 	// Shutdown the workers
 	shutdown()
+	if err := worker.FastWheel.Close(); err != nil {
+		sentry.CaptureException(err)
+	}
 
 	// Close the DB connection
 	if err := infra.DB.Close(); err != nil {

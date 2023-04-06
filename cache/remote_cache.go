@@ -16,7 +16,7 @@ import (
 var remoteCache *cache.Cache
 
 func SetupRemoteCache() {
-	opt, err := redis.ParseURL(config.App.Redis)
+	opt, err := redis.ParseURL(config.App.RedisCache)
 	if err != nil {
 		panic(err)
 	}

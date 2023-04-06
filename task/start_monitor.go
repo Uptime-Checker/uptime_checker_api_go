@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/hibiken/asynq"
 	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
@@ -41,6 +42,14 @@ func NewStartMonitorTask(
 }
 
 func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
+	return s.process(ctx, job.Args)
+}
+
+func (s StartMonitorTask) ProcessTask(ctx context.Context, t *asynq.Task) error {
+	return s.process(ctx, t.Payload())
+}
+
+func (s StartMonitorTask) process(ctx context.Context, payload []byte) error {
 	ctx = pkg.NewTracingID(ctx)
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
@@ -48,7 +57,7 @@ func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
 	lgr.Print(tid, 1, "running StartMonitorTask")
 
 	var body StartMonitorTaskPayload
-	if err := json.Unmarshal(job.Args, &body); err != nil {
+	if err := json.Unmarshal(payload, &body); err != nil {
 		return err
 	}
 
@@ -66,7 +75,6 @@ func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
 		return nil
 	}
 	s.dog.Start(ctx, monitor, config.Region, assertions)
-
 	return nil
 }
 
