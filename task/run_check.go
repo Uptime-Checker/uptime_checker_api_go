@@ -8,6 +8,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/vgarvardt/gue/v5"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
@@ -49,6 +50,11 @@ func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 		return err
 	}
 
+	if cache.GetMonitorRegionRunning(body.MonitorRegionID) != nil {
+		lgr.Print(tid, 2, "monitor region already running", body.MonitorRegionID)
+		return nil
+	}
+	cache.SetMonitorRegionRunning(body.MonitorRegionID)
 	monitorRegionWithAssertions, err := r.monitorRegionDomain.GetWithAllAssoc(ctx, body.MonitorRegionID)
 	if err != nil {
 		sentry.CaptureException(err)
