@@ -66,7 +66,7 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 				return
 			}
 			if currentMonitorRegion.ID == oldestCheckedMonitorRegion.ID {
-				if err := client.RunCheckAsync(ctx, currentMonitorRegion.ID, *monitor.NextCheckAt); err != nil {
+				if err := client.RunCheckAsyncFast(ctx, currentMonitorRegion.ID, *monitor.NextCheckAt); err != nil {
 					lgr.Error(tid, 5, "failed to schedule monitor check run, monitor", monitor.ID, err)
 					sentry.CaptureException(err)
 					return

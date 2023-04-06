@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/hibiken/asynq"
 	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
@@ -38,7 +39,15 @@ func NewRunCheckTask(
 	}
 }
 
-func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
+func (s RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
+	return s.process(ctx, job.Args)
+}
+
+func (s RunCheckTask) ProcessTask(ctx context.Context, t *asynq.Task) error {
+	return s.process(ctx, t.Payload())
+}
+
+func (r RunCheckTask) process(ctx context.Context, payload []byte) error {
 	ctx = pkg.NewTracingID(ctx)
 	tid := pkg.GetTracingID(ctx)
 	defer sentry.RecoverWithContext(ctx)
@@ -46,7 +55,7 @@ func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 	lgr.Print(tid, 1, "running RunCheckTask")
 
 	var body RunCheckTaskPayload
-	if err := json.Unmarshal(job.Args, &body); err != nil {
+	if err := json.Unmarshal(payload, &body); err != nil {
 		return err
 	}
 
