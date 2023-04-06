@@ -117,7 +117,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 				return err
 			}
 			lgr.Print(tracingID, 3, "update user provider", user.ID, user.Email, user.Provider)
-			cache.DeleteUserWithRoleAndSubscription(user.ID)
+			cache.DeleteUserWithRoleAndSubscription(ctx, user.ID)
 		}
 		lgr.Print(tracingID, 4, "deleting guest user", guestUser.ID, guestUser.Email)
 		return u.userDomain.DeleteGuestUser(ctx, tx, guestUser.ID)
@@ -181,7 +181,7 @@ func (u *UserController) ProviderLogin(c *fiber.Ctx) error {
 				return err
 			}
 			lgr.Print(tracingID, 2, "update user provider", user.ID, user.Email, "provider", provider.String())
-			cache.DeleteUserWithRoleAndSubscription(user.ID)
+			cache.DeleteUserWithRoleAndSubscription(ctx, user.ID)
 		}
 		return nil
 	}); err != nil {

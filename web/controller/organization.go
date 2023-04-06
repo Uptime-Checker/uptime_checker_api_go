@@ -129,7 +129,7 @@ func (o *OrganizationController) CreateOrganization(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateOrganization, err)
 	}
 
-	cache.DeleteUserWithRoleAndSubscription(user.ID)
+	cache.DeleteUserWithRoleAndSubscription(ctx, user.ID)
 	return resp.ServeData(c, fiber.StatusOK, organization)
 }
 

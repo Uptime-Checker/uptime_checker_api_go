@@ -4,12 +4,12 @@ go 1.20
 
 require (
 	github.com/axiomhq/axiom-go v0.15.0
-	github.com/coocood/freecache v1.2.3
 	github.com/fatih/color v1.15.0
 	github.com/getsentry/sentry-go v0.19.0
 	github.com/go-co-op/gocron v1.19.0
 	github.com/go-jet/jet/v2 v2.9.0
 	github.com/go-playground/validator/v10 v10.12.0
+	github.com/go-redis/cache/v9 v9.0.0
 	github.com/gofiber/contrib/fibernewrelic v1.1.1
 	github.com/gofiber/contrib/fibersentry v1.0.2
 	github.com/gofiber/fiber/v2 v2.43.0
@@ -20,6 +20,7 @@ require (
 	github.com/mdaliyan/icache/v2 v2.1.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/newrelic/go-agent/v3 v3.20.4
+	github.com/redis/go-redis/v9 v9.0.3
 	github.com/samber/lo v1.38.1
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sourcegraph/conc v0.3.0
@@ -35,6 +36,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -82,6 +84,9 @@ require (
 	github.com/valyala/fasthttp v1.45.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/vgarvardt/backoff v1.0.0 // indirect
+	github.com/vmihailenco/go-tinylfu v0.2.2 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.40.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect

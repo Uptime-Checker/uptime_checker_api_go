@@ -24,7 +24,8 @@ func main() {
 	lgr.SetupLogger()
 
 	// Setup Cache
-	cache.SetupCache()
+	cache.SetupLocalCache()
+	cache.SetupRemoteCache()
 	lgr.Print(tracingID, "cache started")
 
 	// Setup Database

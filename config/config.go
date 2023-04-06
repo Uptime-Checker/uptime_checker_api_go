@@ -23,6 +23,8 @@ type config struct {
 	DatabasePassword string `mapstructure:"DB_PASSWORD"`
 	DatabaseSchema   string `mapstructure:"DB_SCHEMA"`
 
+	Redis string `mapstructure:"REDIS"`
+
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
 
 	NewRelicApp     string `mapstructure:"NEWRELIC_APP"`
