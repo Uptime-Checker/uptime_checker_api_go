@@ -31,26 +31,40 @@ func (w *WatchDog) verify(
 		return fmt.Errorf("could not update monitor region %d, err: %w", monitorRegion.ID, err)
 	}
 
-	status, err := w.handleAlarmPolicy(ctx, monitor, alarmPolicy, check.Success)
+	monitorStatus, err := w.monitorStatusDomain.GetLatest(ctx, monitor.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get monitor status, err: %w", err)
+	}
+	status, err := w.handleAlarmPolicy(ctx, monitor, monitorStatus, alarmPolicy, check.Success)
 	if err != nil {
 		return err
 	}
 	lgr.Print(tracingID, 1, "monitor status", status.String())
+
+	if resource.MonitorStatus(monitorStatus.Status) != status {
+		_, err := w.monitorStatusDomain.Create(ctx, tx, monitorStatus, status)
+		if err != nil {
+			return fmt.Errorf("failed to create monitor status, err: %w", err)
+		}
+	}
+
 	return nil
 }
 
 func (w *WatchDog) handleAlarmPolicy(
 	ctx context.Context,
 	monitor *model.Monitor,
+	monitorStatus *model.MonitorStatusChange,
 	alarmPolicy *model.AlarmPolicy,
 	success bool,
-) (*resource.MonitorStatus, error) {
+) (resource.MonitorStatus, error) {
 	now := times.Now()
-	status := resource.MonitorStatusPassing
+	status := resource.MonitorStatus(monitor.Status)
+	reason := resource.AlarmPolicyName(alarmPolicy.Reason)
+	consecutiveCount := pkg.Abs(w.getMonitorConsecutiveCount(monitor, success))
+
 	if !success {
 		status = resource.MonitorStatusDegraded
-		consecutiveCount := pkg.Abs(w.getMonitorConsecutiveCount(monitor, success))
-		reason := resource.AlarmPolicyName(alarmPolicy.Reason)
 
 		switch reason {
 		case resource.AlarmPolicyErrorThreshold:
@@ -58,10 +72,6 @@ func (w *WatchDog) handleAlarmPolicy(
 				status = resource.MonitorStatusFailing
 			}
 		case resource.AlarmPolicyDurationThreshold:
-			monitorStatus, err := w.monitorStatusDomain.GetLatest(ctx, monitor.ID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get monitor status, err: %w", err)
-			}
 			currentStatus := resource.MonitorStatus(monitorStatus.Status)
 			if currentStatus == resource.MonitorStatusFailing || currentStatus == resource.MonitorStatusDegraded {
 				if now.Sub(monitorStatus.InsertedAt).Seconds() > float64(alarmPolicy.Threshold) {
@@ -71,7 +81,7 @@ func (w *WatchDog) handleAlarmPolicy(
 		case resource.AlarmPolicyRegionThreshold:
 			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get monitor regions, err: %w", err)
+				return status, fmt.Errorf("failed to get monitor regions, err: %w", err)
 			}
 			downRegions := lo.Filter(monitorRegions, func(monitorRegion model.MonitorRegion, index int) bool {
 				return monitorRegion.Down
@@ -80,8 +90,34 @@ func (w *WatchDog) handleAlarmPolicy(
 				status = resource.MonitorStatusFailing
 			}
 		}
+	} else {
+		if status == resource.MonitorStatusFailing {
+			status = resource.MonitorStatusDegraded
+		}
+		switch reason {
+		case resource.AlarmPolicyErrorThreshold:
+			if consecutiveCount >= alarmPolicy.Threshold {
+				status = resource.MonitorStatusPassing
+			}
+		case resource.AlarmPolicyDurationThreshold:
+			if monitor.LastFailedAt != nil &&
+				now.Sub(*monitor.LastFailedAt).Seconds() > float64(alarmPolicy.Threshold) {
+				status = resource.MonitorStatusPassing
+			}
+		case resource.AlarmPolicyRegionThreshold:
+			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
+			if err != nil {
+				return status, fmt.Errorf("failed to get monitor regions, err: %w", err)
+			}
+			upRegions := lo.Filter(monitorRegions, func(monitorRegion model.MonitorRegion, index int) bool {
+				return !monitorRegion.Down
+			})
+			if int32(len(upRegions)) >= alarmPolicy.Threshold {
+				status = resource.MonitorStatusPassing
+			}
+		}
 	}
-	return &status, nil
+	return status, nil
 }
 
 func (w *WatchDog) getMonitorConsecutiveCount(monitor *model.Monitor, success bool) int32 {
