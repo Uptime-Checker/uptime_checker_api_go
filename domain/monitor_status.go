@@ -46,8 +46,8 @@ func (m *MonitorStatusDomain) GetLatest(
 		WHERE(MonitorStatusChange.MonitorID.EQ(Int(monitorID))).
 		ORDER_BY(MonitorStatusChange.InsertedAt.DESC()).LIMIT(1)
 
-	var monitorStatus *model.MonitorStatusChange
-	err := stmt.QueryContext(ctx, infra.DB, &monitorStatus)
+	monitorStatus := &model.MonitorStatusChange{}
+	err := stmt.QueryContext(ctx, infra.DB, monitorStatus)
 	return monitorStatus, err
 }
 
