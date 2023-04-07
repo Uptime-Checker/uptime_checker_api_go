@@ -23,6 +23,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
@@ -91,7 +92,10 @@ func cleanup(ctx context.Context, shutdown context.CancelFunc) {
 
 	// Shutdown the workers
 	shutdown()
-	if err := worker.FastWheel.Close(); err != nil {
+	worker.Shutdown()
+
+	// Shutdown the cache
+	if err := cache.Shutdown(); err != nil {
 		sentry.CaptureException(err)
 	}
 

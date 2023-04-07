@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
 	"github.com/vgarvardt/gue/v5"
 	"github.com/vgarvardt/gue/v5/adapter"
@@ -17,8 +18,9 @@ import (
 )
 
 var (
-	SlowWheel *gue.Client
-	FastWheel *asynq.Client
+	SlowWheel       *gue.Client
+	FastWheel       *asynq.Client
+	fastWheelServer *asynq.Server
 )
 
 // Task list
@@ -81,17 +83,24 @@ func (w *Worker) StartAsynq(ctx context.Context) error {
 		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
 	}
 	FastWheel = asynq.NewClient(redisClientOpt)
-	srv := asynq.NewServer(redisClientOpt, asynq.Config{Concurrency: config.App.WorkerPool})
+	fastWheelServer = asynq.NewServer(redisClientOpt, asynq.Config{Concurrency: config.App.WorkerPool})
 
 	mux := asynq.NewServeMux()
 	mux.Handle(TaskStartMonitor, w.startMonitorTask)
 	mux.Handle(TaskRunCheck, w.runCheckTask)
 
 	go func() {
-		if err := srv.Run(mux); err != nil {
+		if err := fastWheelServer.Run(mux); err != nil {
 			panic(err)
 		}
 	}()
 	lgr.Print(tracingID, "fast worker started with", config.App.WorkerPool, "worker pool")
 	return nil
+}
+
+func Shutdown() {
+	fastWheelServer.Shutdown()
+	if err := FastWheel.Close(); err != nil {
+		sentry.CaptureException(err)
+	}
 }

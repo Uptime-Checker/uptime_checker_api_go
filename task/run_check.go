@@ -39,12 +39,12 @@ func NewRunCheckTask(
 	}
 }
 
-func (s RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
-	return s.process(ctx, job.Args)
+func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
+	return r.process(ctx, job.Args)
 }
 
-func (s RunCheckTask) ProcessTask(ctx context.Context, t *asynq.Task) error {
-	return s.process(ctx, t.Payload())
+func (r RunCheckTask) ProcessTask(ctx context.Context, t *asynq.Task) error {
+	return r.process(ctx, t.Payload())
 }
 
 func (r RunCheckTask) process(ctx context.Context, payload []byte) error {

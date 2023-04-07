@@ -9,11 +9,14 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 )
 
-var monitorCheckPot icache.Pot[int64]
-var monitorRegionCheckPot icache.Pot[string]
+var (
+	monitorCheckPot       icache.Pot[int64]
+	monitorRegionCheckPot icache.Pot[string]
+)
 
 func SetupLocalCache() {
 	monitorCheckPot = icache.NewPot[int64](icache.WithTTL(8 * time.Second))
+	monitorRegionCheckPot = icache.NewPot[string](icache.WithTTL(8 * time.Second))
 }
 
 // SetMonitorToRun caches for 8 seconds

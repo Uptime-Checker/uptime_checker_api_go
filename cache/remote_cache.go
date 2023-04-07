@@ -14,7 +14,10 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
 
-var remoteCache *cache.Cache
+var (
+	remoteCache *cache.Cache
+	rdb         *redis.Client
+)
 
 func SetupRemoteCache() {
 	opt, err := redis.ParseURL(config.App.RedisCache)
@@ -22,11 +25,15 @@ func SetupRemoteCache() {
 		panic(err)
 	}
 
-	rdb := redis.NewClient(opt)
+	rdb = redis.NewClient(opt)
 	remoteCache = cache.New(&cache.Options{
 		Redis:      rdb,
 		LocalCache: cache.NewTinyLFU(1000, 10*time.Minute),
 	})
+}
+
+func Shutdown() error {
+	return rdb.Close()
 }
 
 // SetUserWithRoleAndSubscription caches for 7 days
