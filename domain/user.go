@@ -181,7 +181,7 @@ func (u *UserDomain) UpdateOrganizationAndRole(
 	now := times.Now()
 	user := &model.User{
 		RoleID:         &roleID,
-		OrganizationID: organizationID,
+		OrganizationID: &organizationID,
 		UpdatedAt:      now,
 	}
 

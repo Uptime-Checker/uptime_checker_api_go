@@ -21,7 +21,7 @@ type User struct {
 	Provider          int32
 	LastLoginAt       time.Time
 	RoleID            *int64
-	OrganizationID    int64
+	OrganizationID    *int64
 	InsertedAt        time.Time
 	UpdatedAt         time.Time
 }

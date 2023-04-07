@@ -28,7 +28,7 @@ create table if not exists "user" (
     provider integer default 1 not null,
     last_login_at timestamp(0) default now() not null,
     role_id bigint,
-    organization_id bigint not null,
+    organization_id bigint,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id),
