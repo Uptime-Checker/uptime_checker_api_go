@@ -8,6 +8,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -76,4 +77,24 @@ func (m *MonitorRegionDomain) GetWithAllAssoc(
 	monitorRegionWithAssertions := &pkg.MonitorRegionWithAssertions{}
 	err := stmt.QueryContext(ctx, infra.DB, monitorRegionWithAssertions)
 	return monitorRegionWithAssertions, err
+}
+
+func (m *MonitorRegionDomain) UpdateDown(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+	down bool,
+) (*model.MonitorRegion, error) {
+	now := times.Now()
+	monitorRegion := &model.MonitorRegion{
+		Down:          down,
+		LastCheckedAt: &now,
+		UpdatedAt:     now,
+	}
+
+	updateStmt := MonitorRegion.UPDATE(MonitorRegion.Down, MonitorRegion.LastCheckedAt, Monitor.UpdatedAt).
+		MODEL(monitorRegion).WHERE(MonitorRegion.ID.EQ(Int(id))).RETURNING(MonitorRegion.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, monitorRegion)
+	return monitorRegion, err
 }

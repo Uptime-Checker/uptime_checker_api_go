@@ -53,7 +53,7 @@ func (a *AlarmPolicyDomain) Create(
 	if !alarmPolicyName.Valid() {
 		return nil, constant.ErrInvalidAlarmPolicy
 	}
-	alarmPolicy.Reason = (*string)(&alarmPolicyName)
+	alarmPolicy.Reason = string(alarmPolicyName)
 
 	insertStmt := AlarmPolicy.INSERT(AlarmPolicy.MutableColumns.Except(AlarmPolicy.InsertedAt, AlarmPolicy.UpdatedAt)).
 		MODEL(alarmPolicy).RETURNING(AlarmPolicy.AllColumns)

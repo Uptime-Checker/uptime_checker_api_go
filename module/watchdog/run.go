@@ -23,7 +23,6 @@ import (
 type WatchDog struct {
 	checkDomain         *domain.CheckDomain
 	regionDomain        *domain.RegionDomain
-	assertionDomain     *domain.AssertionDomain
 	monitorRegionDomain *domain.MonitorRegionDomain
 	monitorStatusDomain *domain.MonitorStatusDomain
 
@@ -38,7 +37,6 @@ type WatchDog struct {
 func NewWatchDog(
 	checkDomain *domain.CheckDomain,
 	regionDomain *domain.RegionDomain,
-	assertionDomain *domain.AssertionDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
 	checkService *service.CheckService,
@@ -51,7 +49,6 @@ func NewWatchDog(
 	return &WatchDog{
 		checkDomain:          checkDomain,
 		regionDomain:         regionDomain,
-		assertionDomain:      assertionDomain,
 		monitorRegionDomain:  monitorRegionDomain,
 		monitorStatusDomain:  monitorStatusDomain,
 		checkService:         checkService,
@@ -202,7 +199,8 @@ func (w *WatchDog) run(
 		} else {
 			checkSuccess = false
 			// Create error log
-			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
+			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil,
+				&hitError.Text, hitError.Type)
 			if err != nil {
 				return check, fmt.Errorf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
 			}

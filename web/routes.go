@@ -67,7 +67,6 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	dog := watchdog.NewWatchDog(
 		checkDomain,
 		regionDomain,
-		assertionDomain,
 		monitorRegionDomain,
 		monitorStatusDomain,
 		checkService,

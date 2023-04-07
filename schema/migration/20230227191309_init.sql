@@ -276,7 +276,7 @@ create unique index if not exists uq_monitor_on_alarm on alarm (monitor_id, ongo
 where (ongoing = true);
 create table if not exists alarm_policy (
     id bigserial,
-    reason varchar(255),
+    reason varchar(255) not null,
     threshold integer default 0 not null,
     monitor_id bigint,
     organization_id bigint not null,

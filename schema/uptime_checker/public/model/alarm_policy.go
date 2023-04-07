@@ -13,7 +13,7 @@ import (
 
 type AlarmPolicy struct {
 	ID             int64 `sql:"primary_key"`
-	Reason         *string
+	Reason         string
 	Threshold      int32
 	MonitorID      *int64
 	OrganizationID int64
