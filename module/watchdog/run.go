@@ -32,6 +32,7 @@ type WatchDog struct {
 	monitorRegionService *service.MonitorRegionService
 	errorLogService      *service.ErrorLogService
 	dailyReportService   *service.DailyReportService
+	alarmPolicyService   *service.AlarmPolicyService
 }
 
 func NewWatchDog(
@@ -45,6 +46,7 @@ func NewWatchDog(
 	monitorRegionService *service.MonitorRegionService,
 	errorLogService *service.ErrorLogService,
 	dailyReportService *service.DailyReportService,
+	alarmPolicyService *service.AlarmPolicyService,
 ) *WatchDog {
 	return &WatchDog{
 		checkDomain:          checkDomain,
@@ -57,6 +59,7 @@ func NewWatchDog(
 		monitorRegionService: monitorRegionService,
 		errorLogService:      errorLogService,
 		dailyReportService:   dailyReportService,
+		alarmPolicyService:   alarmPolicyService,
 	}
 }
 
@@ -74,13 +77,13 @@ func (w *WatchDog) Launch(
 		}
 		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
 			"duration:", fmt.Sprintf("%dms", check.Duration))
-		// Send for alarm
 		// Insert to the daily report
 		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
 		if err != nil {
-			return err
+			return fmt.Errorf("daily report add failed, err: %w", err)
 		}
-		return nil
+		// Send for verification and alarm
+		return w.verify(ctx, tx, check, monitor.Monitor, monitorRegionWithAssertions.MonitorRegion)
 	}); err != nil {
 		sentry.CaptureException(err)
 	}
@@ -108,7 +111,7 @@ func (w *WatchDog) startMonitor(
 	if region == nil {
 		region, err := w.regionDomain.Get(ctx, config.App.FlyRegion)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get region %s, err: %w", config.App.FlyRegion, err)
 		}
 		config.Region = region
 	}
@@ -151,14 +154,14 @@ func (w *WatchDog) run(
 	}
 	check, err := w.checkDomain.Create(ctx, tx, check)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create check, monitor %d, err: %w", monitor.ID, err)
 	}
 	lgr.Print(tracingID, 2, "created check", check.ID)
 
 	var headers map[string]string
 	if monitor.Headers != nil {
 		if err := json.Unmarshal([]byte(*monitor.Headers), &headers); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not unmarshal monior headers %d, err: %w", monitor.ID, err)
 		}
 	}
 
@@ -181,7 +184,7 @@ func (w *WatchDog) run(
 		// Create error log
 		_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
 		if err != nil {
-			return check, err
+			return check, fmt.Errorf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
 		}
 	} else {
 		checkSuccess := true
@@ -201,7 +204,7 @@ func (w *WatchDog) run(
 			// Create error log
 			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
 			if err != nil {
-				return check, err
+				return check, fmt.Errorf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
 			}
 		}
 
@@ -211,7 +214,7 @@ func (w *WatchDog) run(
 			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID),
 				nil, resource.ErrorLogTypeAssertionFailure)
 			if err != nil {
-				return check, err
+				return check, fmt.Errorf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
 			}
 		}
 
@@ -219,7 +222,7 @@ func (w *WatchDog) run(
 		check, err = w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
 			hitResponse.StatusCode, hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
 		if err != nil {
-			return nil, err
+			return check, fmt.Errorf("failed to update checl %d, monitor %d, err: %w", check.ID, monitor.ID, err)
 		}
 	}
 	return check, nil
