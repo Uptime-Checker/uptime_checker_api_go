@@ -30,7 +30,7 @@ const (
 var s *gocron.Scheduler
 
 type Task interface {
-	Do(tx *sql.Tx)
+	Do(ctx context.Context, tx *sql.Tx)
 }
 
 // JobName type
@@ -128,12 +128,14 @@ func (c *Cron) checkAndRun() {
 
 	for i, job := range jobsToRun {
 		if job.Name == string(JobNameSyncStripeProducts) {
-			go runTask(ctx, c.jobDomain, *c.syncProductsTask, jobsToRun[i])
+			go runTask(c.jobDomain, *c.syncProductsTask, jobsToRun[i])
 		}
 	}
 }
 
-func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, tsk T, job model.Job) {
+func runTask[T Task](jobDomain *domain.JobDomain, tsk T, job model.Job) {
+	ctx := pkg.NewTracingID(context.Background())
+	defer sentry.RecoverWithContext(ctx)
 	now := times.Now()
 	nextRunAt := now
 	if job.Recurring {
@@ -145,7 +147,7 @@ func runTask[T Task](ctx context.Context, jobDomain *domain.JobDomain, tsk T, jo
 		if err != nil {
 			return err
 		}
-		tsk.Do(tx)
+		tsk.Do(ctx, tx)
 		if job.Recurring {
 			_, err = jobDomain.UpdateStatus(ctx, tx, job.ID, resource.JobStatusScheduled)
 			if err != nil {

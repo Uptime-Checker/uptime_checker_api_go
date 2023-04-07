@@ -4,8 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/getsentry/sentry-go"
-
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
@@ -16,10 +14,8 @@ func NewSyncProductsTask() *SyncProductsTask {
 	return &SyncProductsTask{}
 }
 
-func (s SyncProductsTask) Do(tx *sql.Tx) {
-	ctx := pkg.NewTracingID(context.Background())
+func (s SyncProductsTask) Do(ctx context.Context, tx *sql.Tx) {
 	tid := pkg.GetTracingID(ctx)
-	defer sentry.RecoverWithContext(ctx)
 
 	lgr.Print(tid, 1, "running SyncProductsTask")
 }
