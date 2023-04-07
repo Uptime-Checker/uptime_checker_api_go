@@ -29,11 +29,26 @@ func (m *MonitorStatusDomain) List(
 		MonitorStatusChange.AllColumns,
 	).FROM(MonitorStatusChange).
 		WHERE(MonitorStatusChange.MonitorID.EQ(Int(monitorID))).
-		LIMIT(int64(limit))
+		ORDER_BY(MonitorStatusChange.InsertedAt.DESC()).LIMIT(int64(limit))
 
 	var monitorStatuses []model.MonitorStatusChange
 	err := stmt.QueryContext(ctx, infra.DB, &monitorStatuses)
 	return monitorStatuses, err
+}
+
+func (m *MonitorStatusDomain) GetLatest(
+	ctx context.Context,
+	monitorID int64,
+) (*model.MonitorStatusChange, error) {
+	stmt := SELECT(
+		MonitorStatusChange.AllColumns,
+	).FROM(MonitorStatusChange).
+		WHERE(MonitorStatusChange.MonitorID.EQ(Int(monitorID))).
+		ORDER_BY(MonitorStatusChange.InsertedAt.DESC()).LIMIT(1)
+
+	var monitorStatus *model.MonitorStatusChange
+	err := stmt.QueryContext(ctx, infra.DB, &monitorStatus)
+	return monitorStatus, err
 }
 
 func (m *MonitorStatusDomain) Create(

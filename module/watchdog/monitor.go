@@ -8,6 +8,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -28,26 +29,48 @@ func (w *WatchDog) verify(
 		return fmt.Errorf("could not update monitor region %d, err: %w", monitorRegion.ID, err)
 	}
 
-	status := w.handleAlarmPolicy(monitor, alarmPolicy, check.Success)
+	status, err := w.handleAlarmPolicy(ctx, monitor, alarmPolicy, check.Success)
+	if err != nil {
+		return err
+	}
 	lgr.Print(tracingID, 1, "monitor status", status.String())
 	return nil
 }
 
 func (w *WatchDog) handleAlarmPolicy(
+	ctx context.Context,
 	monitor *model.Monitor,
 	alarmPolicy *model.AlarmPolicy,
 	success bool,
-) resource.MonitorStatus {
+) (*resource.MonitorStatus, error) {
+	now := times.Now()
 	status := resource.MonitorStatusPassing
 	if !success {
 		status = resource.MonitorStatusDegraded
 		consecutiveCount := pkg.Abs(w.getMonitorConsecutiveCount(monitor, success))
-		if alarmPolicy.Reason == string(resource.AlarmPolicyErrorThreshold) &&
-			alarmPolicy.Threshold == consecutiveCount {
-			status = resource.MonitorStatusFailing
+		reason := resource.AlarmPolicyName(alarmPolicy.Reason)
+
+		switch reason {
+		case resource.AlarmPolicyErrorThreshold:
+			if alarmPolicy.Threshold == consecutiveCount {
+				status = resource.MonitorStatusFailing
+			}
+		case resource.AlarmPolicyDurationThreshold:
+			monitorStatus, err := w.monitorStatusDomain.GetLatest(ctx, monitor.ID)
+			if err != nil {
+				return nil, fmt.Errorf("could not get monitor status, err: %w", err)
+			}
+			currentStatus := resource.MonitorStatus(monitorStatus.Status)
+			if currentStatus == resource.MonitorStatusFailing || currentStatus == resource.MonitorStatusDegraded {
+				if now.Sub(monitorStatus.InsertedAt).Seconds() > float64(alarmPolicy.Threshold) {
+					status = resource.MonitorStatusFailing
+				}
+			}
+		case resource.AlarmPolicyRegionThreshold:
+
 		}
 	}
-	return status
+	return &status, nil
 }
 
 func (w *WatchDog) getMonitorConsecutiveCount(monitor *model.Monitor, success bool) int32 {
