@@ -49,6 +49,16 @@ func (c *CheckService) Update(
 	check.ContentType = contentType
 	check.StatusCode = lo.ToPtr(int32(statusCode))
 
+	jsonTraces, err := c.getTraceInfo(traces)
+	if err != nil {
+		return nil, err
+	}
+	check.Traces = pkg.StringPointer(string(jsonTraces))
+
+	return c.checkDomain.Update(ctx, tx, check.ID, check)
+}
+
+func (c *CheckService) getTraceInfo(traces req.TraceInfo) ([]byte, error) {
 	traceInfo := make(map[string]string)
 
 	traceInfo["TotalTime"] = traces.TotalTime.String()
@@ -58,11 +68,5 @@ func (c *CheckService) Update(
 	traceInfo["FirstResponseTime"] = traces.FirstResponseTime.String()
 	traceInfo["ResponseTime"] = traces.ResponseTime.String()
 
-	jsonTraces, err := json.Marshal(traceInfo)
-	if err != nil {
-		return nil, err
-	}
-	check.Traces = pkg.StringPointer(string(jsonTraces))
-
-	return c.checkDomain.Update(ctx, tx, check.ID, check)
+	return json.Marshal(traceInfo)
 }
