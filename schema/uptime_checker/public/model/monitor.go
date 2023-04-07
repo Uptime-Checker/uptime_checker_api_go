@@ -35,6 +35,7 @@ type Monitor struct {
 	FollowRedirects       bool
 	NextCheckAt           *time.Time
 	LastCheckedAt         *time.Time
+	LastSslCheckedAt      *time.Time
 	LastFailedAt          *time.Time
 	CreatedBy             *int64
 	UpdatedBy             *int64

@@ -109,6 +109,7 @@ create table if not exists monitor (
     follow_redirects boolean default false not null,
     next_check_at timestamp(0),
     last_checked_at timestamp(0),
+    last_ssl_checked_at timestamp(0),
     last_failed_at timestamp(0),
     created_by bigint,
     updated_by bigint,

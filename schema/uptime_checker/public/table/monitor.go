@@ -40,6 +40,7 @@ type monitorTable struct {
 	FollowRedirects       postgres.ColumnBool
 	NextCheckAt           postgres.ColumnTimestamp
 	LastCheckedAt         postgres.ColumnTimestamp
+	LastSslCheckedAt      postgres.ColumnTimestamp
 	LastFailedAt          postgres.ColumnTimestamp
 	CreatedBy             postgres.ColumnInteger
 	UpdatedBy             postgres.ColumnInteger
@@ -111,6 +112,7 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		FollowRedirectsColumn       = postgres.BoolColumn("follow_redirects")
 		NextCheckAtColumn           = postgres.TimestampColumn("next_check_at")
 		LastCheckedAtColumn         = postgres.TimestampColumn("last_checked_at")
+		LastSslCheckedAtColumn      = postgres.TimestampColumn("last_ssl_checked_at")
 		LastFailedAtColumn          = postgres.TimestampColumn("last_failed_at")
 		CreatedByColumn             = postgres.IntegerColumn("created_by")
 		UpdatedByColumn             = postgres.IntegerColumn("updated_by")
@@ -119,8 +121,8 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		OrganizationIDColumn        = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn            = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn             = postgres.TimestampColumn("updated_at")
-		allColumns                  = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, ConsecutiveCountColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns              = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, ConsecutiveCountColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns                  = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, ConsecutiveCountColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastSslCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns              = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, ConsecutiveCountColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastSslCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorTable{
@@ -150,6 +152,7 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		FollowRedirects:       FollowRedirectsColumn,
 		NextCheckAt:           NextCheckAtColumn,
 		LastCheckedAt:         LastCheckedAtColumn,
+		LastSslCheckedAt:      LastSslCheckedAtColumn,
 		LastFailedAt:          LastFailedAtColumn,
 		CreatedBy:             CreatedByColumn,
 		UpdatedBy:             UpdatedByColumn,
