@@ -65,6 +65,10 @@ func NewCron(
 	}
 }
 
+func Shutdown() {
+	s.Stop()
+}
+
 func (c *Cron) Start(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
 	now := times.Now()
@@ -101,8 +105,7 @@ func (c *Cron) Start(ctx context.Context) error {
 	}
 
 	// start the watchdog
-	_, err = s.Every(constant.WatchDogCheckIntervalInSeconds).Second().StartAt(now.Add(time.Second * 2)).
-		Do(c.watchDog)
+	_, err = s.Every(constant.WatchDogCheckIntervalInSeconds).Second().StartAt(now.Add(time.Second * 2)).Do(c.watchDog)
 	if err != nil {
 		return err
 	}
