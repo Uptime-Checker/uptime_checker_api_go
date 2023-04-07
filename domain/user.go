@@ -116,11 +116,10 @@ func (u *UserDomain) CreateUser(
 	if !provider.Valid() {
 		return nil, constant.ErrInvalidProvider
 	}
-	providerValue := int32(provider)
 	now := times.Now()
 
-	user.Provider = &providerValue
-	user.LastLoginAt = &now
+	user.Provider = int32(provider)
+	user.LastLoginAt = now
 	insertStmt := User.INSERT(User.MutableColumns.Except(User.InsertedAt, User.UpdatedAt)).
 		MODEL(user).
 		RETURNING(User.AllColumns)
@@ -139,13 +138,12 @@ func (u *UserDomain) UpdateProvider(
 	if !provider.Valid() {
 		return nil, constant.ErrInvalidProvider
 	}
-	providerValue := int32(provider)
 	now := times.Now()
 	user := &model.User{
 		ProviderUID: &providerUID,
-		Provider:    &providerValue,
+		Provider:    int32(provider),
 		PictureURL:  picture,
-		LastLoginAt: &now,
+		LastLoginAt: now,
 		UpdatedAt:   now,
 	}
 
@@ -183,7 +181,7 @@ func (u *UserDomain) UpdateOrganizationAndRole(
 	now := times.Now()
 	user := &model.User{
 		RoleID:         &roleID,
-		OrganizationID: &organizationID,
+		OrganizationID: organizationID,
 		UpdatedAt:      now,
 	}
 
@@ -209,7 +207,7 @@ func (u *UserDomain) CreateUserContact(
 	}
 	modeValue := int32(mode)
 	userContact := &model.UserContact{
-		UserID:   &userID,
+		UserID:   userID,
 		Email:    &email,
 		Mode:     &modeValue,
 		Verified: verified,

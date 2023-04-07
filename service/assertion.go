@@ -24,7 +24,7 @@ func (a *AssertionService) Create(
 	assertion := model.Assertion{
 		Property:  property,
 		Value:     &value,
-		MonitorID: &monitorID,
+		MonitorID: monitorID,
 	}
 
 	return a.assertionDomain.Create(

@@ -110,7 +110,7 @@ func (u *UserController) GuestUserLogin(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			lgr.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", *user.Provider)
+			lgr.Print(tracingID, 2, "created new user", user.ID, user.Email, "provider", user.Provider)
 		} else {
 			user, err = u.userDomain.UpdateProvider(ctx, tx, user.ID, nil, body.Email, resource.UserLoginProviderEmail)
 			if err != nil {

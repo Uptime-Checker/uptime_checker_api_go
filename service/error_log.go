@@ -23,8 +23,8 @@ func (e *ErrorLogService) Create(
 	tx *sql.Tx, monitorID, checkID int64, assertionID *int64, text *string, errorLogType resource.ErrorLogType,
 ) (*model.ErrorLog, error) {
 	errorLog := model.ErrorLog{
-		MonitorID:   &monitorID,
-		CheckID:     &checkID,
+		MonitorID:   monitorID,
+		CheckID:     checkID,
 		AssertionID: assertionID,
 		Text:        text,
 	}

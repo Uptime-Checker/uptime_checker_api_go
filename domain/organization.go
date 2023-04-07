@@ -41,9 +41,9 @@ func (o *OrganizationDomain) CreateOrganizationUser(
 	organizationID, userID, roleID int64,
 ) (*model.OrganizationUser, error) {
 	orgUser := &model.OrganizationUser{
-		RoleID:         &roleID,
-		UserID:         &userID,
-		OrganizationID: &organizationID,
+		RoleID:         roleID,
+		UserID:         userID,
+		OrganizationID: organizationID,
 	}
 	insertStmt := OrganizationUser.INSERT(
 		OrganizationUser.RoleID,

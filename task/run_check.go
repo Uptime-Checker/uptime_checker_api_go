@@ -72,7 +72,7 @@ func (r RunCheckTask) process(ctx context.Context, payload []byte) error {
 
 	now := times.Now()
 	monitor := monitorRegionWithAssertions.Monitor
-	nextCheckAt := now.Add(time.Duration(*monitor.Interval) * time.Second)
+	nextCheckAt := now.Add(time.Duration(monitor.Interval) * time.Second)
 
 	lgr.Print(tid, 2, "updating next check for monitor", monitor.ID, "==>", times.Format(nextCheckAt))
 	_, err = r.monitorDomain.UpdateNextCheckAt(ctx, monitor.ID, &now, &nextCheckAt)

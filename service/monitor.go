@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"strings"
 	"time"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -38,30 +40,33 @@ func (m *MonitorService) Create(
 ) (*model.Monitor, error) {
 	head, getHeadErr := m.monitorDomain.GetHead(ctx, organizationID)
 	monitorMethod := resource.GetMonitorHTTPMethod(method)
-	status := int32(resource.MonitorStatusPending)
+
+	contentType := resource.MonitorBodyFormatNoBody
+	if bodyFormat != nil {
+		contentType = resource.MonitorBodyFormat(*bodyFormat)
+	}
 
 	monitor := &model.Monitor{
 		Name:                  name,
 		URL:                   url,
 		Method:                &monitorMethod,
-		Timeout:               &timeout,
-		Interval:              &interval,
+		Timeout:               timeout,
+		Interval:              interval,
 		Body:                  body,
-		BodyFormat:            bodyFormat,
 		Username:              username,
 		Password:              password,
-		On:                    pkg.BoolPointer(false),
-		Muted:                 pkg.BoolPointer(false),
-		GlobalAlarmSettings:   &globalAlarmSettings,
-		AlarmReminderInterval: &alarmReminderInterval,
-		AlarmReminderCount:    &alarmReminderCount,
-		Status:                &status,
-		CheckSsl:              &checkSSL,
-		FollowRedirects:       &followRedirect,
+		On:                    false,
+		Muted:                 false,
+		GlobalAlarmSettings:   globalAlarmSettings,
+		AlarmReminderInterval: alarmReminderInterval,
+		AlarmReminderCount:    alarmReminderCount,
+		Status:                int32(resource.MonitorStatusPending),
+		CheckSsl:              checkSSL,
+		FollowRedirects:       followRedirect,
 		CreatedBy:             &userID,
 		UpdatedBy:             &userID,
 		NextID:                nil,
-		OrganizationID:        &organizationID,
+		OrganizationID:        organizationID,
 	}
 
 	if headers != nil && len(*headers) > 0 {
@@ -73,7 +78,7 @@ func (m *MonitorService) Create(
 	}
 
 	// Create a new monitor
-	monitor, err := m.monitorDomain.Create(ctx, tx, monitor, resource.MonitorTypeAPI)
+	monitor, err := m.monitorDomain.Create(ctx, tx, monitor, resource.MonitorTypeAPI, contentType)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +91,7 @@ func (m *MonitorService) Create(
 		}
 	}
 
-	monitorStatusChange := &model.MonitorStatusChange{MonitorID: &monitor.ID}
+	monitorStatusChange := &model.MonitorStatusChange{MonitorID: monitor.ID}
 
 	// Create a new monitor status change
 	_, err = m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, resource.MonitorStatusPending)
@@ -103,7 +108,7 @@ func (m *MonitorService) Start(
 	monitor *model.Monitor,
 	on bool,
 ) (*model.Monitor, error) {
-	monitorStatusChange := &model.MonitorStatusChange{MonitorID: &monitor.ID}
+	monitorStatusChange := &model.MonitorStatusChange{MonitorID: monitor.ID}
 	_, err := m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, resource.MonitorStatusPassing)
 	if err != nil {
 		return nil, err
@@ -112,8 +117,25 @@ func (m *MonitorService) Start(
 	now := times.Now()
 	var nextCheckAt time.Time
 	if on {
-		nextCheckAt = now.Add(time.Second * time.Duration(*monitor.Interval))
+		nextCheckAt = now.Add(time.Second * time.Duration(monitor.Interval))
 	}
 
 	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, &nextCheckAt)
+}
+
+func (m *MonitorService) GetRequestContentType(
+	bodyFormat resource.MonitorBodyFormat,
+	headers *map[string]string,
+) string {
+	contentType := bodyFormat.String()
+
+	if headers != nil && len(*headers) > 0 {
+		for key, value := range *headers {
+			if strings.EqualFold(key, constant.ContentTypeHeader) {
+				contentType = value
+			}
+		}
+	}
+
+	return contentType
 }

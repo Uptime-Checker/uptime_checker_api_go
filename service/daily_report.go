@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/samber/lo"
-
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
@@ -36,19 +34,19 @@ func (d *DailyReportService) Add(
 			errorChecks = 1
 		}
 		dailyReport = &model.DailyReport{
-			SuccessfulChecks: lo.ToPtr(int32(successfulChecks)),
-			ErrorChecks:      lo.ToPtr(int32(errorChecks)),
-			Date:             &now,
-			MonitorID:        &monitorID,
-			OrganizationID:   &organizationID,
+			SuccessfulChecks: int32(successfulChecks),
+			ErrorChecks:      int32(errorChecks),
+			Date:             now,
+			MonitorID:        monitorID,
+			OrganizationID:   organizationID,
 		}
 		return d.dailyReportDomain.Create(ctx, tx, dailyReport)
 	}
 	// Update
 	if success {
-		dailyReport.SuccessfulChecks = lo.ToPtr(*dailyReport.SuccessfulChecks + 1)
+		dailyReport.SuccessfulChecks = dailyReport.SuccessfulChecks + 1
 	} else {
-		dailyReport.ErrorChecks = lo.ToPtr(*dailyReport.ErrorChecks + 1)
+		dailyReport.ErrorChecks = dailyReport.ErrorChecks + 1
 	}
 	dailyReport.UpdatedAt = now
 	return d.dailyReportDomain.Update(ctx, tx, dailyReport.ID, dailyReport)

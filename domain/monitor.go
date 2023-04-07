@@ -56,20 +56,17 @@ func (m *MonitorDomain) Create(
 	tx *sql.Tx,
 	monitor *model.Monitor,
 	monitorType resource.MonitorType,
+	bodyFormat resource.MonitorBodyFormat,
 ) (*model.Monitor, error) {
 	if !monitorType.Valid() {
 		return nil, constant.ErrInvalidMonitorType
 	}
-	monitorTypeValue := int32(monitorType)
-
-	if monitor.BodyFormat != nil {
-		format := resource.MonitorBodyFormat(*monitor.BodyFormat)
-		if !format.Valid() {
-			return nil, constant.ErrInvalidMonitorBodyFormat
-		}
+	if !bodyFormat.Valid() {
+		return nil, constant.ErrInvalidMonitorBodyFormat
 	}
 
-	monitor.Type = &monitorTypeValue
+	monitor.Type = int32(monitorType)
+	monitor.BodyFormat = int32(bodyFormat)
 	insertStmt := Monitor.INSERT(Monitor.MutableColumns.Except(Monitor.InsertedAt, Monitor.UpdatedAt)).
 		MODEL(monitor).
 		RETURNING(Monitor.AllColumns)
@@ -158,7 +155,7 @@ func (m *MonitorDomain) UpdateOn(
 ) (*model.Monitor, error) {
 	now := times.Now()
 	monitor := &model.Monitor{
-		On:          &on,
+		On:          on,
 		NextCheckAt: nextCheckAt,
 		UpdatedAt:   now,
 	}

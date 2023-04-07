@@ -32,10 +32,10 @@ func (m *MonitorRegionService) FirstOrCreate(
 	}
 	now := times.Now()
 	monitorRegion = &model.MonitorRegion{
-		Down:          pkg.BoolPointer(false),
+		Down:          false,
 		LastCheckedAt: &now,
-		MonitorID:     &monitorID,
-		RegionID:      &regionID,
+		MonitorID:     monitorID,
+		RegionID:      regionID,
 	}
 	lgr.Print(tracingID, 2, "creating monitor region, monitor", monitorID, "region", regionID)
 	return m.monitorRegionDomain.Create(ctx, tx, monitorRegion)

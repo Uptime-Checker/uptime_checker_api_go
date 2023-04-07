@@ -22,7 +22,7 @@ func HandleFeatureMax(user *pkg.UserWithRoleAndSubscription, feature FeatureType
 	if err != nil {
 		return err
 	}
-	if count > *subscriptionFeature.Count {
+	if count > subscriptionFeature.Count {
 		return constant.ErrUpgradeSubscription
 	}
 	return nil
@@ -33,7 +33,7 @@ func HandleFeatureMin(user *pkg.UserWithRoleAndSubscription, feature FeatureType
 	if err != nil {
 		return err
 	}
-	if count < *subscriptionFeature.Count {
+	if count < subscriptionFeature.Count {
 		return constant.ErrUpgradeSubscription
 	}
 	return nil

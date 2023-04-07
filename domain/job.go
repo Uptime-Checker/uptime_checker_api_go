@@ -60,11 +60,10 @@ func (j *JobDomain) UpdateRunning(
 	if !status.Valid() {
 		return nil, constant.ErrInvalidJobStatus
 	}
-	statusValue := int32(status)
 
 	now := times.Now()
 	job := &model.Job{
-		Status:    &statusValue,
+		Status:    int32(status),
 		LastRanAt: lastRunAt,
 		NextRunAt: nextRunAt,
 		UpdatedAt: now,
@@ -86,11 +85,10 @@ func (j *JobDomain) UpdateStatus(
 	if !status.Valid() {
 		return nil, constant.ErrInvalidJobStatus
 	}
-	statusValue := int32(status)
 
 	now := times.Now()
 	job := &model.Job{
-		Status:    &statusValue,
+		Status:    int32(status),
 		UpdatedAt: now,
 	}
 
@@ -110,11 +108,10 @@ func (j *JobDomain) UpdateNextRunAt(
 	if !status.Valid() {
 		return nil, constant.ErrInvalidJobStatus
 	}
-	statusValue := int32(status)
 
 	now := times.Now()
 	job := &model.Job{
-		Status:    &statusValue,
+		Status:    int32(status),
 		NextRunAt: nextRunAt,
 		UpdatedAt: now,
 	}

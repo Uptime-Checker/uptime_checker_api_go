@@ -76,7 +76,7 @@ func (w *WatchDog) Launch(
 			"duration:", fmt.Sprintf("%dms", check.Duration))
 		// Send for alarm
 		// Insert to the daily report
-		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, *monitor.OrganizationID, check.Success)
+		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
 		if err != nil {
 			return err
 		}
@@ -145,8 +145,8 @@ func (w *WatchDog) run(
 
 	check := &model.Check{
 		Success:        false,
-		RegionID:       &region.ID,
-		MonitorID:      &monitor.ID,
+		RegionID:       region.ID,
+		MonitorID:      monitor.ID,
 		OrganizationID: monitor.OrganizationID,
 	}
 	check, err := w.checkDomain.Create(ctx, tx, check)
@@ -162,12 +162,6 @@ func (w *WatchDog) run(
 		}
 	}
 
-	var bodyFormat *resource.MonitorBodyFormat
-	if monitor.BodyFormat != nil {
-		resourceBodyFormat := resource.MonitorBodyFormat(*monitor.BodyFormat)
-		bodyFormat = &resourceBodyFormat
-	}
-
 	method := resource.GetMonitorMethod(*monitor.Method)
 	hitResponse, hitError := w.Hit(
 		ctx,
@@ -176,10 +170,10 @@ func (w *WatchDog) run(
 		monitor.Body,
 		monitor.Username,
 		monitor.Password,
-		bodyFormat,
+		resource.MonitorBodyFormat(monitor.BodyFormat),
 		&headers,
-		*monitor.Timeout,
-		*monitor.FollowRedirects,
+		monitor.Timeout,
+		monitor.FollowRedirects,
 	)
 
 	if hitResponse == nil && hitError != nil {
@@ -196,7 +190,7 @@ func (w *WatchDog) run(
 		if hitError == nil {
 			for i, assertion := range assertions {
 				if pass := w.Assert(
-					*assertion.Source, assertion.Property, *assertion.Comparison, *assertion.Value, *hitResponse,
+					assertion.Source, assertion.Property, assertion.Comparison, *assertion.Value, *hitResponse,
 				); !pass {
 					failedAssertion = &assertions[i]
 					break

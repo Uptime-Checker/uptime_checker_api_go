@@ -33,7 +33,7 @@ func (p *PaymentService) CreateSubscription(
 	status := resource.SubscriptionStatusTrialing
 	expiry := now.Add(time.Hour * 24 * constant.TrialSubscriptionDurationInDays)
 
-	if *planWithProduct.Tier == int32(resource.ProductTierFree) {
+	if planWithProduct.Tier == int32(resource.ProductTierFree) {
 		isTrial = false
 		status = resource.SubscriptionStatusActive
 		expiry = now.Add(time.Hour * 24 * constant.FreeSubscriptionDurationInDays)

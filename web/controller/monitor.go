@@ -133,7 +133,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		return resp.SendError(c, fiber.StatusUnprocessableEntity, err)
 	}
 
-	count, err := m.monitorDomain.Count(ctx, *user.OrganizationID)
+	count, err := m.monitorDomain.Count(ctx, user.OrganizationID)
 	if err != nil {
 		return resp.ServeInternalServerError(c, err)
 	}
@@ -148,7 +148,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		lgr.Print(tracingID, 2, "creating monitor", body.Method, body.URL)
-		monitor, err = m.monitorService.Create(ctx, tx, user.ID, *user.OrganizationID, body.Name, body.URL, body.Method,
+		monitor, err = m.monitorService.Create(ctx, tx, user.ID, user.OrganizationID, body.Name, body.URL, body.Method,
 			body.Body, body.Username, body.Password, body.BodyFormat, body.Interval, body.Timeout,
 			body.AlarmReminderInterval, body.AlarmReminderCount, body.CheckSSL,
 			body.FollowRedirect, body.GlobalAlarmSettings, body.Headers)
@@ -163,7 +163,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			lgr.Print(tracingID, 3, "assertion created", resource.AssertionSource(*ass.Source).String(), *ass.Value)
+			lgr.Print(tracingID, 3, "assertion created", resource.AssertionSource(ass.Source).String(), *ass.Value)
 			assertions = append(assertions, ass)
 		}
 		return nil
@@ -183,7 +183,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 func (m *MonitorController) ListMonitors(c *fiber.Ctx) error {
 	user := middlelayer.GetUser(c)
 
-	monitors, err := m.monitorDomain.List(c.Context(), *user.OrganizationID, 5)
+	monitors, err := m.monitorDomain.List(c.Context(), user.OrganizationID, 5)
 	if err != nil {
 		return resp.ServeInternalServerError(c, err)
 	}
@@ -255,10 +255,10 @@ func (m *MonitorController) DryRun(c *fiber.Ctx) error {
 	}
 
 	lgr.Print(tracingID, 1, "dry running", body.Method, body.URL)
-	var bodyFormat *resource.MonitorBodyFormat
+	bodyFormat := resource.MonitorBodyFormatNoBody
 	if body.BodyFormat != nil {
 		resourceBodyFormat := resource.MonitorBodyFormat(*body.BodyFormat)
-		bodyFormat = &resourceBodyFormat
+		bodyFormat = resourceBodyFormat
 	}
 	hitResponse, hitError := m.dog.Hit(ctx, body.URL, body.Method, body.Body, body.Username, body.Password, bodyFormat,
 		body.Headers, body.Timeout, body.FollowRedirect)

@@ -45,9 +45,8 @@ func (m *MonitorStatusDomain) Create(
 	if !monitorStatus.Valid() {
 		return nil, constant.ErrInvalidMonitorStatus
 	}
-	monitorStatusValue := int32(monitorStatus)
 
-	monitorStatusChange.Status = &monitorStatusValue
+	monitorStatusChange.Status = int32(monitorStatus)
 	insertStmt := MonitorStatusChange.INSERT(MonitorStatusChange.MutableColumns.
 		Except(MonitorStatusChange.InsertedAt, MonitorStatusChange.UpdatedAt)).
 		MODEL(monitorStatusChange).RETURNING(MonitorStatusChange.AllColumns)

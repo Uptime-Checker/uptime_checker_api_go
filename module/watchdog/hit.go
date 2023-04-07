@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -22,11 +21,10 @@ import (
 )
 
 const (
-	appName              = "uptime_checker"
-	website              = "https://uptimecheckr.com"
-	version              = "v1.0"
-	maxRedirect          = 5
-	contentTypeHeaderKey = "content-type"
+	appName     = "uptime_checker"
+	website     = "https://uptimecheckr.com"
+	version     = "v1.0"
+	maxRedirect = 5
 )
 
 type HitErr struct {
@@ -47,7 +45,7 @@ type HitResponse struct {
 func (w *WatchDog) Hit(
 	ctx context.Context,
 	uri, method string, body, username, password *string,
-	bodyFormat *resource.MonitorBodyFormat,
+	bodyFormat resource.MonitorBodyFormat,
 	headers *map[string]string,
 	timeout int32,
 	followRedirect bool,
@@ -62,7 +60,7 @@ func (w *WatchDog) Hit(
 
 	request := client.R().SetContext(ctx).EnableTrace()
 
-	requestContentType := getRequestContentType(bodyFormat, headers)
+	requestContentType := w.monitorService.GetRequestContentType(bodyFormat, headers)
 	if requestContentType != "" {
 		request.SetContentType(requestContentType)
 	}
@@ -83,23 +81,6 @@ func (w *WatchDog) Hit(
 	}
 	// Return status code, response body, response headers, response size, trace info
 	return w.getResponse(resp)
-}
-
-func getRequestContentType(bodyFormat *resource.MonitorBodyFormat, headers *map[string]string) string {
-	contentType := resource.MonitorBodyFormatNoBody.String()
-	if bodyFormat != nil {
-		contentType = bodyFormat.String()
-	}
-
-	if headers != nil && len(*headers) > 0 {
-		for key, value := range *headers {
-			if strings.EqualFold(key, contentTypeHeaderKey) {
-				contentType = value
-			}
-		}
-	}
-
-	return contentType
 }
 
 func (w *WatchDog) getError(err error) *HitErr {

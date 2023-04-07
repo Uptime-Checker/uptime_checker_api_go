@@ -33,11 +33,9 @@ func (a *AssertionDomain) Create(
 	if !assertionComparison.Valid() {
 		return nil, constant.ErrInvalidAssertionComparison
 	}
-	sourceValue := int32(assertionSource)
-	comparisonValue := int32(assertionComparison)
 
-	assertion.Source = &sourceValue
-	assertion.Comparison = &comparisonValue
+	assertion.Source = int32(assertionSource)
+	assertion.Comparison = int32(assertionComparison)
 
 	insertStmt := Assertion.INSERT(Assertion.MutableColumns.Except(Assertion.InsertedAt, Assertion.UpdatedAt)).
 		MODEL(assertion).RETURNING(Assertion.AllColumns)

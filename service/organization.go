@@ -27,8 +27,8 @@ func (o *OrganizationService) CreateOrganizationAlarmPolicy(
 ) (*model.AlarmPolicy, error) {
 	threshold := int32(constant.DefaultOrganizationAlarmErrorThreshold)
 	alarmPolicy := &model.AlarmPolicy{
-		Threshold:      &threshold,
-		OrganizationID: &organizationID,
+		Threshold:      threshold,
+		OrganizationID: organizationID,
 	}
 
 	return o.alarmPolicyDomain.Create(ctx, tx, alarmPolicy, resource.AlarmPolicyErrorThreshold)

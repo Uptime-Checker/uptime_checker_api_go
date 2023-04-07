@@ -54,10 +54,10 @@ func (p *PaymentDomain) CreateSubscription(
 		Status:         &statusValue,
 		StartsAt:       &now,
 		ExpiresAt:      &expiresAt,
-		IsTrial:        &isTrial,
-		PlanID:         &planID,
-		ProductID:      &productID,
-		OrganizationID: &organizationID,
+		IsTrial:        isTrial,
+		PlanID:         planID,
+		ProductID:      productID,
+		OrganizationID: organizationID,
 	}
 	insertStmt := Subscription.INSERT(Subscription.MutableColumns.
 		Except(Subscription.InsertedAt, Subscription.UpdatedAt)).
