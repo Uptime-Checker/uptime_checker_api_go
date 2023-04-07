@@ -118,7 +118,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
 	}
 	fastWheelMonitoring := asynqmon.New(asynqmon.Options{
-		RootPath:     "/monitoring/tasks", // RootPath specifies the root for asynqmon app
+		RootPath:     "/wheel/fast/monitoring", // RootPath specifies the root for asynqmon app
 		RedisConnOpt: redisClientOpt,
 	})
 	app.All(fmt.Sprintf("%s/*", fastWheelMonitoring.RootPath()), adaptor.HTTPHandler(fastWheelMonitoring))
