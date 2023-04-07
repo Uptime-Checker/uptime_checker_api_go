@@ -18,8 +18,8 @@ type Invitation struct {
 	ExpiresAt         time.Time
 	NotificationCount *int32
 	InvitedByUserID   *int64
-	RoleID            *int64
-	OrganizationID    *int64
+	RoleID            int64
+	OrganizationID    int64
 	InsertedAt        time.Time
 	UpdatedAt         time.Time
 }

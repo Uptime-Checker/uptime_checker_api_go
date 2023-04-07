@@ -13,11 +13,11 @@ import (
 
 type Assertion struct {
 	ID         int64 `sql:"primary_key"`
-	Source     *int32
+	Source     int32
 	Property   *string
-	Comparison *int32
+	Comparison int32
 	Value      *string
-	MonitorID  *int64
+	MonitorID  int64
 	InsertedAt time.Time
 	UpdatedAt  time.Time
 }

@@ -13,8 +13,8 @@ import (
 
 type MonitorStatusChange struct {
 	ID         int64 `sql:"primary_key"`
-	Status     *int32
-	MonitorID  *int64
+	Status     int32
+	MonitorID  int64
 	InsertedAt time.Time
 	UpdatedAt  time.Time
 }

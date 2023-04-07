@@ -13,10 +13,10 @@ import (
 
 type OrganizationUser struct {
 	ID             int64 `sql:"primary_key"`
-	Status         *int32
-	RoleID         *int64
-	UserID         *int64
-	OrganizationID *int64
+	Status         int32
+	RoleID         int64
+	UserID         int64
+	OrganizationID int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time
 }

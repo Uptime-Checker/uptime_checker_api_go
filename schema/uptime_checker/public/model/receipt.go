@@ -14,20 +14,20 @@ import (
 type Receipt struct {
 	ID                 int64 `sql:"primary_key"`
 	Price              float64
-	Currency           *string
+	Currency           string
 	ExternalID         *string
 	ExternalCustomerID *string
 	URL                *string
 	Status             *int32
-	Paid               *bool
+	Paid               bool
 	PaidAt             *time.Time
 	From               *time.Time
 	To                 *time.Time
-	IsTrial            *bool
+	IsTrial            bool
 	PlanID             *int64
 	ProductID          *int64
 	SubscriptionID     *int64
-	OrganizationID     *int64
+	OrganizationID     int64
 	InsertedAt         time.Time
 	UpdatedAt          time.Time
 }

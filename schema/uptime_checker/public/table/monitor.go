@@ -35,6 +35,7 @@ type monitorTable struct {
 	AlarmReminderInterval postgres.ColumnInteger
 	AlarmReminderCount    postgres.ColumnInteger
 	Status                postgres.ColumnInteger
+	ConsecutiveCount      postgres.ColumnInteger
 	CheckSsl              postgres.ColumnBool
 	FollowRedirects       postgres.ColumnBool
 	NextCheckAt           postgres.ColumnTimestamp
@@ -105,6 +106,7 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		AlarmReminderIntervalColumn = postgres.IntegerColumn("alarm_reminder_interval")
 		AlarmReminderCountColumn    = postgres.IntegerColumn("alarm_reminder_count")
 		StatusColumn                = postgres.IntegerColumn("status")
+		ConsecutiveCountColumn      = postgres.IntegerColumn("consecutive_count")
 		CheckSslColumn              = postgres.BoolColumn("check_ssl")
 		FollowRedirectsColumn       = postgres.BoolColumn("follow_redirects")
 		NextCheckAtColumn           = postgres.TimestampColumn("next_check_at")
@@ -117,8 +119,8 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		OrganizationIDColumn        = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn            = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn             = postgres.TimestampColumn("updated_at")
-		allColumns                  = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns              = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns                  = postgres.ColumnList{IDColumn, NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, ConsecutiveCountColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns              = postgres.ColumnList{NameColumn, URLColumn, MethodColumn, TimeoutColumn, IntervalColumn, TypeColumn, BodyColumn, BodyFormatColumn, HeadersColumn, UsernameColumn, PasswordColumn, OnColumn, MutedColumn, GlobalAlarmSettingsColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, StatusColumn, ConsecutiveCountColumn, CheckSslColumn, FollowRedirectsColumn, NextCheckAtColumn, LastCheckedAtColumn, LastFailedAtColumn, CreatedByColumn, UpdatedByColumn, MonitorGroupIDColumn, NextIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorTable{
@@ -143,6 +145,7 @@ func newMonitorTableImpl(schemaName, tableName, alias string) monitorTable {
 		AlarmReminderInterval: AlarmReminderIntervalColumn,
 		AlarmReminderCount:    AlarmReminderCountColumn,
 		Status:                StatusColumn,
+		ConsecutiveCount:      ConsecutiveCountColumn,
 		CheckSsl:              CheckSslColumn,
 		FollowRedirects:       FollowRedirectsColumn,
 		NextCheckAt:           NextCheckAtColumn,

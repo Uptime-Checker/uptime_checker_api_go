@@ -13,12 +13,12 @@ import (
 
 type Alarm struct {
 	ID                 int64 `sql:"primary_key"`
-	Ongoing            *bool
+	Ongoing            bool
 	ResolvedAt         *time.Time
 	TriggeredByCheckID *int64
 	ResolvedByCheckID  *int64
-	MonitorID          *int64
-	OrganizationID     *int64
+	MonitorID          int64
+	OrganizationID     int64
 	InsertedAt         time.Time
 	UpdatedAt          time.Time
 }

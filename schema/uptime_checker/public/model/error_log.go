@@ -16,8 +16,8 @@ type ErrorLog struct {
 	Text          *string
 	Type          *int32
 	ScreenshotURL *string
-	CheckID       *int64
-	MonitorID     *int64
+	CheckID       int64
+	MonitorID     int64
 	AssertionID   *int64
 	InsertedAt    time.Time
 	UpdatedAt     time.Time

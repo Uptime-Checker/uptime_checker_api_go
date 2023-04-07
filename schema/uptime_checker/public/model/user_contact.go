@@ -21,8 +21,8 @@ type UserContact struct {
 	VerificationCodeExpiresAt *time.Time
 	Verified                  bool
 	Subscribed                bool
-	BounceCount               *int32
-	UserID                    *int64
+	BounceCount               int32
+	UserID                    int64
 	InsertedAt                time.Time
 	UpdatedAt                 time.Time
 }

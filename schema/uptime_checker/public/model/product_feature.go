@@ -13,9 +13,9 @@ import (
 
 type ProductFeature struct {
 	ID         int64 `sql:"primary_key"`
-	Count      *int32
-	ProductID  *int64
-	FeatureID  *int64
+	Count      int32
+	ProductID  int64
+	FeatureID  int64
 	InsertedAt time.Time
 	UpdatedAt  time.Time
 }

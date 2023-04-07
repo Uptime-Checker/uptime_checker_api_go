@@ -14,9 +14,9 @@ import (
 type AlarmPolicy struct {
 	ID             int64 `sql:"primary_key"`
 	Reason         *string
-	Threshold      *int32
+	Threshold      int32
 	MonitorID      *int64
-	OrganizationID *int64
+	OrganizationID int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time
 }

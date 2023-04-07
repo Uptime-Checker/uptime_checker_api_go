@@ -13,12 +13,12 @@ import (
 
 type DailyReport struct {
 	ID               int64 `sql:"primary_key"`
-	SuccessfulChecks *int32
-	ErrorChecks      *int32
-	Downtime         *int32
-	Date             *time.Time
-	MonitorID        *int64
-	OrganizationID   *int64
+	SuccessfulChecks int32
+	ErrorChecks      int32
+	Downtime         int32
+	Date             time.Time
+	MonitorID        int64
+	OrganizationID   int64
 	InsertedAt       time.Time
 	UpdatedAt        time.Time
 }

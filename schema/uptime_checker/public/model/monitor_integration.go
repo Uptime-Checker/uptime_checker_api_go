@@ -16,7 +16,7 @@ type MonitorIntegration struct {
 	Name           *string
 	Type           *int32
 	Config         *string
-	OrganizationID *int64
+	OrganizationID int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time
 }

@@ -17,12 +17,12 @@ type Subscription struct {
 	StartsAt           *time.Time
 	ExpiresAt          *time.Time
 	CanceledAt         *time.Time
-	IsTrial            *bool
+	IsTrial            bool
 	ExternalID         *string
 	ExternalCustomerID *string
-	PlanID             *int64
-	ProductID          *int64
-	OrganizationID     *int64
+	PlanID             int64
+	ProductID          int64
+	OrganizationID     int64
 	InsertedAt         time.Time
 	UpdatedAt          time.Time
 }

@@ -13,10 +13,10 @@ import (
 
 type MonitorRegion struct {
 	ID            int64 `sql:"primary_key"`
-	Down          *bool
+	Down          bool
 	LastCheckedAt *time.Time
-	MonitorID     *int64
-	RegionID      *int64
+	MonitorID     int64
+	RegionID      int64
 	InsertedAt    time.Time
 	UpdatedAt     time.Time
 }

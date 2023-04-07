@@ -14,7 +14,7 @@ import (
 type MonitorGroup struct {
 	ID             int64 `sql:"primary_key"`
 	Name           string
-	OrganizationID *int64
+	OrganizationID int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time
 }

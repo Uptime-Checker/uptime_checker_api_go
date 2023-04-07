@@ -16,9 +16,9 @@ type MonitorNotification struct {
 	Type           *int32
 	Successful     bool
 	AlarmID        *int64
-	MonitorID      *int64
+	MonitorID      int64
 	UserContactID  *int64
-	OrganizationID *int64
+	OrganizationID int64
 	IntegrationID  *int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time

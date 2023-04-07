@@ -14,7 +14,7 @@ import (
 type Plan struct {
 	ID         int64 `sql:"primary_key"`
 	Price      float64
-	Type       *int32
+	Type       int32
 	ExternalID *string
 	ProductID  *int64
 	InsertedAt time.Time

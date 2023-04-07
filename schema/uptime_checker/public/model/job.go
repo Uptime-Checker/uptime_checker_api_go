@@ -13,13 +13,13 @@ import (
 
 type Job struct {
 	ID         int64 `sql:"primary_key"`
-	Status     *int32
-	On         *bool
+	Status     int32
+	On         bool
 	Name       string
 	Interval   *int32
 	LastRanAt  *time.Time
 	NextRunAt  *time.Time
-	Recurring  *bool
+	Recurring  bool
 	InsertedAt time.Time
 	UpdatedAt  time.Time
 }

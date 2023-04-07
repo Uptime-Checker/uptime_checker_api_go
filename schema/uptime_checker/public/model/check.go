@@ -21,9 +21,9 @@ type Check struct {
 	ContentType    *string
 	Duration       *int32
 	Success        bool
-	RegionID       *int64
-	MonitorID      *int64
-	OrganizationID *int64
+	RegionID       int64
+	MonitorID      int64
+	OrganizationID int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time
 }

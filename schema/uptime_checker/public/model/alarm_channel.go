@@ -13,10 +13,10 @@ import (
 
 type AlarmChannel struct {
 	ID             int64 `sql:"primary_key"`
-	On             *bool
+	On             bool
 	UserContactID  *int64
 	MonitorID      *int64
-	OrganizationID *int64
+	OrganizationID int64
 	IntegrationID  *int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time

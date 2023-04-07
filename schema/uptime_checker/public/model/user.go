@@ -18,10 +18,10 @@ type User struct {
 	PictureURL        *string
 	PaymentCustomerID *string
 	ProviderUID       *string
-	Provider          *int32
-	LastLoginAt       *time.Time
+	Provider          int32
+	LastLoginAt       time.Time
 	RoleID            *int64
-	OrganizationID    *int64
+	OrganizationID    int64
 	InsertedAt        time.Time
 	UpdatedAt         time.Time
 }

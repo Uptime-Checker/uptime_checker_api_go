@@ -16,7 +16,7 @@ type Product struct {
 	Name        string
 	Description *string
 	ExternalID  *string
-	Tier        *int32
+	Tier        int32
 	InsertedAt  time.Time
 	UpdatedAt   time.Time
 }

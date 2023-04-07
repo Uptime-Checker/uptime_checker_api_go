@@ -16,22 +16,23 @@ type Monitor struct {
 	Name                  string
 	URL                   string
 	Method                *int32
-	Timeout               *int32
-	Interval              *int32
-	Type                  *int32
+	Timeout               int32
+	Interval              int32
+	Type                  int32
 	Body                  *string
-	BodyFormat            *int32
+	BodyFormat            int32
 	Headers               *string
 	Username              *string
 	Password              *string
-	On                    *bool
-	Muted                 *bool
-	GlobalAlarmSettings   *bool
-	AlarmReminderInterval *int32
-	AlarmReminderCount    *int32
-	Status                *int32
-	CheckSsl              *bool
-	FollowRedirects       *bool
+	On                    bool
+	Muted                 bool
+	GlobalAlarmSettings   bool
+	AlarmReminderInterval int32
+	AlarmReminderCount    int32
+	Status                int32
+	ConsecutiveCount      int32
+	CheckSsl              bool
+	FollowRedirects       bool
 	NextCheckAt           *time.Time
 	LastCheckedAt         *time.Time
 	LastFailedAt          *time.Time
@@ -39,7 +40,7 @@ type Monitor struct {
 	UpdatedBy             *int64
 	MonitorGroupID        *int64
 	NextID                *int64
-	OrganizationID        *int64
+	OrganizationID        int64
 	InsertedAt            time.Time
 	UpdatedAt             time.Time
 }

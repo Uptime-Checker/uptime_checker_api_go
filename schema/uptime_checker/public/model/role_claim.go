@@ -14,7 +14,7 @@ import (
 type RoleClaim struct {
 	ID         int64 `sql:"primary_key"`
 	Claim      string
-	RoleID     *int64
+	RoleID     int64
 	InsertedAt time.Time
 	UpdatedAt  time.Time
 }
