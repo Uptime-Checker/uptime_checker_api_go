@@ -47,6 +47,8 @@ func (w *WatchDog) verify(
 			return fmt.Errorf("failed to create monitor status, err: %w", err)
 		}
 	}
+	
+	// Update monitor params - status | consecutive
 
 	return nil
 }
