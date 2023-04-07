@@ -44,9 +44,9 @@ func (d *DailyReportService) Add(
 	}
 	// Update
 	if success {
-		dailyReport.SuccessfulChecks = dailyReport.SuccessfulChecks + 1
+		dailyReport.SuccessfulChecks++
 	} else {
-		dailyReport.ErrorChecks = dailyReport.ErrorChecks + 1
+		dailyReport.ErrorChecks--
 	}
 	dailyReport.UpdatedAt = now
 	return d.dailyReportDomain.Update(ctx, tx, dailyReport.ID, dailyReport)

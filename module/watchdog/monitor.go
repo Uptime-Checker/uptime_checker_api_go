@@ -56,13 +56,13 @@ func (w *WatchDog) getMonitorConsecutiveCount(monitor *model.Monitor, success bo
 		if current < 0 {
 			current = 1
 		} else {
-			current = current + 1
+			current++
 		}
 	}
 	if current > 0 {
 		current = -1
 	} else {
-		current = current - 1
+		current--
 	}
 	return current
 }
