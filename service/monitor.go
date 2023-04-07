@@ -120,7 +120,7 @@ func (m *MonitorService) Start(
 		nextCheckAt = now.Add(time.Second * time.Duration(monitor.Interval))
 	}
 
-	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, &nextCheckAt)
+	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, &now, &nextCheckAt)
 }
 
 func (m *MonitorService) GetRequestContentType(
