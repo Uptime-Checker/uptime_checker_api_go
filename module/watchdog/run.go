@@ -67,8 +67,16 @@ func (w *WatchDog) Launch(
 ) {
 	tracingID := pkg.GetTracingID(ctx)
 	monitor := monitorRegionWithAssertions.Monitor
+
+	check, hitResponse, hitErr, err := w.fly(ctx, monitor.Monitor, monitorRegionWithAssertions.Region)
+	if err != nil {
+		sentry.CaptureException(err)
+	}
+
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
-		check, err := w.run(ctx, tx, monitor.Monitor, monitorRegionWithAssertions.Region, monitor.Assertions)
+		check, err := w.run(
+			ctx, tx, check, monitor.Monitor, monitor.Assertions, hitResponse, hitErr,
+		)
 		if err != nil {
 			return err
 		}
@@ -112,8 +120,15 @@ func (w *WatchDog) startMonitor(
 		}
 		config.Region = region
 	}
+	check, hitResponse, hitErr, err := w.fly(ctx, monitor, config.Region)
+	if err != nil {
+		return err
+	}
+
 	return infra.Transaction(ctx, func(tx *sql.Tx) error {
-		check, err := w.run(ctx, tx, monitor, config.Region, assertions)
+		check, err := w.run(
+			ctx, tx, check, monitor, assertions, hitResponse, hitErr,
+		)
 		if err != nil {
 			return err
 		}
@@ -132,15 +147,12 @@ func (w *WatchDog) startMonitor(
 	})
 }
 
-func (w *WatchDog) run(
+func (w *WatchDog) fly(
 	ctx context.Context,
-	tx *sql.Tx,
 	monitor *model.Monitor,
 	region *model.Region,
-	assertions []model.Assertion,
-) (*model.Check, error) {
+) (*model.Check, *HitResponse, *HitErr, error) {
 	tracingID := pkg.GetTracingID(ctx)
-
 	lgr.Print(tracingID, 1, "running =>", monitor.URL, "from", region.Name)
 
 	check := &model.Check{
@@ -149,16 +161,16 @@ func (w *WatchDog) run(
 		MonitorID:      monitor.ID,
 		OrganizationID: monitor.OrganizationID,
 	}
-	check, err := w.checkDomain.Create(ctx, tx, check)
+	check, err := w.checkDomain.Create(ctx, check)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create check, monitor %d, err: %w", monitor.ID, err)
+		return nil, nil, nil, fmt.Errorf("failed to create check, monitor %d, err: %w", monitor.ID, err)
 	}
 	lgr.Print(tracingID, 2, "created check", check.ID)
 
 	var headers map[string]string
 	if monitor.Headers != nil {
 		if err := json.Unmarshal([]byte(*monitor.Headers), &headers); err != nil {
-			return nil, fmt.Errorf("could not unmarshal monior headers %d, err: %w", monitor.ID, err)
+			return nil, nil, nil, fmt.Errorf("could not unmarshal monior headers %d, err: %w", monitor.ID, err)
 		}
 	}
 
@@ -175,6 +187,19 @@ func (w *WatchDog) run(
 		monitor.Timeout,
 		monitor.FollowRedirects,
 	)
+	return check, hitResponse, hitError, err
+}
+
+func (w *WatchDog) run(
+	ctx context.Context,
+	tx *sql.Tx,
+	check *model.Check,
+	monitor *model.Monitor,
+	assertions []model.Assertion,
+	hitResponse *HitResponse, hitError *HitErr,
+) (*model.Check, error) {
+	tracingID := pkg.GetTracingID(ctx)
+	method := resource.GetMonitorMethod(*monitor.Method)
 
 	if hitResponse == nil && hitError != nil {
 		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
@@ -217,7 +242,7 @@ func (w *WatchDog) run(
 		}
 
 		// update the check
-		check, err = w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
+		check, err := w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
 			hitResponse.StatusCode, hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
 		if err != nil {
 			return check, fmt.Errorf("failed to update checl %d, monitor %d, err: %w", check.ID, monitor.ID, err)

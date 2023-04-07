@@ -418,7 +418,7 @@ linters-settings:
       - name: function-length
         disabled: true
       - name: function-result-limit
-        arguments: [3]
+        arguments: [4]
       - name: file-header
         disabled: true
       - name: line-length-limit
