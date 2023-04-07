@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/samber/lo"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -52,13 +54,13 @@ func (w *WatchDog) handleAlarmPolicy(
 
 		switch reason {
 		case resource.AlarmPolicyErrorThreshold:
-			if alarmPolicy.Threshold == consecutiveCount {
+			if consecutiveCount >= alarmPolicy.Threshold {
 				status = resource.MonitorStatusFailing
 			}
 		case resource.AlarmPolicyDurationThreshold:
 			monitorStatus, err := w.monitorStatusDomain.GetLatest(ctx, monitor.ID)
 			if err != nil {
-				return nil, fmt.Errorf("could not get monitor status, err: %w", err)
+				return nil, fmt.Errorf("failed to get monitor status, err: %w", err)
 			}
 			currentStatus := resource.MonitorStatus(monitorStatus.Status)
 			if currentStatus == resource.MonitorStatusFailing || currentStatus == resource.MonitorStatusDegraded {
@@ -67,7 +69,16 @@ func (w *WatchDog) handleAlarmPolicy(
 				}
 			}
 		case resource.AlarmPolicyRegionThreshold:
-
+			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get monitor regions, err: %w", err)
+			}
+			downRegions := lo.Filter(monitorRegions, func(monitorRegion model.MonitorRegion, index int) bool {
+				return monitorRegion.Down
+			})
+			if int32(len(downRegions)) >= alarmPolicy.Threshold {
+				status = resource.MonitorStatusFailing
+			}
 		}
 	}
 	return &status, nil

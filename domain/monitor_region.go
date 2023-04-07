@@ -43,6 +43,17 @@ func (m *MonitorRegionDomain) Create(
 	return monitorRegion, err
 }
 
+func (m *MonitorRegionDomain) GetAll(
+	ctx context.Context,
+	monitorID int64,
+) ([]model.MonitorRegion, error) {
+	stmt := SELECT(MonitorRegion.AllColumns).FROM(MonitorRegion).WHERE(MonitorRegion.MonitorID.EQ(Int(monitorID)))
+
+	var monitorRegions []model.MonitorRegion
+	err := stmt.QueryContext(ctx, infra.DB, &monitorRegions)
+	return monitorRegions, err
+}
+
 func (m *MonitorRegionDomain) GetMonitorRegion(
 	ctx context.Context,
 	monitorID, regionID int64,
