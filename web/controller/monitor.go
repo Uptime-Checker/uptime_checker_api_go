@@ -232,7 +232,9 @@ func (m *MonitorController) Start(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
-			_, err = m.monitorDomain.UpdateOn(ctx, tx, body.MonitorID, body.On, monitor.LastCheckedAt, nil)
+			status := resource.MonitorStatus(monitor.Status)
+			_, err = m.monitorDomain.UpdateOn(ctx, tx, body.MonitorID, body.On, status, monitor.LastCheckedAt,
+				nil)
 			return err
 		}); err != nil {
 			return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)

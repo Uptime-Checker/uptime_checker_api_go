@@ -151,17 +151,23 @@ func (m *MonitorDomain) UpdateOn(
 	tx *sql.Tx,
 	id int64,
 	on bool,
+	status resource.MonitorStatus,
 	lastCheckedAt, nextCheckAt *time.Time,
 ) (*model.Monitor, error) {
+	if !status.Valid() {
+		return nil, constant.ErrInvalidMonitorStatus
+	}
 	now := times.Now()
 	monitor := &model.Monitor{
 		On:            on,
+		Status:        int32(status),
 		LastCheckedAt: lastCheckedAt,
 		NextCheckAt:   nextCheckAt,
 		UpdatedAt:     now,
 	}
 
-	updateStmt := Monitor.UPDATE(Monitor.On, Monitor.LastCheckedAt, Monitor.NextCheckAt, Monitor.UpdatedAt).
+	updateStmt := Monitor.
+		UPDATE(Monitor.On, Monitor.Status, Monitor.LastCheckedAt, Monitor.NextCheckAt, Monitor.UpdatedAt).
 		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
 
 	err := updateStmt.QueryContext(ctx, tx, monitor)

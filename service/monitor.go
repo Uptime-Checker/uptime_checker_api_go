@@ -45,6 +45,7 @@ func (m *MonitorService) Create(
 	if bodyFormat != nil {
 		contentType = resource.MonitorBodyFormat(*bodyFormat)
 	}
+	pendingStatus := resource.MonitorStatusPending
 
 	monitor := &model.Monitor{
 		Name:                  name,
@@ -60,7 +61,7 @@ func (m *MonitorService) Create(
 		GlobalAlarmSettings:   globalAlarmSettings,
 		AlarmReminderInterval: alarmReminderInterval,
 		AlarmReminderCount:    alarmReminderCount,
-		Status:                int32(resource.MonitorStatusPending),
+		Status:                int32(pendingStatus),
 		CheckSsl:              checkSSL,
 		FollowRedirects:       followRedirect,
 		CreatedBy:             &userID,
@@ -94,7 +95,7 @@ func (m *MonitorService) Create(
 	monitorStatusChange := &model.MonitorStatusChange{MonitorID: monitor.ID}
 
 	// Create a new monitor status change
-	_, err = m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, resource.MonitorStatusPending)
+	_, err = m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, pendingStatus)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +109,9 @@ func (m *MonitorService) Start(
 	monitor *model.Monitor,
 	on bool,
 ) (*model.Monitor, error) {
+	passingStatus := resource.MonitorStatusPassing
 	monitorStatusChange := &model.MonitorStatusChange{MonitorID: monitor.ID}
-	_, err := m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, resource.MonitorStatusPassing)
+	_, err := m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, passingStatus)
 	if err != nil {
 		return nil, err
 	}
@@ -119,8 +121,7 @@ func (m *MonitorService) Start(
 	if on {
 		nextCheckAt = now.Add(time.Second * time.Duration(monitor.Interval))
 	}
-
-	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, &now, &nextCheckAt)
+	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, passingStatus, &now, &nextCheckAt)
 }
 
 func (m *MonitorService) GetRequestContentType(

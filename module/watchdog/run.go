@@ -132,12 +132,14 @@ func (w *WatchDog) startMonitor(
 		if err != nil {
 			return err
 		}
+		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
+			"duration:", fmt.Sprintf("%dms", check.Duration))
 		if check.Success {
 			monitor, err := w.monitorService.Start(ctx, tx, monitor, true)
 			if err != nil {
 				return err
 			}
-			lgr.Print(tracingID, 1, "starting monitor for", monitor.URL)
+			lgr.Print(tracingID, 2, "starting monitor for", monitor.URL)
 			_, err = w.monitorRegionService.FirstOrCreate(ctx, tx, monitor.ID, config.Region.ID)
 			if err != nil {
 				return err
