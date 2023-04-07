@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -110,10 +111,22 @@ func (m *MonitorService) Start(
 	on bool,
 ) (*model.Monitor, error) {
 	passingStatus := resource.MonitorStatusPassing
-	monitorStatusChange := &model.MonitorStatusChange{MonitorID: monitor.ID}
-	_, err := m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, passingStatus)
+	createMonitorStatusChange := func() error {
+		monitorStatusChange := &model.MonitorStatusChange{MonitorID: monitor.ID}
+		_, err := m.monitorStatusDomain.Create(ctx, tx, monitorStatusChange, passingStatus)
+		return err
+	}
+
+	latestMonitorStatus, err := m.monitorStatusDomain.GetLatest(ctx, monitor.ID)
 	if err != nil {
-		return nil, err
+		if err := createMonitorStatusChange(); err != nil {
+			return nil, fmt.Errorf("failed to create monitor status, err: %w", err)
+		}
+	}
+	if resource.MonitorStatus(latestMonitorStatus.Status) != passingStatus {
+		if err := createMonitorStatusChange(); err != nil {
+			return nil, fmt.Errorf("failed to create monitor status, err: %w", err)
+		}
 	}
 
 	now := times.Now()
