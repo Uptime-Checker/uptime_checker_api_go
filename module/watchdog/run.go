@@ -135,7 +135,7 @@ func (w *WatchDog) startMonitor(
 		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
 			"duration:", fmt.Sprintf("%dms", check.Duration))
 		if check.Success {
-			monitor, err := w.monitorService.Start(ctx, tx, monitor, true)
+			monitor, err := w.monitorService.StartOn(ctx, tx, monitor)
 			if err != nil {
 				return err
 			}

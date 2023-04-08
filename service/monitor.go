@@ -104,11 +104,10 @@ func (m *MonitorService) Create(
 	return monitor, nil
 }
 
-func (m *MonitorService) Start(
+func (m *MonitorService) StartOn(
 	ctx context.Context,
 	tx *sql.Tx,
 	monitor *model.Monitor,
-	on bool,
 ) (*model.Monitor, error) {
 	passingStatus := resource.MonitorStatusPassing
 	createMonitorStatusChange := func() error {
@@ -130,11 +129,8 @@ func (m *MonitorService) Start(
 	}
 
 	now := times.Now()
-	var nextCheckAt time.Time
-	if on {
-		nextCheckAt = now.Add(time.Second * time.Duration(monitor.Interval))
-	}
-	return m.monitorDomain.UpdateOn(ctx, tx, monitor.ID, on, passingStatus, &now, &nextCheckAt)
+	nextCheckAt := now.Add(time.Second * time.Duration(monitor.Interval))
+	return m.monitorDomain.UpdateOnStatusAndCheckedAt(ctx, tx, monitor.ID, true, passingStatus, &now, &nextCheckAt)
 }
 
 func (m *MonitorService) GetRequestContentType(

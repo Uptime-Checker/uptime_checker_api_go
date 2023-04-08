@@ -146,7 +146,7 @@ func (m *MonitorDomain) ListMonitorsToRun(ctx context.Context, prev, later time.
 	return monitors, err
 }
 
-func (m *MonitorDomain) UpdateOn(
+func (m *MonitorDomain) UpdateOnStatusAndCheckedAt(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,
