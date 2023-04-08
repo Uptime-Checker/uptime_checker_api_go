@@ -55,12 +55,12 @@ func (w *WatchDog) verify(
 		lastFailedAt = &check.InsertedAt
 	}
 	consecutiveCount := w.getMonitorConsecutiveCount(monitor, check.Success)
-	_, err = w.monitorDomain.UpdateConsecutive(ctx, tx, monitor.ID, status, consecutiveCount, lastFailedAt)
+	monitor, err = w.monitorDomain.UpdateConsecutive(ctx, tx, monitor.ID, status, consecutiveCount, lastFailedAt)
 	if err != nil {
 		return fmt.Errorf("failed to update monitor consecutive count, err: %w", err)
 	}
 
-	return nil
+	return w.alarmCheck(ctx, tx, monitor, check, status)
 }
 
 func (w *WatchDog) handleAlarmPolicy(

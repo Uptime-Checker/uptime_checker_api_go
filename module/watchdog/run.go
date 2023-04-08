@@ -155,6 +155,7 @@ func (w *WatchDog) startMonitor(
 	})
 }
 
+// fly hits the target
 func (w *WatchDog) fly(
 	ctx context.Context,
 	monitor *model.Monitor,
@@ -198,6 +199,7 @@ func (w *WatchDog) fly(
 	return check, hitResponse, hitError, err
 }
 
+// run comes after flying
 func (w *WatchDog) run(
 	ctx context.Context,
 	tx *sql.Tx,

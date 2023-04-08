@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/samber/lo"
-
 	"github.com/imroc/req/v3"
+	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -48,6 +48,7 @@ func (c *CheckService) Update(
 	check.ContentSize = size
 	check.ContentType = contentType
 	check.StatusCode = lo.ToPtr(int32(statusCode))
+	check.UpdatedAt = times.Now()
 
 	jsonTraces, err := c.getTraceInfo(traces)
 	if err != nil {

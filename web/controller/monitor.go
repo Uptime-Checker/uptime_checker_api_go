@@ -118,11 +118,11 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 }
 
 func (m *MonitorController) Get(c *fiber.Ctx) error {
-	monitorID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	monitorID, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return resp.SendError(c, fiber.StatusUnprocessableEntity, err)
 	}
-	monitor, err := m.monitorDomain.Get(c.Context(), monitorID)
+	monitor, err := m.monitorDomain.Get(c.Context(), int64(monitorID))
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToGetMonitor, err)
 	}
