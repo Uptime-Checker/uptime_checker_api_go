@@ -193,3 +193,30 @@ func (m *MonitorDomain) UpdateNextCheckAt(
 	err := updateStmt.QueryContext(ctx, infra.DB, monitor)
 	return monitor, err
 }
+
+func (m *MonitorDomain) UpdateConsecutive(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+	status resource.MonitorStatus,
+	consecutiveCount int32,
+	lastFailedAt *time.Time,
+) (*model.Monitor, error) {
+	if !status.Valid() {
+		return nil, constant.ErrInvalidMonitorStatus
+	}
+	now := times.Now()
+	monitor := &model.Monitor{
+		ConsecutiveCount: consecutiveCount,
+		Status:           int32(status),
+		LastFailedAt:     lastFailedAt,
+		UpdatedAt:        now,
+	}
+
+	updateStmt := Monitor.
+		UPDATE(Monitor.ConsecutiveCount, Monitor.Status, Monitor.LastFailedAt, Monitor.UpdatedAt).
+		MODEL(monitor).WHERE(Monitor.ID.EQ(Int(id))).RETURNING(Monitor.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, monitor)
+	return monitor, err
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/samber/lo"
 
@@ -47,8 +48,17 @@ func (w *WatchDog) verify(
 			return fmt.Errorf("failed to create monitor status, err: %w", err)
 		}
 	}
-	
+
 	// Update monitor params - status | consecutive
+	var lastFailedAt *time.Time
+	if !check.Success {
+		lastFailedAt = &check.InsertedAt
+	}
+	consecutiveCount := w.getMonitorConsecutiveCount(monitor, check.Success)
+	_, err = w.monitorDomain.UpdateConsecutive(ctx, tx, monitor.ID, status, consecutiveCount, lastFailedAt)
+	if err != nil {
+		return fmt.Errorf("failed to update monitor consecutive count, err: %w", err)
+	}
 
 	return nil
 }
