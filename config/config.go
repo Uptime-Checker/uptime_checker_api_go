@@ -27,6 +27,7 @@ type config struct {
 	RedisQueue     string `mapstructure:"REDIS_QUEUE"`
 	RedisQueueUser string `mapstructure:"REDIS_QUEUE_USER"`
 	RedisQueuePass string `mapstructure:"REDIS_QUEUE_PASS"`
+	RedisQueuePool int    `mapstructure:"REDIS_QUEUE_POOL"`
 
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
 

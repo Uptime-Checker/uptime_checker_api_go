@@ -6,7 +6,6 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
-	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
@@ -39,10 +38,6 @@ func NewStartMonitorTask(
 		regionDomain:     regionDomain,
 		assertionsDomain: assertionsDomain,
 	}
-}
-
-func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
-	return s.process(ctx, job.Args)
 }
 
 func (s StartMonitorTask) ProcessTask(ctx context.Context, t *asynq.Task) error {

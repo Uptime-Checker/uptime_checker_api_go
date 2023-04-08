@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/hibiken/asynq"
 	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
@@ -41,10 +40,6 @@ func NewRunCheckTask(
 
 func (r RunCheckTask) Do(ctx context.Context, job *gue.Job) error {
 	return r.process(ctx, job.Args)
-}
-
-func (r RunCheckTask) ProcessTask(ctx context.Context, t *asynq.Task) error {
-	return r.process(ctx, t.Payload())
 }
 
 func (r RunCheckTask) process(ctx context.Context, payload []byte) error {

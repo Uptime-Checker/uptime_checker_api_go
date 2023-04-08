@@ -50,8 +50,7 @@ func (w *Worker) StartGue(ctx context.Context) error {
 	}
 
 	workMap := gue.WorkMap{
-		TaskRunCheck:     w.runCheckTask.Do,
-		TaskStartMonitor: w.startMonitorTask.Do,
+		TaskRunCheck: w.runCheckTask.Do,
 	}
 
 	// create a pool of workers
@@ -84,12 +83,11 @@ func (w *Worker) StartAsynq(ctx context.Context) error {
 	}
 	FastWheel = asynq.NewClient(redisClientOpt)
 	fastWheelServer = asynq.NewServer(redisClientOpt, asynq.Config{
-		Concurrency: config.App.WorkerPool, Logger: lgr.Zapper,
+		Concurrency: config.App.RedisQueuePool, Logger: lgr.Zapper,
 	})
 
 	mux := asynq.NewServeMux()
 	mux.Handle(TaskStartMonitor, w.startMonitorTask)
-	mux.Handle(TaskRunCheck, w.runCheckTask)
 
 	go func() {
 		if err := fastWheelServer.Run(mux); err != nil {
