@@ -3,7 +3,8 @@ package watchdog
 import (
 	"context"
 	"database/sql"
-	"fmt"
+
+	"github.com/cockroachdb/errors"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
@@ -45,7 +46,7 @@ func (w *WatchDog) resolveAlarm(
 	}
 	_, err := w.alarmDomain.Resolve(ctx, tx, alarm.ID, check.ID)
 	if err != nil {
-		return fmt.Errorf("failed to resolve alarm, err: %w", err)
+		return errors.Newf("failed to resolve alarm, err: %w", err)
 	}
 	lgr.Print(tracingID, 2, "resolved alarm", alarm.ID)
 	// update daily report duration
@@ -73,7 +74,7 @@ func (w *WatchDog) raiseAlarm(
 	}
 	_, err := w.alarmDomain.Create(ctx, tx, alarm)
 	if err != nil {
-		return fmt.Errorf("failed to create alarm, err: %w", err)
+		return errors.Newf("failed to create alarm, err: %w", err)
 	}
 	lgr.Print(tracingID, 2, "raised alarm", alarm.ID)
 	// send notification

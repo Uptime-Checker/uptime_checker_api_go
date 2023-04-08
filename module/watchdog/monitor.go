@@ -3,9 +3,9 @@ package watchdog
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -25,16 +25,16 @@ func (w *WatchDog) verify(
 	tracingID := pkg.GetTracingID(ctx)
 	alarmPolicy, err := w.alarmPolicyService.Get(ctx, monitor.ID, monitor.OrganizationID)
 	if err != nil {
-		return fmt.Errorf("could not find alarm policy %d, err: %w", monitor.ID, err)
+		return errors.Newf("could not find alarm policy %d, err: %w", monitor.ID, err)
 	}
 	monitorRegion, err = w.monitorRegionDomain.UpdateDown(ctx, tx, monitorRegion.ID, !check.Success)
 	if err != nil {
-		return fmt.Errorf("could not update monitor region %d, err: %w", monitorRegion.ID, err)
+		return errors.Newf("could not update monitor region %d, err: %w", monitorRegion.ID, err)
 	}
 
 	monitorStatus, err := w.monitorStatusDomain.GetLatest(ctx, monitor.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get monitor status, err: %w", err)
+		return errors.Newf("failed to get monitor status, err: %w", err)
 	}
 	status, err := w.handleAlarmPolicy(ctx, monitor, monitorStatus, alarmPolicy, check.Success)
 	if err != nil {
@@ -45,7 +45,7 @@ func (w *WatchDog) verify(
 	if resource.MonitorStatus(monitorStatus.Status) != status {
 		_, err := w.monitorStatusDomain.Create(ctx, tx, monitorStatus, status)
 		if err != nil {
-			return fmt.Errorf("failed to create monitor status, err: %w", err)
+			return errors.Newf("failed to create monitor status, err: %w", err)
 		}
 	}
 
@@ -57,7 +57,7 @@ func (w *WatchDog) verify(
 	consecutiveCount := w.getMonitorConsecutiveCount(monitor, check.Success)
 	monitor, err = w.monitorDomain.UpdateConsecutive(ctx, tx, monitor.ID, status, consecutiveCount, lastFailedAt)
 	if err != nil {
-		return fmt.Errorf("failed to update monitor consecutive count, err: %w", err)
+		return errors.Newf("failed to update monitor consecutive count, err: %w", err)
 	}
 
 	return w.alarmCheck(ctx, tx, monitor, check, status)
@@ -93,7 +93,7 @@ func (w *WatchDog) handleAlarmPolicy(
 		case resource.AlarmPolicyRegionThreshold:
 			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
 			if err != nil {
-				return status, fmt.Errorf("failed to get monitor regions, err: %w", err)
+				return status, errors.Newf("failed to get monitor regions, err: %w", err)
 			}
 			downRegions := lo.Filter(monitorRegions, func(monitorRegion model.MonitorRegion, index int) bool {
 				return monitorRegion.Down
@@ -119,7 +119,7 @@ func (w *WatchDog) handleAlarmPolicy(
 		case resource.AlarmPolicyRegionThreshold:
 			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
 			if err != nil {
-				return status, fmt.Errorf("failed to get monitor regions, err: %w", err)
+				return status, errors.Newf("failed to get monitor regions, err: %w", err)
 			}
 			upRegions := lo.Filter(monitorRegions, func(monitorRegion model.MonitorRegion, index int) bool {
 				return !monitorRegion.Down

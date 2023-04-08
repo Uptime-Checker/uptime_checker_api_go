@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
+	"github.com/cockroachdb/errors"
 )
 
 type MonitorService struct {
@@ -119,12 +119,12 @@ func (m *MonitorService) StartOn(
 	latestMonitorStatus, err := m.monitorStatusDomain.GetLatest(ctx, monitor.ID)
 	if err != nil {
 		if err := createMonitorStatusChange(); err != nil {
-			return nil, fmt.Errorf("failed to create monitor status, err: %w", err)
+			return nil, errors.Newf("failed to create monitor status, err: %w", err)
 		}
 	}
 	if resource.MonitorStatus(latestMonitorStatus.Status) != passingStatus {
 		if err := createMonitorStatusChange(); err != nil {
-			return nil, fmt.Errorf("failed to create monitor status, err: %w", err)
+			return nil, errors.Newf("failed to create monitor status, err: %w", err)
 		}
 	}
 
