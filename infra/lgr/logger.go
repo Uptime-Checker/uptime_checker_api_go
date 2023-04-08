@@ -13,7 +13,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 )
 
-var zapper *zap.SugaredLogger
+var Zapper *zap.SugaredLogger
 
 func newZapLogger() *zap.SugaredLogger {
 	var logger *zap.Logger
@@ -44,31 +44,31 @@ func newZapLogger() *zap.SugaredLogger {
 }
 
 func SetupLogger() {
-	zapper = newZapLogger()
+	Zapper = newZapLogger()
 }
 
 func Print(v ...any) {
-	zapper.Info(v)
+	Zapper.Info(v)
 }
 
 func Warn(v ...any) {
-	zapper.Warn(v)
+	Zapper.Warn(v)
 }
 
 func Error(v ...any) {
-	zapper.Error(v)
+	Zapper.Error(v)
 }
 
 func Printf(format string, v ...any) {
-	zapper.Infof(format, v)
+	Zapper.Infof(format, v)
 }
 
 func Errorf(format string, v ...any) {
-	zapper.Errorf(format, v)
+	Zapper.Errorf(format, v)
 }
 
 func Sync() {
-	if err := zapper.Sync(); err != nil {
+	if err := Zapper.Sync(); err != nil {
 		sentry.CaptureException(err)
 	}
 }

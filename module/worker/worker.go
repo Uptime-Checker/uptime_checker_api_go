@@ -83,7 +83,9 @@ func (w *Worker) StartAsynq(ctx context.Context) error {
 		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
 	}
 	FastWheel = asynq.NewClient(redisClientOpt)
-	fastWheelServer = asynq.NewServer(redisClientOpt, asynq.Config{Concurrency: config.App.WorkerPool})
+	fastWheelServer = asynq.NewServer(redisClientOpt, asynq.Config{
+		Concurrency: config.App.WorkerPool, Logger: lgr.Zapper,
+	})
 
 	mux := asynq.NewServeMux()
 	mux.Handle(TaskStartMonitor, w.startMonitorTask)
