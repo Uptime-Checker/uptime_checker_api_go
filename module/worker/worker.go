@@ -45,7 +45,7 @@ func (w *Worker) StartGue(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
 
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?pool_max_conns=%d", config.App.DatabaseUser,
-		config.App.DatabasePassword, config.App.DatabaseHost, config.App.Port,
+		config.App.DatabasePassword, config.App.DatabaseHost, config.App.DatabasePort,
 		config.App.DatabaseSchema, config.App.DatabaseMaxConnection)
 	pgxCfg, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
@@ -56,6 +56,9 @@ func (w *Worker) StartGue(ctx context.Context) error {
 		return err
 	}
 	dbPoolAdapter = pgxv5.NewConnPool(pgxPool)
+	if err := dbPoolAdapter.Ping(ctx); err != nil {
+		return err
+	}
 
 	SlowWheel, err = gue.NewClient(dbPoolAdapter)
 	if err != nil {
