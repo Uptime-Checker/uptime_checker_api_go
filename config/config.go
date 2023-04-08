@@ -17,11 +17,12 @@ type config struct {
 
 	Version string `mapstructure:"VERSION"`
 
-	DatabaseHost     string `mapstructure:"DB_HOST"`
-	DatabasePort     string `mapstructure:"DB_PORT"`
-	DatabaseUser     string `mapstructure:"DB_USER"`
-	DatabasePassword string `mapstructure:"DB_PASSWORD"`
-	DatabaseSchema   string `mapstructure:"DB_SCHEMA"`
+	DatabaseHost          string `mapstructure:"DB_HOST"`
+	DatabasePort          string `mapstructure:"DB_PORT"`
+	DatabaseUser          string `mapstructure:"DB_USER"`
+	DatabasePassword      string `mapstructure:"DB_PASSWORD"`
+	DatabaseSchema        string `mapstructure:"DB_SCHEMA"`
+	DatabaseMaxConnection int    `mapstructure:"DB_MAX_CONNECTION"`
 
 	RedisCache     string `mapstructure:"REDIS_CACHE"`
 	RedisQueue     string `mapstructure:"REDIS_QUEUE"`

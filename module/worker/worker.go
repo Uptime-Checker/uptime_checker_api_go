@@ -2,16 +2,17 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/hibiken/asynq"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vgarvardt/gue/v5"
 	"github.com/vgarvardt/gue/v5/adapter"
-	"github.com/vgarvardt/gue/v5/adapter/libpq"
+	"github.com/vgarvardt/gue/v5/adapter/pgxv5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
-	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
@@ -21,6 +22,7 @@ var (
 	SlowWheel       *gue.Client
 	FastWheel       *asynq.Client
 	fastWheelServer *asynq.Server
+	dbPoolAdapter   adapter.ConnPool
 )
 
 // Task list
@@ -41,10 +43,21 @@ func NewWorker(runCheckTask *task.RunCheckTask, startMonitorTask *task.StartMoni
 
 func (w *Worker) StartGue(ctx context.Context) error {
 	tracingID := pkg.GetTracingID(ctx)
-	poolAdapter := libpq.NewConnPool(infra.DB)
 
-	var err error
-	SlowWheel, err = gue.NewClient(poolAdapter)
+	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?pool_max_conns=%d", config.App.DatabaseUser,
+		config.App.DatabasePassword, config.App.DatabaseHost, config.App.Port,
+		config.App.DatabaseSchema, config.App.DatabaseMaxConnection)
+	pgxCfg, err := pgxpool.ParseConfig(connectionString)
+	if err != nil {
+		return err
+	}
+	pgxPool, err := pgxpool.NewWithConfig(ctx, pgxCfg)
+	if err != nil {
+		return err
+	}
+	dbPoolAdapter = pgxv5.NewConnPool(pgxPool)
+
+	SlowWheel, err = gue.NewClient(dbPoolAdapter)
 	if err != nil {
 		return err
 	}
@@ -101,6 +114,9 @@ func (w *Worker) StartAsynq(ctx context.Context) error {
 func Shutdown() {
 	fastWheelServer.Shutdown()
 	if err := FastWheel.Close(); err != nil {
+		sentry.CaptureException(err)
+	}
+	if err := dbPoolAdapter.Close(); err != nil {
 		sentry.CaptureException(err)
 	}
 }
