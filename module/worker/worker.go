@@ -107,7 +107,7 @@ func (w *Worker) StartAsynq(ctx context.Context) error {
 			panic(err)
 		}
 	}()
-	lgr.Print(tracingID, "fast worker started with", config.App.WorkerPool, "worker pool")
+	lgr.Print(tracingID, "fast worker started with", config.App.RedisQueuePool, "worker pool")
 	return nil
 }
 
