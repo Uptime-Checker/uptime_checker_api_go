@@ -20,7 +20,7 @@ func (w *WatchDog) alarmCheck(
 ) error {
 	var ongoingAlarm *model.Alarm
 	alarm, err := w.alarmDomain.GetOngoing(ctx, monitor.ID)
-	if err != nil {
+	if err == nil {
 		ongoingAlarm = alarm
 	}
 	if status == resource.MonitorStatusPassing {
