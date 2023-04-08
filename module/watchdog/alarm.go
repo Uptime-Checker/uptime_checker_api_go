@@ -48,6 +48,8 @@ func (w *WatchDog) resolveAlarm(
 		return fmt.Errorf("failed to resolve alarm, err: %w", err)
 	}
 	lgr.Print(tracingID, 2, "resolved alarm", alarm.ID)
+	// update daily report duration
+	// send notification
 	return nil
 }
 
@@ -74,5 +76,6 @@ func (w *WatchDog) raiseAlarm(
 		return fmt.Errorf("failed to create alarm, err: %w", err)
 	}
 	lgr.Print(tracingID, 2, "raised alarm", alarm.ID)
+	// send notification
 	return nil
 }
