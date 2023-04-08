@@ -95,7 +95,7 @@ create table if not exists monitor (
     type integer default 1 not null,
     body text,
     body_format integer default 1 not null,
-    headers json,
+    headers jsonb,
     username text,
     password text,
     "on" boolean default true not null,
