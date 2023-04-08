@@ -26,6 +26,7 @@ type WatchDog struct {
 	monitorDomain       *domain.MonitorDomain
 	monitorRegionDomain *domain.MonitorRegionDomain
 	monitorStatusDomain *domain.MonitorStatusDomain
+	alarmDomain         *domain.AlarmDomain
 
 	checkService         *service.CheckService
 	monitorService       *service.MonitorService
@@ -41,6 +42,7 @@ func NewWatchDog(
 	monitorDomain *domain.MonitorDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
+	alarmDomain *domain.AlarmDomain,
 	checkService *service.CheckService,
 	monitorService *service.MonitorService,
 	monitorRegionService *service.MonitorRegionService,
@@ -54,6 +56,7 @@ func NewWatchDog(
 		monitorDomain:        monitorDomain,
 		monitorRegionDomain:  monitorRegionDomain,
 		monitorStatusDomain:  monitorStatusDomain,
+		alarmDomain:          alarmDomain,
 		checkService:         checkService,
 		monitorService:       monitorService,
 		monitorRegionService: monitorRegionService,

@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -114,6 +115,18 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 	// Validate the status code
 
 	return nil
+}
+
+func (m *MonitorController) Get(c *fiber.Ctx) error {
+	monitorID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	if err != nil {
+		return resp.SendError(c, fiber.StatusUnprocessableEntity, err)
+	}
+	monitor, err := m.monitorDomain.Get(c.Context(), monitorID)
+	if err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToGetMonitor, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, monitor)
 }
 
 func (m *MonitorController) Create(c *fiber.Ctx) error {

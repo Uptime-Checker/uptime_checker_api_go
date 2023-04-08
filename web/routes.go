@@ -48,6 +48,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	assertionDomain := domain.NewAssertionDomain()
 	errorLogDomain := domain.NewErrorLogDomain()
 	dailyReportDomain := domain.NewDailyReportDomain()
+	alarmDomain := domain.NewAlarmDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -70,6 +71,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorDomain,
 		monitorRegionDomain,
 		monitorStatusDomain,
+		alarmDomain,
 		checkService,
 		monitorService,
 		monitorRegionService,
@@ -205,6 +207,7 @@ func registerMonitorHandlers(
 	)
 
 	router.Post("/", auth, handler.Create)
+	router.Get("/:id", auth, handler.Get)
 	router.Post("/start", auth, handler.Start)
 	router.Post("/dry", auth, handler.DryRun)
 	router.Get("/list", auth, handler.ListMonitors)
