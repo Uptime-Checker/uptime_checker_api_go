@@ -130,12 +130,15 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	})
 	app.Hooks().OnListen(func() error {
 		if err := cogman.Start(ctx); err != nil {
-			return err
+			panic(err)
 		}
 		if err := wheel.StartGue(ctx); err != nil {
-			return err
+			panic(err)
 		}
-		return wheel.StartAsynq(ctx)
+		if err := wheel.StartAsynq(ctx); err != nil {
+			panic(err)
+		}
+		return nil
 	})
 }
 
