@@ -81,7 +81,7 @@ func (w *WatchDog) Launch(
 			return err
 		}
 		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
-			"duration:", fmt.Sprintf("%dms", check.Duration))
+			"duration:", fmt.Sprintf("%dms", *check.Duration))
 		// Insert to the daily report
 		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
 		if err != nil {
@@ -133,7 +133,7 @@ func (w *WatchDog) startMonitor(
 			return err
 		}
 		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
-			"duration:", fmt.Sprintf("%dms", check.Duration))
+			"duration:", fmt.Sprintf("%dms", *check.Duration))
 		if check.Success {
 			monitor, err := w.monitorService.StartOn(ctx, tx, monitor)
 			if err != nil {
