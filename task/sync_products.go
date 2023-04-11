@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 )
@@ -18,4 +19,8 @@ func (s SyncProductsTask) Do(ctx context.Context, tx *sql.Tx) {
 	tid := pkg.GetTracingID(ctx)
 
 	lgr.Print(tid, 1, "running SyncProductsTask")
+	billingProducts := infra.ListProductsWithPrices()
+	for i, i2 := range collection {
+
+	}
 }
