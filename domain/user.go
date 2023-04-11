@@ -199,8 +199,8 @@ func (u *UserDomain) UpdatePaymentID(
 ) (*model.User, error) {
 	now := times.Now()
 	user := &model.User{
-		Name:      &paymentCustomerID,
-		UpdatedAt: now,
+		PaymentCustomerID: &paymentCustomerID,
+		UpdatedAt:         now,
 	}
 
 	updateStmt := User.UPDATE(User.PaymentCustomerID, User.UpdatedAt).

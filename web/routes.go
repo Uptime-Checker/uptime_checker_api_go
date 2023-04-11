@@ -229,4 +229,5 @@ func registerProductHandlers(
 
 	router.Get("/external", auth, handler.ListExternal)
 	router.Get("/internal", auth, handler.ListInternal)
+	router.Get("/billing/customer", auth, handler.CreateBillingCustomer)
 }

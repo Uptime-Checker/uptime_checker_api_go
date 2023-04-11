@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
@@ -26,7 +27,7 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 	ctx := c.Context()
 	user := middlelayer.GetUser(c)
 	if user.PaymentCustomerID != nil {
-		return resp.ServeNoContent(c, fiber.StatusNoContent)
+		return resp.ServeData(c, fiber.StatusOK, user)
 	}
 	billingCustomer, err := infra.CreateCustomer(user.Name, user.Email)
 	if err != nil {
@@ -36,6 +37,7 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrBillingCustomerUpdateFailed, err)
 	}
+	cache.DeleteUserWithRoleAndSubscription(ctx, user.ID)
 	return resp.ServeData(c, fiber.StatusOK, updatedUser)
 }
 
