@@ -65,6 +65,6 @@ type PlanWithProduct struct {
 }
 
 type BillingProduct struct {
-	Product *stripe.Product
-	Prices  []*stripe.Price
+	*stripe.Product
+	Prices []*stripe.Price
 }

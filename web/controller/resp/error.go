@@ -14,21 +14,23 @@ const (
 )
 
 const (
-	ErrFailedToCreateGuestUser    = "failed to create guest user"
-	ErrFailedToCreateOrganization = "failed to create organization"
-	ErrGuestUserRateLimited       = "guest user rate limited"
-	ErrGuestUserNotFound          = "guest user not found"
-	ErrPlanNotFound               = "plan not found"
-	ErrRoleNotFound               = "role not found"
-	ErrCreatingNewUser            = "failed to create new user"
-	ErrUpdatingUser               = "failed to update user"
-	ErrDeletingGuestUser          = "failed to delete guest user"
-	ErrGuestUserLoginFailed       = "failed to login guest user"
-	ErrMonitorCreateFailed        = "failed to create monitor"
-	ErrFailedToGetMonitor         = "failed to get monitor"
-	ErrMonitorNotFound            = "monitor not found"
-	ErrMalformedJWT               = "missing or malformed JWT"
-	ErrDryRunFailed               = "dry run failed"
+	ErrFailedToCreateGuestUser     = "failed to create guest user"
+	ErrFailedToCreateOrganization  = "failed to create organization"
+	ErrGuestUserRateLimited        = "guest user rate limited"
+	ErrGuestUserNotFound           = "guest user not found"
+	ErrPlanNotFound                = "plan not found"
+	ErrRoleNotFound                = "role not found"
+	ErrCreatingNewUser             = "failed to create new user"
+	ErrUpdatingUser                = "failed to update user"
+	ErrDeletingGuestUser           = "failed to delete guest user"
+	ErrGuestUserLoginFailed        = "failed to login guest user"
+	ErrMonitorCreateFailed         = "failed to create monitor"
+	ErrBillingCustomerCreateFailed = "failed to create billing customer"
+	ErrBillingCustomerUpdateFailed = "failed to update billing customer"
+	ErrFailedToGetMonitor          = "failed to get monitor"
+	ErrMonitorNotFound             = "monitor not found"
+	ErrMalformedJWT                = "missing or malformed JWT"
+	ErrDryRunFailed                = "dry run failed"
 )
 
 var (

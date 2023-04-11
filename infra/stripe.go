@@ -1,8 +1,11 @@
 package infra
 
 import (
+	"github.com/cockroachdb/errors"
+	"github.com/getsentry/sentry-go"
 	"github.com/sourcegraph/conc/pool"
 	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/customer"
 	"github.com/stripe/stripe-go/v74/price"
 	"github.com/stripe/stripe-go/v74/product"
 
@@ -63,4 +66,17 @@ func ListProductsWithPrices() []pkg.BillingProduct {
 		billingProducts = append(billingProducts, billingProduct)
 	}
 	return billingProducts
+}
+
+func CreateCustomer(name *string, email string) (*stripe.Customer, error) {
+	customerParams := &stripe.CustomerParams{
+		Email: &email,
+		Name:  name,
+	}
+	cus, err := customer.New(customerParams)
+	if err != nil {
+		sentry.CaptureException(errors.Newf("failed to create stripe customer for %s, err: %w", email, err))
+		return nil, err
+	}
+	return cus, nil
 }

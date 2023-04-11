@@ -192,6 +192,24 @@ func (u *UserDomain) UpdateOrganizationAndRole(
 	return user, err
 }
 
+func (u *UserDomain) UpdatePaymentID(
+	ctx context.Context,
+	id int64,
+	paymentCustomerID string,
+) (*model.User, error) {
+	now := times.Now()
+	user := &model.User{
+		Name:      &paymentCustomerID,
+		UpdatedAt: now,
+	}
+
+	updateStmt := User.UPDATE(User.PaymentCustomerID, User.UpdatedAt).
+		MODEL(user).WHERE(User.ID.EQ(Int(id))).RETURNING(User.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
 // User Contact
 
 func (u *UserDomain) CreateUserContact(

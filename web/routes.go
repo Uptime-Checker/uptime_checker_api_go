@@ -49,6 +49,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	errorLogDomain := domain.NewErrorLogDomain()
 	dailyReportDomain := domain.NewDailyReportDomain()
 	alarmDomain := domain.NewAlarmDomain()
+	productDomain := domain.NewProductDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -119,7 +120,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	)
 
 	productRouter := v1.Group("/product")
-	registerProductHandlers(productRouter, authService)
+	registerProductHandlers(productRouter, productDomain, userDomain, authService)
 
 	redisClientOpt := asynq.RedisClientOpt{
 		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
@@ -218,11 +219,13 @@ func registerMonitorHandlers(
 
 func registerProductHandlers(
 	router fiber.Router,
+	productDomain *domain.ProductDomain,
+	userDomain *domain.UserDomain,
 	authService *service.AuthService,
 ) {
 	auth := middlelayer.Protected(authService)
 
-	handler := controller.NewProductController()
+	handler := controller.NewProductController(productDomain, userDomain)
 
 	router.Get("/external", auth, handler.ListExternal)
 	router.Get("/internal", auth, handler.ListInternal)
