@@ -26,7 +26,7 @@ func StartMonitorAsync(ctx context.Context, monitorID int64) error {
 	}
 
 	t := asynq.NewTask(worker.TaskStartMonitor, payload)
-	info, err := worker.FastWheel.EnqueueContext(ctx, t)
+	info, err := worker.AsynqEnqueue(ctx, t)
 	if err != nil {
 		return err
 	}

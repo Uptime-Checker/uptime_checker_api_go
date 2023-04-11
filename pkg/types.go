@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/stripe/stripe-go/v74"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
@@ -61,4 +62,9 @@ type OrganizationUserRole struct {
 type PlanWithProduct struct {
 	*model.Plan
 	*model.Product
+}
+
+type BillingProduct struct {
+	Product *stripe.Product
+	Prices  []*stripe.Price
 }

@@ -27,5 +27,5 @@ func RunCheckAsync(ctx context.Context, monitorRegionID int64, runAt time.Time) 
 	}
 
 	job := &gue.Job{Type: worker.TaskRunCheck, RunAt: runAt, Args: payload}
-	return worker.SlowWheel.Enqueue(ctx, job)
+	return worker.GueEnqueue(ctx, job)
 }

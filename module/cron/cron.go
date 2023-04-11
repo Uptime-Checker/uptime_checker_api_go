@@ -70,6 +70,7 @@ func Shutdown() {
 }
 
 func (c *Cron) Start(ctx context.Context) error {
+	return nil
 	tracingID := pkg.GetTracingID(ctx)
 	now := times.Now()
 	s = gocron.NewScheduler(time.UTC)

@@ -118,6 +118,9 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		assertionService,
 	)
 
+	productRouter := v1.Group("/product")
+	registerProductHandlers(productRouter, authService)
+
 	redisClientOpt := asynq.RedisClientOpt{
 		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
 	}
@@ -211,4 +214,16 @@ func registerMonitorHandlers(
 	router.Post("/start", auth, handler.Start)
 	router.Post("/dry", auth, handler.DryRun)
 	router.Get("/list", auth, handler.ListMonitors)
+}
+
+func registerProductHandlers(
+	router fiber.Router,
+	authService *service.AuthService,
+) {
+	auth := middlelayer.Protected(authService)
+
+	handler := controller.NewProductController()
+
+	router.Get("/external", auth, handler.ListExternal)
+	router.Get("/internal", auth, handler.ListInternal)
 }
