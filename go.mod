@@ -29,6 +29,7 @@ require (
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sourcegraph/conc v0.3.0
 	github.com/spf13/viper v1.15.0
+	github.com/stripe/stripe-go/v74 v74.15.0
 	github.com/vgarvardt/gue/v5 v5.1.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.7.0

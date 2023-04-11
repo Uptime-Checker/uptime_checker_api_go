@@ -28,6 +28,9 @@ func main() {
 	cache.SetupRemoteCache()
 	lgr.Print(tracingID, "cache started")
 
+	// Setup billing
+	infra.SetupBilling()
+
 	// Setup Database
 	if err := infra.ConnectDatabase(ctx, !config.IsProd); err != nil {
 		panic(err)
