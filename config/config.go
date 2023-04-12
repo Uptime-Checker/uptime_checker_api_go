@@ -32,7 +32,8 @@ type config struct {
 
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
 
-	StripeKey string `mapstructure:"STRIPE_SECRET_KEY"`
+	StripeKey        string `mapstructure:"STRIPE_SECRET_KEY"`
+	StripeWebhookKey string `mapstructure:"STRIPE_WEBHOOK_SIGNING_SECRET"`
 
 	NewRelicApp     string `mapstructure:"NEWRELIC_APP"`
 	NewRelicLicense string `mapstructure:"NEWRELIC_LICENSE"`

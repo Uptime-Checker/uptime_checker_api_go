@@ -3,10 +3,11 @@ package constant
 const UTCTimeZone = "UTC"
 
 const (
-	APIKeyHeader        = "X_API_KEY"
-	OriginalIPHeader    = "X-Forwarded-For"
-	AuthorizationHeader = "Authorization"
-	ContentTypeHeader   = "content-type"
+	APIKeyHeader          = "X_API_KEY"
+	OriginalIPHeader      = "X-Forwarded-For"
+	AuthorizationHeader   = "Authorization"
+	ContentTypeHeader     = "content-type"
+	StripeSignatureHeader = "Stripe-Signature"
 )
 
 const AuthScheme = "Bearer"

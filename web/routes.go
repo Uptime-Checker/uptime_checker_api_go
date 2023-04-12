@@ -124,6 +124,9 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	productRouter := v1.Group("/product")
 	registerProductHandlers(productRouter, productDomain, userDomain, authService)
 
+	webhookRouter := app.Group("/webhook")
+	registerWebhookHandlers(webhookRouter, paymentService)
+
 	redisClientOpt := asynq.RedisClientOpt{
 		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
 	}
@@ -232,4 +235,13 @@ func registerProductHandlers(
 	router.Get("/external", auth, handler.ListExternal)
 	router.Get("/internal", auth, handler.ListInternal)
 	router.Get("/billing/customer", auth, handler.CreateBillingCustomer)
+}
+
+func registerWebhookHandlers(
+	router fiber.Router,
+	paymentService *service.PaymentService,
+) {
+	handler := controller.NewWebhookController(paymentService)
+
+	router.Post("/stripe", handler.StripePayment)
 }
