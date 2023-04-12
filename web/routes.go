@@ -232,8 +232,8 @@ func registerProductHandlers(
 
 	handler := controller.NewProductController(productDomain, userDomain)
 
-	router.Get("/external", auth, handler.ListExternal)
-	router.Get("/internal", auth, handler.ListInternal)
+	router.Get("/list/external", auth, handler.ListExternal)
+	router.Get("/list/internal", auth, handler.ListInternal)
 	router.Get("/billing/customer", auth, handler.CreateBillingCustomer)
 }
 
