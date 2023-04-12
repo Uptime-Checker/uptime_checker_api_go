@@ -1,16 +1,40 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"context"
+
+	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
+	"github.com/Uptime-Checker/uptime_checker_api_go/config"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/web"
+)
 
 func main() {
-	app := fiber.New()
+	ctx, shutdown := context.WithCancel(context.Background())
+	ctx = pkg.NewTracingID(ctx)
+	tracingID := pkg.GetTracingID(ctx)
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
-	err := app.Listen(":3000")
-	if err != nil {
-		panic("Server start failed")
+	if err := config.LoadConfig(".env"); err != nil {
+		panic(err)
 	}
+
+	// Setup logger
+	lgr.SetupLogger()
+
+	// Setup Cache
+	cache.SetupLocalCache()
+	cache.SetupRemoteCache()
+	lgr.Print(tracingID, "cache started")
+
+	// Setup billing
+	infra.SetupBilling()
+
+	// Setup Database
+	if err := infra.ConnectDatabase(ctx, !config.IsProd); err != nil {
+		panic(err)
+	}
+	lgr.Print(tracingID, "database connected")
+	web.Setup(ctx, shutdown)
 }

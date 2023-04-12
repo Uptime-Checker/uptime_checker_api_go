@@ -14,10 +14,13 @@
 
 # IDE files
 .idea
+.vscode
 
 # Dependency directories (remove the comment below to include it)
 vendor/
 tmp/
+bin/
 
 # Environment
 .env
+lint.txt
