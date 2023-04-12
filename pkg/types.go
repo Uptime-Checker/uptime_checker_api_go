@@ -64,6 +64,11 @@ type PlanWithProduct struct {
 	*model.Product
 }
 
+type ProductWithPlans struct {
+	*model.Product
+	Plans []*model.Plan
+}
+
 type BillingProduct struct {
 	*stripe.Product
 	Prices []*stripe.Price

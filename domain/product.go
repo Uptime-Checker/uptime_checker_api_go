@@ -9,6 +9,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -20,10 +21,12 @@ func NewProductDomain() *ProductDomain {
 	return &ProductDomain{}
 }
 
-func (p *ProductDomain) ListProducts(ctx context.Context) ([]model.Product, error) {
-	stmt := SELECT(Product.AllColumns).FROM(Product)
+func (p *ProductDomain) ListProductWithPlans(ctx context.Context) ([]pkg.ProductWithPlans, error) {
+	stmt := SELECT(Product.AllColumns, Plan.AllColumns).FROM(
+		Product.LEFT_JOIN(Plan, Plan.ProductID.EQ(Product.ID)),
+	)
 
-	var products []model.Product
+	var products []pkg.ProductWithPlans
 	err := stmt.QueryContext(ctx, infra.DB, &products)
 	return products, err
 }
