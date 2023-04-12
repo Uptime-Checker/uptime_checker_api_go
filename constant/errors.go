@@ -16,6 +16,7 @@ var (
 	ErrInvalidAlarmPolicy         = errors.New("invalid alarm policy")
 	ErrInvalidAssertionSource     = errors.New("invalid assertion source")
 	ErrInvalidProductTier         = errors.New("invalid product tier")
+	ErrInvalidPlanType            = errors.New("invalid plan type")
 	ErrInvalidAssertionComparison = errors.New("invalid assertion comparison")
 	ErrInvalidErrorLogType        = errors.New("invalid error log type")
 )

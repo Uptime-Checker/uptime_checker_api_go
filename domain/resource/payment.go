@@ -81,3 +81,30 @@ func GetProductTier(tier string) ProductTier {
 	}
 	return ProductTierFree
 }
+
+// PlanType type
+type PlanType int
+
+// List of plan types
+const (
+	PlanTypeMonthly PlanType = iota + 1
+	PlanTypeYearly
+)
+
+// Valid checks if the PlanType is valid
+func (p PlanType) Valid() bool {
+	planTypes := []PlanType{
+		PlanTypeMonthly,
+		PlanTypeYearly,
+	}
+	for _, c := range planTypes {
+		if c == p {
+			return true
+		}
+	}
+	return false
+}
+
+func (p PlanType) String() string {
+	return [...]string{"Monthly", "Yearly"}[p-1]
+}
