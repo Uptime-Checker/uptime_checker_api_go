@@ -55,7 +55,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
 	userService := service.NewUserService(userDomain)
-	paymentService := service.NewPaymentService(paymentDomain)
+	paymentService := service.NewPaymentService(userDomain, paymentDomain)
 	organizationService := service.NewOrganizationService(organizationDomain, alarmPolicyDomain)
 	monitorService := service.NewMonitorService(monitorDomain, monitorStatusDomain)
 	assertionService := service.NewAssertionService(assertionDomain)

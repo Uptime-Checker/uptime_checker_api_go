@@ -416,7 +416,7 @@ create unique index if not exists plan_external_id_index on plan (external_id);
 create unique index if not exists plan_price_type_index on plan (price, type);
 create table if not exists subscription (
     id bigserial,
-    status integer,
+    status varchar(255) not null,
     starts_at timestamp(0),
     expires_at timestamp(0),
     canceled_at timestamp(0),
@@ -448,7 +448,7 @@ create table if not exists receipt (
     external_id varchar(255),
     external_customer_id varchar(255),
     url varchar(255),
-    status integer,
+    status varchar(255) not null,
     paid boolean default false not null,
     paid_at timestamp(0),
     "from" date,

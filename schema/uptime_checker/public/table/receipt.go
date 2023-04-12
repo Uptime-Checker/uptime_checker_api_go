@@ -23,7 +23,7 @@ type receiptTable struct {
 	ExternalID         postgres.ColumnString
 	ExternalCustomerID postgres.ColumnString
 	URL                postgres.ColumnString
-	Status             postgres.ColumnInteger
+	Status             postgres.ColumnString
 	Paid               postgres.ColumnBool
 	PaidAt             postgres.ColumnTimestamp
 	From               postgres.ColumnDate
@@ -81,7 +81,7 @@ func newReceiptTableImpl(schemaName, tableName, alias string) receiptTable {
 		ExternalIDColumn         = postgres.StringColumn("external_id")
 		ExternalCustomerIDColumn = postgres.StringColumn("external_customer_id")
 		URLColumn                = postgres.StringColumn("url")
-		StatusColumn             = postgres.IntegerColumn("status")
+		StatusColumn             = postgres.StringColumn("status")
 		PaidColumn               = postgres.BoolColumn("paid")
 		PaidAtColumn             = postgres.TimestampColumn("paid_at")
 		FromColumn               = postgres.DateColumn("from")

@@ -18,7 +18,7 @@ type Receipt struct {
 	ExternalID         *string
 	ExternalCustomerID *string
 	URL                *string
-	Status             *int32
+	Status             string
 	Paid               bool
 	PaidAt             *time.Time
 	From               *time.Time

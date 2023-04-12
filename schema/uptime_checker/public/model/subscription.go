@@ -13,7 +13,7 @@ import (
 
 type Subscription struct {
 	ID                 int64 `sql:"primary_key"`
-	Status             *int32
+	Status             string
 	StartsAt           *time.Time
 	ExpiresAt          *time.Time
 	CanceledAt         *time.Time

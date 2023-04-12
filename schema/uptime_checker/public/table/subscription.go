@@ -18,7 +18,7 @@ type subscriptionTable struct {
 
 	//Columns
 	ID                 postgres.ColumnInteger
-	Status             postgres.ColumnInteger
+	Status             postgres.ColumnString
 	StartsAt           postgres.ColumnTimestamp
 	ExpiresAt          postgres.ColumnTimestamp
 	CanceledAt         postgres.ColumnTimestamp
@@ -71,7 +71,7 @@ func newSubscriptionTable(schemaName, tableName, alias string) *SubscriptionTabl
 func newSubscriptionTableImpl(schemaName, tableName, alias string) subscriptionTable {
 	var (
 		IDColumn                 = postgres.IntegerColumn("id")
-		StatusColumn             = postgres.IntegerColumn("status")
+		StatusColumn             = postgres.StringColumn("status")
 		StartsAtColumn           = postgres.TimestampColumn("starts_at")
 		ExpiresAtColumn          = postgres.TimestampColumn("expires_at")
 		CanceledAtColumn         = postgres.TimestampColumn("canceled_at")

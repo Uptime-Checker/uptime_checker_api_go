@@ -74,6 +74,14 @@ func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, er
 	return user, err
 }
 
+func (u *UserDomain) GetUserFromPaymentCustomerID(ctx context.Context, pymentCustomerID string) (*model.User, error) {
+	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.PaymentCustomerID.EQ(String(pymentCustomerID))).LIMIT(1)
+
+	user := &model.User{}
+	err := stmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
 func (u *UserDomain) GetUserWithRoleAndSubscription(
 	ctx context.Context,
 	id int64,

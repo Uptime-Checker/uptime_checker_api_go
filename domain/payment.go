@@ -8,7 +8,6 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -36,22 +35,17 @@ func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
 	isTrial bool,
-	status resource.SubscriptionStatus,
+	status string,
 	expiresAt time.Time,
 	planID, productID, organizationID int64,
 ) (*model.Subscription, error) {
-	if !status.Valid() {
-		return nil, constant.ErrInvalidSubscriptionStatus
-	}
-	statusValue := int32(status)
-
 	now := times.Now()
 	if times.CompareDate(now, expiresAt) == constant.Date1AfterDate2 {
 		return nil, constant.ErrExpiresAtInThePast
 	}
 
 	subscription := &model.Subscription{
-		Status:         &statusValue,
+		Status:         status,
 		StartsAt:       &now,
 		ExpiresAt:      &expiresAt,
 		IsTrial:        isTrial,
@@ -65,4 +59,12 @@ func (p *PaymentDomain) CreateSubscription(
 		RETURNING(Subscription.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, subscription)
 	return subscription, err
+}
+
+func (p *PaymentDomain) CreateReceipt(
+	ctx context.Context,
+	tx *sql.Tx,
+	receipt *model.Receipt,
+) (*model.Receipt, error) {
+	return nil, nil
 }
