@@ -63,6 +63,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	errorLogService := service.NewErrorLogService(errorLogDomain)
 	dailyReportService := service.NewDailyReportService(dailyReportDomain)
 	alarmPolicyService := service.NewAlarmPolicyService(alarmPolicyDomain)
+	productService := service.NewProductService(productDomain)
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
@@ -82,7 +83,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	)
 
 	// Setup Tasks
-	syncProductsTask := task.NewSyncProductsTask()
+	syncProductsTask := task.NewSyncProductsTask(productService)
 	runCheckTask := task.NewRunCheckTask(dog, monitorDomain, monitorRegionDomain)
 	startMonitorTask := task.NewStartMonitorTask(dog, monitorDomain, regionDomain, assertionDomain)
 

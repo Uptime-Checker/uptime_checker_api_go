@@ -15,6 +15,7 @@ var (
 	ErrInvalidMonitorBodyFormat   = errors.New("invalid monitor body format")
 	ErrInvalidAlarmPolicy         = errors.New("invalid alarm policy")
 	ErrInvalidAssertionSource     = errors.New("invalid assertion source")
+	ErrInvalidProductTier         = errors.New("invalid product tier")
 	ErrInvalidAssertionComparison = errors.New("invalid assertion comparison")
 	ErrInvalidErrorLogType        = errors.New("invalid error log type")
 )

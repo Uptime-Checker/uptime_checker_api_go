@@ -67,3 +67,17 @@ func (p ProductTier) Valid() bool {
 func (p ProductTier) String() string {
 	return [...]string{"Free", "Developer", "Startup", "Enterprise"}[p-1]
 }
+
+func GetProductTier(tier string) ProductTier {
+	switch tier {
+	case "Free":
+		return ProductTierFree
+	case "Developer":
+		return ProductTierDeveloper
+	case "Startup":
+		return ProductTierStartup
+	case "Enterprise":
+		return ProductTierEnterprise
+	}
+	return ProductTierFree
+}
