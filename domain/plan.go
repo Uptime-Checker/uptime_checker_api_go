@@ -27,6 +27,7 @@ func (p *PlanDomain) Create(
 		return nil, constant.ErrInvalidPlanType
 	}
 	plan.Price = price
+	plan.Type = int32(planType)
 	insertStmt := Plan.INSERT(Plan.MutableColumns.Except(Plan.InsertedAt, Plan.UpdatedAt)).
 		MODEL(plan).ON_CONFLICT(Plan.ExternalID).DO_UPDATE(SET(Plan.Price.SET(Float(price)))).RETURNING(Plan.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, plan)

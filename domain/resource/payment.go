@@ -70,13 +70,13 @@ func (p ProductTier) String() string {
 
 func GetProductTier(tier string) ProductTier {
 	switch tier {
-	case "Free":
+	case "free":
 		return ProductTierFree
-	case "Developer":
+	case "developer":
 		return ProductTierDeveloper
-	case "Startup":
+	case "startup":
 		return ProductTierStartup
-	case "Enterprise":
+	case "enterprise":
 		return ProductTierEnterprise
 	}
 	return ProductTierFree

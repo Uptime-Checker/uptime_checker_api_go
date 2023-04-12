@@ -43,6 +43,7 @@ func (p *ProductDomain) Create(
 	if !productTier.Valid() {
 		return nil, constant.ErrInvalidProductTier
 	}
+	product.Tier = int32(productTier)
 	insertStmt := Product.INSERT(Product.MutableColumns.Except(Product.InsertedAt, Product.UpdatedAt)).
 		MODEL(product).RETURNING(Product.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, product)
