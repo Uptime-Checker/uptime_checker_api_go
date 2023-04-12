@@ -67,6 +67,7 @@ func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Eve
 				lgr.Error(tracingID, 2, "failed to get user, stripe customer:", stripeInvoice.Customer.ID, err)
 				return errors.Newf("failed to get user, stripe customer: %s, err: %w", stripeInvoice.Customer.ID, err)
 			}
+			externalPlanID := stripeInvoice.Lines.Data[0].Price.ID
 			return p.createOrUpdateReceipt(ctx, tx, event, stripeInvoice, user)
 		case constant.StripeCustomerSubscriptionCreated,
 			constant.StripeCustomerSubscriptionUpdated,
