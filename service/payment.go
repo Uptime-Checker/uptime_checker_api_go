@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/stripe/stripe-go/v74"
@@ -46,5 +47,18 @@ func (p *PaymentService) CreateSubscription(
 }
 
 func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Event) {
-
+	switch event.Type {
+	case constant.StripeInvoiceCreated, constant.StripeInvoicePaid, constant.StripeInvoicePaymentFailed:
+		var stripeInvoice stripe.Invoice
+		if err := json.Unmarshal(event.Data.Raw, &stripeInvoice); err != nil {
+			panic(err)
+		}
+	case constant.StripeCustomerSubscriptionCreated,
+		constant.StripeCustomerSubscriptionUpdated,
+		constant.StripeCustomerSubscriptionDeleted:
+		var stripeSubscription stripe.Subscription
+		if err := json.Unmarshal(event.Data.Raw, &stripeSubscription); err != nil {
+			panic(err)
+		}
+	}
 }
