@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/stripe/stripe-go/v74"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -41,4 +43,8 @@ func (p *PaymentService) CreateSubscription(
 
 	return p.paymentDomain.CreateSubscription(ctx, tx, isTrial, status, expiry,
 		planWithProduct.Plan.ID, planWithProduct.Product.ID, organizationID)
+}
+
+func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Event) {
+
 }

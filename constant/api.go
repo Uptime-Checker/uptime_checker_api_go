@@ -23,3 +23,13 @@ const (
 	Date1BeforeDate2 DateCompare = -1
 	Date1EqualDate2  DateCompare = 0
 )
+
+// List of Stripe Events
+const (
+	StripeCustomerSubscriptionCreated = "customer.subscription.created"
+	StripeCustomerSubscriptionUpdated = "customer.subscription.updated"
+	StripeCustomerSubscriptionDeleted = "customer.subscription.deleted"
+	StripeInvoiceCreated              = "invoice.created"
+	StripeInvoicePaid                 = "invoice.paid"
+	StripeInvoicePaymentFailed        = "invoice.payment_failed"
+)
