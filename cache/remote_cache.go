@@ -72,3 +72,36 @@ func DeleteUserWithRoleAndSubscription(ctx context.Context, userID int64) {
 func getUserCacheKey(userID int64) string {
 	return fmt.Sprintf("%s_%d", "user", userID)
 }
+
+// ========================================================================
+
+// SetReceiptEventForCustomer caches for 1 hour
+func SetReceiptEventForCustomer(ctx context.Context, customerID string, eventAt time.Time) {
+	serializedTime, err := json.Marshal(eventAt)
+	if err != nil {
+		sentry.CaptureException(err)
+		return
+	}
+
+	if err := remoteCache.Set(&cache.Item{
+		Ctx: ctx, Key: getReceiptEventKey(customerID), Value: serializedTime, TTL: 1 * time.Hour,
+	}); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func GetReceiptEventForCustomer(ctx context.Context, customerID string) *time.Time {
+	var serializedTime string
+	if err := remoteCache.Get(ctx, getReceiptEventKey(customerID), &serializedTime); err != nil {
+		return nil
+	}
+	var eventAt time.Time
+	if err := json.Unmarshal([]byte(serializedTime), &eventAt); err != nil {
+		sentry.CaptureException(err)
+	}
+	return &eventAt
+}
+
+func getReceiptEventKey(customerID string) string {
+	return fmt.Sprintf("receipt_event_%s", customerID)
+}

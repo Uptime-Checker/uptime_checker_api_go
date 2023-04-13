@@ -11,6 +11,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stripe/stripe-go/v74"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -119,7 +120,12 @@ func (p *PaymentService) createOrUpdateReceipt(
 		OrganizationID:     *user.OrganizationID,
 	}
 
-	_, err = p.paymentDomain.CreateReceipt(ctx, tx, receipt)
+	eventAt := time.Unix(invoice.PeriodStart, 0)
+	lastEventAt := cache.GetReceiptEventForCustomer(ctx, invoice.Customer.ID)
+	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
+		_, err = p.paymentDomain.CreateReceipt(ctx, tx, receipt)
+	}
+
 	return err
 }
 
