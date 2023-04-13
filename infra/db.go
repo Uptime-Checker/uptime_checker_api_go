@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	// pgx is the postgres driver needed to be imported
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -96,4 +97,25 @@ func Transaction(ctx context.Context, f func(*sql.Tx) error) error {
 		return err
 	}
 	return CommitTransaction(ctx, tx)
+}
+
+func GetStringExpression(value *string) postgres.StringExpression {
+	if value == nil {
+		return nil
+	}
+	return postgres.CAST(postgres.String(*value)).AS_TEXT()
+}
+
+func GetTimestampExpression(value *time.Time) postgres.TimestampExpression {
+	if value == nil {
+		return nil
+	}
+	return postgres.CAST(postgres.TimestampT(*value)).AS_TIMESTAMP()
+}
+
+func GetIntegerExpression(value *int64) postgres.IntegerExpression {
+	if value == nil {
+		return nil
+	}
+	return postgres.CAST(postgres.Int(*value)).AS_BIGINT()
 }
