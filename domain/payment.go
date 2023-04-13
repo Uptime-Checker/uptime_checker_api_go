@@ -31,6 +31,15 @@ func (p *PaymentDomain) GetPlanWithProduct(ctx context.Context, id int64) (*pkg.
 	return planWithProduct, err
 }
 
+func (p *PaymentDomain) GetPlanWithProductFromExternalPlanID(ctx context.Context, id string) (*pkg.PlanWithProduct, error) {
+	stmt := SELECT(Plan.AllColumns, Product.AllColumns).
+		FROM(Plan.LEFT_JOIN(Product, Plan.ProductID.EQ(Product.ID))).WHERE(Plan.ExternalID.EQ(String(id)))
+
+	planWithProduct := &pkg.PlanWithProduct{}
+	err := stmt.QueryContext(ctx, infra.DB, planWithProduct)
+	return planWithProduct, err
+}
+
 func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,

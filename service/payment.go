@@ -64,11 +64,14 @@ func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Eve
 			}
 			user, err := p.userDomain.GetUserFromPaymentCustomerID(ctx, stripeInvoice.Customer.ID)
 			if err != nil {
-				lgr.Error(tracingID, 2, "failed to get user, stripe customer:", stripeInvoice.Customer.ID, err)
-				return errors.Newf("failed to get user, stripe customer: %s, err: %w", stripeInvoice.Customer.ID, err)
+				return errors.Newf("failed to get stripe customer: %s, err: %w", stripeInvoice.Customer.ID, err)
 			}
-			externalPlanID := stripeInvoice.Lines.Data[0].Price.ID
-			return p.createOrUpdateReceipt(ctx, tx, event, stripeInvoice, user)
+			line := stripeInvoice.Lines.Data[0]
+			plan, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, line.Price.ID)
+			if err != nil {
+				return errors.Newf("failed to get plan, external plan ID: %s, err: %w", line.Price.ID, err)
+			}
+			return p.createOrUpdateReceipt(ctx, tx, event, stripeInvoice, user, plan)
 		case constant.StripeCustomerSubscriptionCreated,
 			constant.StripeCustomerSubscriptionUpdated,
 			constant.StripeCustomerSubscriptionDeleted:
@@ -89,6 +92,7 @@ func (p *PaymentService) createOrUpdateReceipt(
 	event stripe.Event,
 	invoice stripe.Invoice,
 	user *model.User,
+	plan *pkg.PlanWithProduct,
 ) error {
 	receipt := &model.Receipt{
 		Price:              float64(invoice.Total),
@@ -102,8 +106,8 @@ func (p *PaymentService) createOrUpdateReceipt(
 		From:               lo.ToPtr(time.Unix(invoice.PeriodStart, 0)),
 		To:                 lo.ToPtr(time.Unix(invoice.PeriodEnd, 0)),
 		IsTrial:            false,
-		PlanID:             new(int64),
-		ProductID:          new(int64),
+		PlanID:             &plan.Plan.ID,
+		ProductID:          &plan.Product.ID,
 		SubscriptionID:     new(int64),
 		OrganizationID:     *user.OrganizationID,
 	}
