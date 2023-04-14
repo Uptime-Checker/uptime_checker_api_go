@@ -76,7 +76,7 @@ func getUserCacheKey(userID int64) string {
 // ========================================================================
 
 // SetReceiptEventForCustomer caches for 1 hour
-func SetReceiptEventForCustomer(ctx context.Context, customerID string, eventAt time.Time) {
+func SetPaymentEventForCustomer(ctx context.Context, key string, eventAt time.Time) {
 	serializedTime, err := json.Marshal(eventAt)
 	if err != nil {
 		sentry.CaptureException(err)
@@ -84,15 +84,15 @@ func SetReceiptEventForCustomer(ctx context.Context, customerID string, eventAt 
 	}
 
 	if err := remoteCache.Set(&cache.Item{
-		Ctx: ctx, Key: getReceiptEventKey(customerID), Value: serializedTime, TTL: 1 * time.Hour,
+		Ctx: ctx, Key: key, Value: serializedTime, TTL: 1 * time.Hour,
 	}); err != nil {
 		sentry.CaptureException(err)
 	}
 }
 
-func GetReceiptEventForCustomer(ctx context.Context, customerID string) *time.Time {
+func GetPaymentEventForCustomer(ctx context.Context, key string) *time.Time {
 	var serializedTime string
-	if err := remoteCache.Get(ctx, getReceiptEventKey(customerID), &serializedTime); err != nil {
+	if err := remoteCache.Get(ctx, key, &serializedTime); err != nil {
 		return nil
 	}
 	var eventAt time.Time
@@ -102,6 +102,10 @@ func GetReceiptEventForCustomer(ctx context.Context, customerID string) *time.Ti
 	return &eventAt
 }
 
-func getReceiptEventKey(customerID string) string {
+func GetReceiptEventKey(customerID string) string {
 	return fmt.Sprintf("receipt_event_%s", customerID)
+}
+
+func GetSubscriptionEventKey(customerID string) string {
+	return fmt.Sprintf("subscription_event_%s", customerID)
 }

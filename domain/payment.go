@@ -43,7 +43,10 @@ func (p *PaymentDomain) GetPlanWithProductFromExternalPlanID(
 	return planWithProduct, err
 }
 
-func (u *PaymentDomain) GetSubscriptionFromExternalID(ctx context.Context, externalID string) (*model.Subscription, error) {
+func (u *PaymentDomain) GetSubscriptionFromExternalID(
+	ctx context.Context,
+	externalID string,
+) (*model.Subscription, error) {
 	stmt := SELECT(Subscription.AllColumns).FROM(Subscription).WHERE(
 		Subscription.ExternalID.EQ(String(externalID)),
 	).LIMIT(1)
