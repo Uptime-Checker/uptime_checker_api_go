@@ -45,12 +45,21 @@ func (p *PaymentService) CreateSubscription(
 
 	if planWithProduct.Tier == int32(resource.ProductTierFree) {
 		isTrial = false
-		status = stripe.SubscriptionStatusTrialing
+		status = stripe.SubscriptionStatusActive
 		expiry = now.Add(time.Hour * 24 * constant.FreeSubscriptionDurationInDays)
 	}
 
-	return p.paymentDomain.CreateSubscription(ctx, tx, isTrial, string(status), expiry,
-		planWithProduct.Plan.ID, planWithProduct.Product.ID, organizationID)
+	subscription := &model.Subscription{
+		Status:         string(status),
+		StartsAt:       &now,
+		ExpiresAt:      &expiry,
+		IsTrial:        isTrial,
+		PlanID:         planWithProduct.Plan.ID,
+		ProductID:      planWithProduct.Product.ID,
+		OrganizationID: organizationID,
+	}
+
+	return p.paymentDomain.CreateSubscription(ctx, tx, subscription)
 }
 
 func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Event) {
@@ -71,11 +80,54 @@ func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Eve
 			if err := json.Unmarshal(event.Data.Raw, &stripeSubscription); err != nil {
 				panic(err)
 			}
+			return p.createOrUpdateSubscription(ctx, tx, event, stripeSubscription)
 		}
 		return nil
 	}); err != nil {
 		sentry.CaptureException(errors.Newf("failed to commit stripe webhook transaction, err: %w", err))
 	}
+}
+
+func (p *PaymentService) createOrUpdateSubscription(
+	ctx context.Context,
+	tx *sql.Tx,
+	event stripe.Event,
+	subscription stripe.Subscription,
+) error {
+	user, err := p.userDomain.GetUserFromPaymentCustomerID(ctx, subscription.Customer.ID)
+	if err != nil {
+		return errors.Newf("failed to get stripe customer: %s, err: %w", subscription.Customer.ID, err)
+	}
+	item := subscription.Items.Data[0]
+	planWithProduct, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, item.Price.ID)
+	if err != nil {
+		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", item.Price.ID, err)
+	}
+
+	localSubscription := &model.Subscription{
+		Status:             string(subscription.Status),
+		StartsAt:           lo.ToPtr(time.Unix(subscription.StartDate, 0)),
+		ExpiresAt:          lo.ToPtr(time.Unix(subscription.CurrentPeriodEnd, 0)),
+		CanceledAt:         p.getCanceledAt(subscription),
+		IsTrial:            subscription.Status == stripe.SubscriptionStatusTrialing,
+		ExternalID:         &subscription.ID,
+		ExternalCustomerID: user.PaymentCustomerID,
+		PlanID:             planWithProduct.Plan.ID,
+		ProductID:          planWithProduct.Product.ID,
+		OrganizationID:     *user.OrganizationID,
+	}
+
+	eventAt := time.Unix(event.Created, 0)
+	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(subscription.Customer.ID))
+	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
+		_, err = p.paymentDomain.CreateSubscription(ctx, tx, localSubscription)
+		if err != nil {
+			return errors.Newf("failed to create subscription, err: %w", err)
+		}
+		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(subscription.Customer.ID), eventAt)
+	}
+
+	return nil
 }
 
 func (p *PaymentService) createOrUpdateReceipt(
@@ -89,7 +141,7 @@ func (p *PaymentService) createOrUpdateReceipt(
 		return errors.Newf("failed to get stripe customer: %s, err: %w", invoice.Customer.ID, err)
 	}
 	line := invoice.Lines.Data[0]
-	plan, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, line.Price.ID)
+	planWithProduct, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, line.Price.ID)
 	if err != nil {
 		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", line.Price.ID, err)
 	}
@@ -114,24 +166,35 @@ func (p *PaymentService) createOrUpdateReceipt(
 		From:               lo.ToPtr(time.Unix(invoice.PeriodStart, 0)),
 		To:                 lo.ToPtr(time.Unix(invoice.PeriodEnd, 0)),
 		IsTrial:            false,
-		PlanID:             &plan.Plan.ID,
-		ProductID:          &plan.Product.ID,
+		PlanID:             &planWithProduct.Plan.ID,
+		ProductID:          &planWithProduct.Product.ID,
 		SubscriptionID:     &subscriptionID,
 		OrganizationID:     *user.OrganizationID,
 	}
 
-	eventAt := time.Unix(invoice.PeriodStart, 0)
-	lastEventAt := cache.GetReceiptEventForCustomer(ctx, invoice.Customer.ID)
+	eventAt := time.Unix(event.Created, 0)
+	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetReceiptEventKey(invoice.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
 		_, err = p.paymentDomain.CreateReceipt(ctx, tx, receipt)
+		if err != nil {
+			return errors.Newf("failed to create receipt, err: %w", err)
+		}
+		cache.SetPaymentEventForCustomer(ctx, cache.GetReceiptEventKey(invoice.Customer.ID), eventAt)
 	}
 
-	return err
+	return nil
 }
 
 func (p *PaymentService) getPaidAt(event stripe.Event) *time.Time {
 	if event.Type == constant.StripeInvoicePaid {
 		return lo.ToPtr(time.Unix(event.Created, 0))
+	}
+	return nil
+}
+
+func (p *PaymentService) getCanceledAt(subscription stripe.Subscription) *time.Time {
+	if subscription.CancelAt != 0 {
+		return lo.ToPtr(time.Unix(subscription.CancelAt, 0))
 	}
 	return nil
 }

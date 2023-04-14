@@ -3,14 +3,11 @@ package domain
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	. "github.com/go-jet/jet/v2/postgres"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
-	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -59,25 +56,8 @@ func (u *PaymentDomain) GetSubscriptionFromExternalID(
 func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
-	isTrial bool,
-	status string,
-	expiresAt time.Time,
-	planID, productID, organizationID int64,
+	subscription *model.Subscription,
 ) (*model.Subscription, error) {
-	now := times.Now()
-	if times.CompareDate(now, expiresAt) == constant.Date1AfterDate2 {
-		return nil, constant.ErrExpiresAtInThePast
-	}
-
-	subscription := &model.Subscription{
-		Status:         status,
-		StartsAt:       &now,
-		ExpiresAt:      &expiresAt,
-		IsTrial:        isTrial,
-		PlanID:         planID,
-		ProductID:      productID,
-		OrganizationID: organizationID,
-	}
 	insertStmt := Subscription.INSERT(Subscription.MutableColumns.
 		Except(Subscription.InsertedAt, Subscription.UpdatedAt)).
 		MODEL(subscription).
