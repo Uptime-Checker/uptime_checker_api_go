@@ -40,7 +40,7 @@ func (p *PaymentDomain) GetPlanWithProductFromExternalPlanID(
 	return planWithProduct, err
 }
 
-func (u *PaymentDomain) GetSubscriptionFromExternalID(
+func (p *PaymentDomain) GetSubscriptionFromExternalID(
 	ctx context.Context,
 	externalID string,
 ) (*model.Subscription, error) {
