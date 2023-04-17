@@ -5,6 +5,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
@@ -43,8 +44,16 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 
 func (p *ProductController) ListInternal(c *fiber.Ctx) error {
 	products, err := p.productDomain.ListProductWithPlans(c.Context())
+	var respProducts []resp.Product
+	for _, product := range products {
+		respProduct := resp.Product{
+			Popular:          resource.ProductTier(product.Tier) == resource.ProductTierStartup,
+			ProductWithPlans: product,
+		}
+		respProducts = append(respProducts, respProduct)
+	}
 	if err != nil {
 		return resp.SendError(c, fiber.StatusInternalServerError, err)
 	}
-	return resp.ServeData(c, fiber.StatusOK, products)
+	return resp.ServeData(c, fiber.StatusOK, respProducts)
 }
