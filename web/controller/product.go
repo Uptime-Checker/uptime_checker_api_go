@@ -44,7 +44,7 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 
 func (p *ProductController) ListInternal(c *fiber.Ctx) error {
 	products, err := p.productDomain.ListProductWithPlans(c.Context())
-	var respProducts []resp.Product
+	respProducts := make([]resp.Product, 0)
 	for _, product := range products {
 		respProduct := resp.Product{
 			Popular:          resource.ProductTier(product.Tier) == resource.ProductTierStartup,
