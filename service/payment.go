@@ -145,13 +145,13 @@ func (p *PaymentService) createOrUpdateReceipt(
 	if err != nil {
 		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", line.Price.ID, err)
 	}
-	subscription, err := p.getSubscriptionID(ctx, invoice)
-	if err != nil {
-		return errors.Newf("failed to get subscription, external ID: %s, err: %w", invoice.Subscription.ID, err)
-	}
 
 	var subscriptionID int64
-	if subscription != nil {
+	if invoice.Subscription != nil {
+		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, invoice.Subscription.ID)
+		if err != nil {
+			return errors.Newf("failed to get subscription, external ID: %s, err: %w", invoice.Subscription.ID, err)
+		}
 		subscriptionID = subscription.ID
 	}
 	receipt := &model.Receipt{
@@ -197,11 +197,4 @@ func (p *PaymentService) getCanceledAt(subscription stripe.Subscription) *time.T
 		return lo.ToPtr(time.Unix(subscription.CancelAt, 0))
 	}
 	return nil
-}
-
-func (p *PaymentService) getSubscriptionID(ctx context.Context, invoice stripe.Invoice) (*model.Subscription, error) {
-	if invoice.Subscription == nil {
-		return nil, nil
-	}
-	return p.paymentDomain.GetSubscriptionFromExternalID(ctx, invoice.Subscription.ID)
 }
