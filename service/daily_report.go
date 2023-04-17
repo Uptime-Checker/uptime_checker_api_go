@@ -36,6 +36,7 @@ func (d *DailyReportService) Add(
 		dailyReport = &model.DailyReport{
 			SuccessfulChecks: int32(successfulChecks),
 			ErrorChecks:      int32(errorChecks),
+			Downtime:         0, // fresh, huh
 			Date:             now,
 			MonitorID:        monitorID,
 			OrganizationID:   organizationID,
@@ -49,5 +50,15 @@ func (d *DailyReportService) Add(
 		dailyReport.ErrorChecks--
 	}
 	dailyReport.UpdatedAt = now
+	return d.dailyReportDomain.Update(ctx, tx, dailyReport.ID, dailyReport)
+}
+
+func (d *DailyReportService) UpdateDailyDowntime(
+	ctx context.Context,
+	tx *sql.Tx, dailyReport *model.DailyReport, from, to time.Time,
+) (*model.DailyReport, error) {
+	duration := to.Sub(from).Seconds()
+	dailyReport.Downtime += int32(duration)
+	dailyReport.UpdatedAt = time.Now()
 	return d.dailyReportDomain.Update(ctx, tx, dailyReport.ID, dailyReport)
 }

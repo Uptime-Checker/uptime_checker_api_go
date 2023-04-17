@@ -90,12 +90,12 @@ func (w *WatchDog) Launch(
 		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
 			"duration:", fmt.Sprintf("%dms", *check.Duration))
 		// Insert to the daily report
-		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
+		dailyReport, err := w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
 		if err != nil {
 			return errors.Newf("daily report add failed, err: %w", err)
 		}
 		// Send for verification and alarm
-		return w.verify(ctx, tx, check, monitor.Monitor, monitorRegionWithAssertions.MonitorRegion)
+		return w.verify(ctx, tx, check, monitor.Monitor, monitorRegionWithAssertions.MonitorRegion, dailyReport)
 	}); err != nil {
 		sentry.CaptureException(err)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -18,6 +19,7 @@ func (w *WatchDog) alarmCheck(
 	monitor *model.Monitor,
 	check *model.Check,
 	status resource.MonitorStatus,
+	dailyReport *model.DailyReport,
 ) error {
 	var ongoingAlarm *model.Alarm
 	alarm, err := w.alarmDomain.GetOngoing(ctx, monitor.ID)
@@ -25,7 +27,7 @@ func (w *WatchDog) alarmCheck(
 		ongoingAlarm = alarm
 	}
 	if status == resource.MonitorStatusPassing {
-		return w.resolveAlarm(ctx, tx, monitor, check, ongoingAlarm)
+		return w.resolveAlarm(ctx, tx, monitor, check, ongoingAlarm, dailyReport)
 	} else if status == resource.MonitorStatusFailing {
 		return w.raiseAlarm(ctx, tx, monitor, check, ongoingAlarm)
 	}
@@ -38,6 +40,7 @@ func (w *WatchDog) resolveAlarm(
 	monitor *model.Monitor,
 	check *model.Check,
 	alarm *model.Alarm,
+	dailyReport *model.DailyReport,
 ) error {
 	tracingID := pkg.GetTracingID(ctx)
 	if alarm == nil {
@@ -50,6 +53,10 @@ func (w *WatchDog) resolveAlarm(
 	}
 	lgr.Print(tracingID, 2, "resolved alarm", alarm.ID)
 	// update daily report duration
+	_, err = w.dailyReportService.UpdateDailyDowntime(ctx, tx, dailyReport, times.Now(), alarm.InsertedAt)
+	if err != nil {
+		return errors.Newf("failed to update daily downtime, err: %w", err)
+	}
 	// send notification
 	return nil
 }

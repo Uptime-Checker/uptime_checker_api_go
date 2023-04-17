@@ -21,6 +21,7 @@ func (w *WatchDog) verify(
 	check *model.Check,
 	monitor *model.Monitor,
 	monitorRegion *model.MonitorRegion,
+	dailyReport *model.DailyReport,
 ) error {
 	tracingID := pkg.GetTracingID(ctx)
 	alarmPolicy, err := w.alarmPolicyService.Get(ctx, monitor.ID, monitor.OrganizationID)
@@ -60,7 +61,7 @@ func (w *WatchDog) verify(
 		return errors.Newf("failed to update monitor consecutive count, err: %w", err)
 	}
 
-	return w.alarmCheck(ctx, tx, monitor, check, status)
+	return w.alarmCheck(ctx, tx, monitor, check, status, dailyReport)
 }
 
 func (w *WatchDog) handleAlarmPolicy(
