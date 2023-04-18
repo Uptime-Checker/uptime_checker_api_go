@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
@@ -15,13 +16,18 @@ import (
 )
 
 type MonitorIntegrationController struct {
+	alarmChannelDomain        *domain.AlarmChannelDomain
 	monitorIntegrationService *service.MonitorIntegrationService
 }
 
 func NewMonitorIntegrationController(
+	alarmChannelDomain *domain.AlarmChannelDomain,
 	monitorIntegrationService *service.MonitorIntegrationService,
 ) *MonitorIntegrationController {
-	return &MonitorIntegrationController{monitorIntegrationService: monitorIntegrationService}
+	return &MonitorIntegrationController{
+		alarmChannelDomain:        alarmChannelDomain,
+		monitorIntegrationService: monitorIntegrationService,
+	}
 }
 
 type MonitorIntegrationBody struct {
@@ -55,6 +61,15 @@ func (m *MonitorIntegrationController) Create(c *fiber.Ctx) error {
 		monitorIntegration, err = m.monitorIntegrationService.Create(
 			ctx, tx, user.Organization, integrationType, body.Config,
 		)
+		if err != nil {
+			return err
+		}
+		alarmChannel := &model.AlarmChannel{
+			On:             true,
+			OrganizationID: user.Organization.ID,
+			IntegrationID:  &monitorIntegration.ID,
+		}
+		alarmChannel, err = m.alarmChannelDomain.Create(ctx, tx, alarmChannel)
 		return err
 	}); err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateIntegration, err)
