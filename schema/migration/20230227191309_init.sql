@@ -559,6 +559,7 @@ drop table "check";
 drop table region;
 drop table user_contact;
 drop table guest_user;
+drop table property;
 drop table invitation;
 drop table organization_user;
 drop table receipt;
