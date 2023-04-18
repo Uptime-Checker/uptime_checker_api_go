@@ -16,6 +16,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
+	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
@@ -46,7 +47,8 @@ type Cron struct {
 	regionDomain        *domain.RegionDomain
 	monitorDomain       *domain.MonitorDomain
 	monitorRegionDomain *domain.MonitorRegionDomain
-	propertyDomain      *domain.PropertyDomain
+
+	propertyService *service.PropertyService
 
 	syncProductsTask *task.SyncProductsTask
 }
@@ -56,7 +58,7 @@ func NewCron(
 	regionDomain *domain.RegionDomain,
 	monitorDomain *domain.MonitorDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
-	propertyDomain *domain.PropertyDomain,
+	propertyService *service.PropertyService,
 	syncProductsTask *task.SyncProductsTask,
 ) *Cron {
 	return &Cron{
@@ -64,7 +66,7 @@ func NewCron(
 		regionDomain:        regionDomain,
 		monitorDomain:       monitorDomain,
 		monitorRegionDomain: monitorRegionDomain,
-		propertyDomain:      propertyDomain,
+		propertyService:     propertyService,
 		syncProductsTask:    syncProductsTask,
 	}
 }
