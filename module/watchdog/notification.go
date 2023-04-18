@@ -5,8 +5,11 @@ import (
 	"database/sql"
 
 	"github.com/cockroachdb/errors"
+	"github.com/getsentry/sentry-go"
 	"github.com/sourcegraph/conc/iter"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -57,4 +60,25 @@ func (w *WatchDog) notifyAlarmChannel(
 	alarm *model.Alarm,
 	alarmChannel *model.AlarmChannel,
 ) {
+	tracingID := pkg.GetTracingID(ctx)
+	if !alarmChannel.On {
+		lgr.Print(tracingID, "alarm channel is off", alarmChannel.ID)
+		return
+	}
+	notification := model.MonitorNotification{
+		Type:           0,
+		Successful:     false,
+		AlarmID:        &alarm.ID,
+		MonitorID:      monitor.ID,
+		OrganizationID: monitor.OrganizationID,
+	}
+	if alarmChannel.IntegrationID != nil {
+		integration, err := w.monitorIntegrationDomain.Get(ctx, *alarmChannel.IntegrationID)
+		if err != nil {
+			sentry.CaptureException(errors.Newf("failed to get integration: %d, err: %w",
+				*alarmChannel.IntegrationID, err))
+			return
+		}
+		notification.IntegrationID = &integration.ID
+	}
 }

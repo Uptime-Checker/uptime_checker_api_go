@@ -53,6 +53,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	productDomain := domain.NewProductDomain()
 	planDomain := domain.NewPlanDomain()
 	alarmChannelDomain := domain.NewAlarmChannelDomain()
+	monitorIntegrationDomain := domain.NewMonitorIntegrationDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -77,6 +78,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorDomain,
 		monitorRegionDomain,
 		monitorStatusDomain,
+		monitorIntegrationDomain,
 		alarmDomain,
 		alarmChannelDomain,
 		checkService,

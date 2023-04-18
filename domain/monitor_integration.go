@@ -37,6 +37,15 @@ func (m *MonitorIntegrationDomain) Create(
 	return monitorIntegration, err
 }
 
+func (m *MonitorIntegrationDomain) Get(ctx context.Context, id int64) (*model.MonitorIntegration, error) {
+	stmt := SELECT(MonitorIntegration.AllColumns).FROM(MonitorIntegration).WHERE(MonitorIntegration.ID.EQ(Int(id))).
+		LIMIT(1)
+
+	integration := &model.MonitorIntegration{}
+	err := stmt.QueryContext(ctx, infra.DB, integration)
+	return integration, err
+}
+
 func (m *MonitorIntegrationDomain) List(
 	ctx context.Context,
 	organizationID int64,

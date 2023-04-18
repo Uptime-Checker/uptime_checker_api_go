@@ -22,13 +22,14 @@ import (
 )
 
 type WatchDog struct {
-	checkDomain         *domain.CheckDomain
-	regionDomain        *domain.RegionDomain
-	monitorDomain       *domain.MonitorDomain
-	monitorRegionDomain *domain.MonitorRegionDomain
-	monitorStatusDomain *domain.MonitorStatusDomain
-	alarmDomain         *domain.AlarmDomain
-	alarmChannelDomain  *domain.AlarmChannelDomain
+	checkDomain              *domain.CheckDomain
+	regionDomain             *domain.RegionDomain
+	monitorDomain            *domain.MonitorDomain
+	monitorRegionDomain      *domain.MonitorRegionDomain
+	monitorStatusDomain      *domain.MonitorStatusDomain
+	monitorIntegrationDomain *domain.MonitorIntegrationDomain
+	alarmDomain              *domain.AlarmDomain
+	alarmChannelDomain       *domain.AlarmChannelDomain
 
 	checkService         *service.CheckService
 	monitorService       *service.MonitorService
@@ -44,6 +45,7 @@ func NewWatchDog(
 	monitorDomain *domain.MonitorDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
+	monitorIntegrationDomain *domain.MonitorIntegrationDomain,
 	alarmDomain *domain.AlarmDomain,
 	alarmChannelDomain *domain.AlarmChannelDomain,
 	checkService *service.CheckService,
@@ -54,19 +56,20 @@ func NewWatchDog(
 	alarmPolicyService *service.AlarmPolicyService,
 ) *WatchDog {
 	return &WatchDog{
-		checkDomain:          checkDomain,
-		regionDomain:         regionDomain,
-		monitorDomain:        monitorDomain,
-		monitorRegionDomain:  monitorRegionDomain,
-		monitorStatusDomain:  monitorStatusDomain,
-		alarmDomain:          alarmDomain,
-		alarmChannelDomain:   alarmChannelDomain,
-		checkService:         checkService,
-		monitorService:       monitorService,
-		monitorRegionService: monitorRegionService,
-		errorLogService:      errorLogService,
-		dailyReportService:   dailyReportService,
-		alarmPolicyService:   alarmPolicyService,
+		checkDomain:              checkDomain,
+		regionDomain:             regionDomain,
+		monitorDomain:            monitorDomain,
+		monitorRegionDomain:      monitorRegionDomain,
+		monitorStatusDomain:      monitorStatusDomain,
+		monitorIntegrationDomain: monitorIntegrationDomain,
+		alarmDomain:              alarmDomain,
+		alarmChannelDomain:       alarmChannelDomain,
+		checkService:             checkService,
+		monitorService:           monitorService,
+		monitorRegionService:     monitorRegionService,
+		errorLogService:          errorLogService,
+		dailyReportService:       dailyReportService,
+		alarmPolicyService:       alarmPolicyService,
 	}
 }
 
