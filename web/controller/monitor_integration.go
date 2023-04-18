@@ -53,11 +53,11 @@ func (m *MonitorIntegrationController) Create(c *fiber.Ctx) error {
 	var monitorIntegration *model.MonitorIntegration
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 		monitorIntegration, err = m.monitorIntegrationService.Create(
-			ctx, tx, *user.OrganizationID, integrationType, body.Config,
+			ctx, tx, user.Organization, integrationType, body.Config,
 		)
 		return err
 	}); err != nil {
-		return resp.SendError(c, fiber.StatusBadRequest, err)
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateIntegration, err)
 	}
 	return resp.ServeData(c, fiber.StatusOK, monitorIntegration)
 }
