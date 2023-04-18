@@ -43,6 +43,7 @@ var (
 	ErrMaxTimeoutExceeded           = errors.New("max timeout exceeded")
 	ErrHeaderKeyNeeded              = errors.New("header key needed")
 	ErrStatusCodeAssertionRequired  = errors.New("status code assertion required")
+	ErrWebhookURLRequired           = errors.New("webhook URL is required")
 )
 
 var Validate = validator.New()

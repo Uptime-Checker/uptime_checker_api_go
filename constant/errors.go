@@ -26,7 +26,6 @@ var (
 	ErrUpgradeSubscription = errors.New("upgrade subscription")
 	ErrUpgradePermission   = errors.New("upgrade permission")
 	ErrSubscriptionExpired = errors.New("subscription expired")
-	ErrWebhookURLRequired  = errors.New("webhook URL is required")
 )
 
 const (
