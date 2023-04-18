@@ -69,7 +69,7 @@ func (m *MonitorIntegrationController) Create(c *fiber.Ctx) error {
 			OrganizationID: user.Organization.ID,
 			IntegrationID:  &monitorIntegration.ID,
 		}
-		alarmChannel, err = m.alarmChannelDomain.Create(ctx, tx, alarmChannel)
+		_, err = m.alarmChannelDomain.Create(ctx, tx, alarmChannel)
 		return err
 	}); err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateIntegration, err)

@@ -44,6 +44,9 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 
 func (p *ProductController) ListInternal(c *fiber.Ctx) error {
 	products, err := p.productDomain.ListProductWithPlans(c.Context())
+	if err != nil {
+		return resp.SendError(c, fiber.StatusInternalServerError, err)
+	}
 	respProducts := make([]resp.Product, 0)
 	for _, product := range products {
 		respProduct := resp.Product{

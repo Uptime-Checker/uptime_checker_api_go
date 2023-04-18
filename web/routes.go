@@ -51,6 +51,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	alarmDomain := domain.NewAlarmDomain()
 	productDomain := domain.NewProductDomain()
 	planDomain := domain.NewPlanDomain()
+	alarmChannelDomain := domain.NewAlarmChannelDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -75,6 +76,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorRegionDomain,
 		monitorStatusDomain,
 		alarmDomain,
+		alarmChannelDomain,
 		checkService,
 		monitorService,
 		monitorRegionService,
@@ -233,7 +235,7 @@ func registerProductHandlers(
 	handler := controller.NewProductController(productDomain, userDomain)
 
 	router.Get("/list/external", auth, handler.ListExternal)
-	router.Get("/list/internal", auth, handler.ListInternal)
+	router.Get("/list/internal", handler.ListInternal)
 	router.Get("/billing/customer", auth, handler.CreateBillingCustomer)
 }
 
