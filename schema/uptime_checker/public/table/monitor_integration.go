@@ -20,6 +20,7 @@ type monitorIntegrationTable struct {
 	ID             postgres.ColumnInteger
 	Type           postgres.ColumnInteger
 	Config         postgres.ColumnString
+	ExternalID     postgres.ColumnString
 	OrganizationID postgres.ColumnInteger
 	InsertedAt     postgres.ColumnTimestamp
 	UpdatedAt      postgres.ColumnTimestamp
@@ -66,11 +67,12 @@ func newMonitorIntegrationTableImpl(schemaName, tableName, alias string) monitor
 		IDColumn             = postgres.IntegerColumn("id")
 		TypeColumn           = postgres.IntegerColumn("type")
 		ConfigColumn         = postgres.StringColumn("config")
+		ExternalIDColumn     = postgres.StringColumn("external_id")
 		OrganizationIDColumn = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn     = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, TypeColumn, ConfigColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{TypeColumn, ConfigColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns           = postgres.ColumnList{IDColumn, TypeColumn, ConfigColumn, ExternalIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{TypeColumn, ConfigColumn, ExternalIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorIntegrationTable{
@@ -80,6 +82,7 @@ func newMonitorIntegrationTableImpl(schemaName, tableName, alias string) monitor
 		ID:             IDColumn,
 		Type:           TypeColumn,
 		Config:         ConfigColumn,
+		ExternalID:     ExternalIDColumn,
 		OrganizationID: OrganizationIDColumn,
 		InsertedAt:     InsertedAtColumn,
 		UpdatedAt:      UpdatedAtColumn,

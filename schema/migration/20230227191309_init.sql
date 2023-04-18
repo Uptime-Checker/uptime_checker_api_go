@@ -199,6 +199,7 @@ create table if not exists monitor_integration (
     id bigserial,
     type integer not null,
     config jsonb not null,
+    external_id varchar(255),
     organization_id bigint not null,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),

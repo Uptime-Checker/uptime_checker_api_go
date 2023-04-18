@@ -54,6 +54,14 @@ func (o *OrganizationDomain) CreateOrganizationUser(
 	return orgUser, err
 }
 
+func (m *OrganizationDomain) Get(ctx context.Context, id int64) (*model.Organization, error) {
+	stmt := SELECT(Organization.AllColumns).FROM(Organization).WHERE(Organization.ID.EQ(Int(id))).LIMIT(1)
+
+	organization := &model.Organization{}
+	err := stmt.QueryContext(ctx, infra.DB, organization)
+	return organization, err
+}
+
 func (o *OrganizationDomain) GetRoleByType(ctx context.Context, roleType resource.RoleType) (*model.Role, error) {
 	stmt := SELECT(Role.AllColumns).FROM(Role).WHERE(Role.Type.EQ(Int(int64(roleType)))).LIMIT(1)
 
