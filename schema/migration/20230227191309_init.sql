@@ -345,7 +345,7 @@ create unique index if not exists guest_user_code_index on guest_user (code);
 create index if not exists guest_user_expires_at_index on guest_user (expires_at);
 create table if not exists property (
     id bigserial,
-    `key` varchar(255) not null,
+    key varchar(255) not null,
     value varchar(255) not null,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
