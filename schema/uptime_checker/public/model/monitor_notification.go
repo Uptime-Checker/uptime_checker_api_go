@@ -13,7 +13,8 @@ import (
 
 type MonitorNotification struct {
 	ID             int64 `sql:"primary_key"`
-	Type           *int32
+	Type           int32
+	ExternalID     *string
 	Successful     bool
 	AlarmID        *int64
 	MonitorID      int64

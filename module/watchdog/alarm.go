@@ -16,8 +16,9 @@ import (
 func (w *WatchDog) alarmCheck(
 	ctx context.Context,
 	tx *sql.Tx,
-	monitor *model.Monitor,
 	check *model.Check,
+	errorLog *model.ErrorLog,
+	monitor *model.Monitor,
 	status resource.MonitorStatus,
 	dailyReport *model.DailyReport,
 ) error {
@@ -27,9 +28,9 @@ func (w *WatchDog) alarmCheck(
 		ongoingAlarm = alarm
 	}
 	if status == resource.MonitorStatusPassing {
-		return w.resolveAlarm(ctx, tx, monitor, check, ongoingAlarm, dailyReport)
+		return w.resolveAlarm(ctx, tx, check, errorLog, monitor, ongoingAlarm, dailyReport)
 	} else if status == resource.MonitorStatusFailing {
-		return w.raiseAlarm(ctx, tx, monitor, check, ongoingAlarm)
+		return w.raiseAlarm(ctx, tx, check, errorLog, monitor, ongoingAlarm)
 	}
 	return nil
 }
@@ -37,8 +38,9 @@ func (w *WatchDog) alarmCheck(
 func (w *WatchDog) resolveAlarm(
 	ctx context.Context,
 	tx *sql.Tx,
-	monitor *model.Monitor,
 	check *model.Check,
+	errorLog *model.ErrorLog,
+	monitor *model.Monitor,
 	alarm *model.Alarm,
 	dailyReport *model.DailyReport,
 ) error {
@@ -58,19 +60,21 @@ func (w *WatchDog) resolveAlarm(
 		return errors.Newf("failed to update daily downtime, err: %w", err)
 	}
 	// send notification
-	return nil
+	return w.notify(ctx, tx, check, errorLog, monitor, alarm)
 }
 
 func (w *WatchDog) raiseAlarm(
 	ctx context.Context,
 	tx *sql.Tx,
-	monitor *model.Monitor,
 	check *model.Check,
+	errorLog *model.ErrorLog,
+	monitor *model.Monitor,
 	alarm *model.Alarm,
 ) error {
 	tracingID := pkg.GetTracingID(ctx)
 	if alarm != nil {
 		lgr.Print(tracingID, "no new alarm to raise", monitor.ID, "ongoing alarm", alarm.ID)
+		// send reminder
 		return nil
 	}
 	alarm = &model.Alarm{
@@ -85,5 +89,5 @@ func (w *WatchDog) raiseAlarm(
 	}
 	lgr.Print(tracingID, 2, "raised alarm", alarm.ID)
 	// send notification
-	return nil
+	return w.notify(ctx, tx, check, errorLog, monitor, alarm)
 }

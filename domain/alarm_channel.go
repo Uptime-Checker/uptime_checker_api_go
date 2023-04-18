@@ -29,7 +29,7 @@ func (a *AlarmChannelDomain) Create(
 	return alarmChannel, err
 }
 
-func (m *AlarmChannelDomain) ListByOrganization(
+func (a *AlarmChannelDomain) ListByOrganization(
 	ctx context.Context,
 	organizationID int64,
 ) ([]model.AlarmChannel, error) {
@@ -41,7 +41,7 @@ func (m *AlarmChannelDomain) ListByOrganization(
 	return alarmChannels, err
 }
 
-func (m *AlarmChannelDomain) ListByMonitor(
+func (a *AlarmChannelDomain) ListByMonitor(
 	ctx context.Context,
 	monitorID int64,
 ) ([]model.AlarmChannel, error) {

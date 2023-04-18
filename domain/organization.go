@@ -54,7 +54,7 @@ func (o *OrganizationDomain) CreateOrganizationUser(
 	return orgUser, err
 }
 
-func (m *OrganizationDomain) Get(ctx context.Context, id int64) (*model.Organization, error) {
+func (o *OrganizationDomain) Get(ctx context.Context, id int64) (*model.Organization, error) {
 	stmt := SELECT(Organization.AllColumns).FROM(Organization).WHERE(Organization.ID.EQ(Int(id))).LIMIT(1)
 
 	organization := &model.Organization{}

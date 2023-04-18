@@ -19,6 +19,7 @@ func (w *WatchDog) verify(
 	ctx context.Context,
 	tx *sql.Tx,
 	check *model.Check,
+	errorLog *model.ErrorLog,
 	monitor *model.Monitor,
 	monitorRegion *model.MonitorRegion,
 	dailyReport *model.DailyReport,
@@ -61,7 +62,7 @@ func (w *WatchDog) verify(
 		return errors.Newf("failed to update monitor consecutive count, err: %w", err)
 	}
 
-	return w.alarmCheck(ctx, tx, monitor, check, status, dailyReport)
+	return w.alarmCheck(ctx, tx, check, errorLog, monitor, status, dailyReport)
 }
 
 func (w *WatchDog) handleAlarmPolicy(

@@ -309,7 +309,8 @@ create index if not exists daily_report_organization_id_index on daily_report (o
 create unique index if not exists daily_report_date_monitor_id_index on daily_report (date, monitor_id);
 create table if not exists monitor_notification (
     id bigserial,
-    type integer,
+    type integer not null,
+    external_id varchar(255),
     successful boolean default true not null,
     alarm_id bigint,
     monitor_id bigint not null,
