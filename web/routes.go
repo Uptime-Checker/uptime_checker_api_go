@@ -39,6 +39,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	paymentDomain := domain.NewPaymentDomain()
 	organizationDomain := domain.NewOrganizationDomain()
 
+	propertyDomain := domain.NewPropertyDomain()
 	monitorDomain := domain.NewMonitorDomain()
 	checkDomain := domain.NewCheckDomain()
 	monitorStatusDomain := domain.NewMonitorStatusDomain()
@@ -90,7 +91,14 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	runCheckTask := task.NewRunCheckTask(dog, monitorDomain, monitorRegionDomain)
 	startMonitorTask := task.NewStartMonitorTask(dog, monitorDomain, regionDomain, assertionDomain)
 
-	cogman := cron.NewCron(jobDomain, regionDomain, monitorDomain, monitorRegionDomain, syncProductsTask)
+	cogman := cron.NewCron(
+		jobDomain,
+		regionDomain,
+		monitorDomain,
+		monitorRegionDomain,
+		propertyDomain,
+		syncProductsTask,
+	)
 	wheel := worker.NewWorker(runCheckTask, startMonitorTask)
 
 	//  ========== Age of the routers ==========

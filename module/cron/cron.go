@@ -38,6 +38,7 @@ type JobName string
 
 const (
 	JobNameSyncStripeProducts JobName = "SYNC_STRIPE_PRODUCTS"
+	JobNameCheckWatchdog      JobName = "CHECK_WATCHDOG"
 )
 
 type Cron struct {
@@ -45,6 +46,7 @@ type Cron struct {
 	regionDomain        *domain.RegionDomain
 	monitorDomain       *domain.MonitorDomain
 	monitorRegionDomain *domain.MonitorRegionDomain
+	propertyDomain      *domain.PropertyDomain
 
 	syncProductsTask *task.SyncProductsTask
 }
@@ -54,6 +56,7 @@ func NewCron(
 	regionDomain *domain.RegionDomain,
 	monitorDomain *domain.MonitorDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
+	propertyDomain *domain.PropertyDomain,
 	syncProductsTask *task.SyncProductsTask,
 ) *Cron {
 	return &Cron{
@@ -61,6 +64,7 @@ func NewCron(
 		regionDomain:        regionDomain,
 		monitorDomain:       monitorDomain,
 		monitorRegionDomain: monitorRegionDomain,
+		propertyDomain:      propertyDomain,
 		syncProductsTask:    syncProductsTask,
 	}
 }
@@ -116,7 +120,7 @@ func (c *Cron) Start(ctx context.Context) error {
 }
 
 func (c *Cron) checkAndRun() {
-	ctx := context.Background()
+	ctx := pkg.NewTracingID(context.Background())
 	lgr.Print("Running cron check")
 
 	// Cron check runs every 30s. We look for jobs that need to be run from last 20s to next 20s from current time
@@ -129,6 +133,8 @@ func (c *Cron) checkAndRun() {
 	for i, job := range jobsToRun {
 		if job.Name == string(JobNameSyncStripeProducts) {
 			go runTask(c.jobDomain, *c.syncProductsTask, jobsToRun[i])
+		} else if job.Name == string(JobNameCheckWatchdog) {
+			c.stopTheDog(ctx)
 		}
 	}
 }
