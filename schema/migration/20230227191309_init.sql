@@ -197,9 +197,8 @@ create index if not exists check_monitor_id_index on "check" (monitor_id);
 create index if not exists check_organization_id_index on "check" (organization_id);
 create table if not exists monitor_integration (
     id bigserial,
-    name varchar(255),
-    type integer,
-    config jsonb,
+    type integer not null,
+    config jsonb not null,
     organization_id bigint not null,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),

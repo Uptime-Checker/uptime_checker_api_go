@@ -92,7 +92,7 @@ func (w *WatchDog) handleAlarmPolicy(
 				}
 			}
 		case resource.AlarmPolicyRegionThreshold:
-			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
+			monitorRegions, err := w.monitorRegionDomain.List(ctx, monitor.ID)
 			if err != nil {
 				return status, errors.Newf("failed to get monitor regions, err: %w", err)
 			}
@@ -118,7 +118,7 @@ func (w *WatchDog) handleAlarmPolicy(
 				status = resource.MonitorStatusPassing
 			}
 		case resource.AlarmPolicyRegionThreshold:
-			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
+			monitorRegions, err := w.monitorRegionDomain.List(ctx, monitor.ID)
 			if err != nil {
 				return status, errors.Newf("failed to get monitor regions, err: %w", err)
 			}
