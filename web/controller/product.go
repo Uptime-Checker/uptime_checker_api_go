@@ -43,7 +43,7 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 }
 
 func (p *ProductController) ListInternal(c *fiber.Ctx) error {
-	products, err := p.productDomain.ListProductWithPlans(c.Context())
+	products, err := p.productDomain.ListProductWithPlansAndFeatures(c.Context())
 	if err != nil {
 		return resp.SendError(c, fiber.StatusInternalServerError, err)
 	}
