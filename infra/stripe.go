@@ -55,6 +55,9 @@ func ListProductsWithPrices() []pkg.BillingProduct {
 	billingProducts := make([]pkg.BillingProduct, 0)
 
 	for _, p := range products {
+		if !p.Active {
+			continue
+		}
 		billingProduct := pkg.BillingProduct{Product: p}
 		billingProductPrices := make([]*stripe.Price, 0)
 		for _, billingProductPrice := range prices {
