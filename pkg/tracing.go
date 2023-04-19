@@ -3,8 +3,6 @@ package pkg
 import (
 	"context"
 
-	"github.com/segmentio/ksuid"
-
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 )
 
@@ -28,9 +26,4 @@ func GetTracingID(ctx context.Context) string {
 func NewTracingID(ctx context.Context) context.Context {
 	ctx = context.WithValue(ctx, constant.TracingKey, GetUniqueString())
 	return ctx
-}
-
-// GetUniqueString returns unique string
-func GetUniqueString() string {
-	return ksuid.New().String()
 }

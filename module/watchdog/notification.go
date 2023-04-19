@@ -8,6 +8,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/sourcegraph/conc/iter"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
@@ -79,6 +80,11 @@ func (w *WatchDog) notifyAlarmChannel(
 				*alarmChannel.IntegrationID, err))
 			return
 		}
+		integrationType := resource.MonitorIntegrationType(integration.Type)
 		notification.IntegrationID = &integration.ID
+		if integrationType == resource.MonitorIntegrationTypeWebhook {
+			eventID := pkg.GetUniqueString()
+			notification.ExternalID = &eventID
+		}
 	}
 }
