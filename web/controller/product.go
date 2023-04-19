@@ -7,6 +7,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/middlelayer"
 )
@@ -43,15 +44,27 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 }
 
 func (p *ProductController) ListInternal(c *fiber.Ctx) error {
-	products, err := p.productDomain.ListProductWithPlansAndFeatures(c.Context())
+	ctx := c.Context()
+
+	var err error
+	products := make([]pkg.ProductWithPlansAndFeatures, 0)
+	cachedProducts := cache.GetInternalProducts(ctx)
+	if cachedProducts != nil {
+		products = *cachedProducts
+	}
+	products, err = p.productDomain.ListProductWithPlansAndFeatures(ctx)
 	if err != nil {
 		return resp.SendError(c, fiber.StatusInternalServerError, err)
+	}
+	// Minimum
+	if len(products) > 3 {
+		cache.SetInternalProducts(ctx, products)
 	}
 	respProducts := make([]resp.Product, 0)
 	for _, product := range products {
 		respProduct := resp.Product{
-			Popular:          resource.ProductTier(product.Tier) == resource.ProductTierStartup,
-			ProductWithPlans: product,
+			Popular:                     resource.ProductTier(product.Tier) == resource.ProductTierStartup,
+			ProductWithPlansAndFeatures: product,
 		}
 		respProducts = append(respProducts, respProduct)
 	}

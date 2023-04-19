@@ -64,7 +64,7 @@ type PlanWithProduct struct {
 	*model.Product
 }
 
-type ProductWithPlans struct {
+type ProductWithPlansAndFeatures struct {
 	*model.Product
 	Plans    []*model.Plan
 	Features []*SubscriptionFeature

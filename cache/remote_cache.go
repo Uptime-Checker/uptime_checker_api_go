@@ -109,3 +109,41 @@ func GetReceiptEventKey(customerID string) string {
 func GetSubscriptionEventKey(customerID string) string {
 	return fmt.Sprintf("subscription_event_%s", customerID)
 }
+
+// ========================================================================
+// SetInternalProducts caches for 7 days
+func SetInternalProducts(ctx context.Context, products []pkg.ProductWithPlansAndFeatures) {
+	serializedProducts, err := json.Marshal(products)
+	if err != nil {
+		sentry.CaptureException(err)
+		return
+	}
+
+	if err := remoteCache.Set(&cache.Item{
+		Ctx: ctx, Key: getProductsCacheKey(), Value: serializedProducts, TTL: 7 * 24 * time.Hour,
+	}); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func GetInternalProducts(ctx context.Context) *[]pkg.ProductWithPlansAndFeatures {
+	var serializedProducts string
+	if err := remoteCache.Get(ctx, getProductsCacheKey(), &serializedProducts); err != nil {
+		return nil
+	}
+	var products []pkg.ProductWithPlansAndFeatures
+	if err := json.Unmarshal([]byte(serializedProducts), &products); err != nil {
+		sentry.CaptureException(err)
+	}
+	return &products
+}
+
+func DeleteInternalProducts(ctx context.Context) {
+	if err := remoteCache.Delete(ctx, getProductsCacheKey()); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func getProductsCacheKey() string {
+	return fmt.Sprintf("products_internal")
+}

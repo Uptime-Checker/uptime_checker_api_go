@@ -6,5 +6,5 @@ import (
 
 type Product struct {
 	Popular bool
-	pkg.ProductWithPlans
+	pkg.ProductWithPlansAndFeatures
 }
