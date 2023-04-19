@@ -26,42 +26,45 @@ func NewSyncProductsTask(planDomain *domain.PlanDomain, productService *service.
 	return &SyncProductsTask{planDomain: planDomain, productService: productService}
 }
 
-func (s SyncProductsTask) Do(ctx context.Context, tx *sql.Tx) {
+func (s SyncProductsTask) Do(ctx context.Context) {
 	tid := pkg.GetTracingID(ctx)
 
-	lgr.Print(tid, 1, "running SyncProductsTask")
-	billingProducts := infra.ListProductsWithPrices()
-	for _, billingProduct := range billingProducts {
-		product, err := s.productService.Add(
-			ctx,
-			tx,
-			billingProduct.Name,
-			billingProduct.Description,
-			billingProduct.ID,
-			billingProduct.Metadata["tier"],
-		)
-		if err != nil {
-			sentry.CaptureException(errors.Newf("failed to add product %s, err: %w", billingProduct.Name, err))
-			return
-		}
-
-		for _, price := range billingProduct.Prices {
-			plan := &model.Plan{
-				ExternalID: &price.ID,
-				ProductID:  &product.ID,
-			}
-			_, err := s.planDomain.Create(
+	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
+		lgr.Print(tid, 1, "running SyncProductsTask")
+		billingProducts := infra.ListProductsWithPrices()
+		for _, billingProduct := range billingProducts {
+			product, err := s.productService.Add(
 				ctx,
 				tx,
-				plan,
-				float64(price.UnitAmount/100),
-				s.getPlantType(price.Recurring.Interval),
+				billingProduct.Name,
+				billingProduct.Description,
+				billingProduct.ID,
+				billingProduct.Metadata["tier"],
 			)
 			if err != nil {
-				sentry.CaptureException(errors.Newf("failed to add plan %s, err: %w", price.ID, err))
-				return
+				return errors.Newf("failed to add product %s, err: %w", billingProduct.Name, err)
+			}
+
+			for _, price := range billingProduct.Prices {
+				plan := &model.Plan{
+					ExternalID: &price.ID,
+					ProductID:  &product.ID,
+				}
+				_, err := s.planDomain.Create(
+					ctx,
+					tx,
+					plan,
+					float64(price.UnitAmount/100),
+					s.getPlantType(price.Recurring.Interval),
+				)
+				if err != nil {
+					return errors.Newf("failed to add plan %s, err: %w", price.ID, err)
+				}
 			}
 		}
+		return nil
+	}); err != nil {
+		sentry.CaptureException(err)
 	}
 }
 

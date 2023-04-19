@@ -31,7 +31,7 @@ const (
 var s *gocron.Scheduler
 
 type Task interface {
-	Do(ctx context.Context, tx *sql.Tx)
+	Do(ctx context.Context)
 }
 
 // JobName type
@@ -155,7 +155,7 @@ func runTask[T Task](jobDomain *domain.JobDomain, tsk T, job model.Job) {
 		if err != nil {
 			return err
 		}
-		tsk.Do(ctx, tx)
+		tsk.Do(ctx)
 		if job.Recurring {
 			_, err = jobDomain.UpdateStatus(ctx, tx, job.ID, resource.JobStatusScheduled)
 			if err != nil {
