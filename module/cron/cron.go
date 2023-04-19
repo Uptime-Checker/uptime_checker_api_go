@@ -147,7 +147,7 @@ func runTask[T Task](jobDomain *domain.JobDomain, tsk T, job model.Job) {
 	now := times.Now()
 	nextRunAt := now
 	if job.Recurring {
-		nextRunAt = now.Add(time.Minute * time.Duration(*job.Interval))
+		nextRunAt = now.Add(time.Second * time.Duration(*job.Interval))
 	}
 
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
