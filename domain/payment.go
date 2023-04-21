@@ -53,6 +53,7 @@ func (p *PaymentDomain) GetSubscriptionFromExternalID(
 	return subscription, err
 }
 
+// CreateSubscription upserts
 func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
@@ -66,6 +67,7 @@ func (p *PaymentDomain) CreateSubscription(
 	return subscription, err
 }
 
+// CreateReceipt upserts
 func (p *PaymentDomain) CreateReceipt(
 	ctx context.Context,
 	tx *sql.Tx,

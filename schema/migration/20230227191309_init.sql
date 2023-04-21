@@ -429,6 +429,7 @@ create table if not exists subscription (
     starts_at timestamp(0),
     expires_at timestamp(0),
     canceled_at timestamp(0),
+    cancellation_reason varchar(1000),
     is_trial boolean default false not null,
     external_id varchar(255),
     external_customer_id varchar(255),

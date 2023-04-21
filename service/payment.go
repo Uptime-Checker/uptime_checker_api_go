@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cockroachdb/errors"
@@ -109,6 +110,7 @@ func (p *PaymentService) createOrUpdateSubscription(
 		StartsAt:           lo.ToPtr(time.Unix(subscription.StartDate, 0)),
 		ExpiresAt:          lo.ToPtr(time.Unix(subscription.CurrentPeriodEnd, 0)),
 		CanceledAt:         p.getCanceledAt(subscription),
+		CancellationReason: p.getCancellationReason(subscription),
 		IsTrial:            subscription.Status == stripe.SubscriptionStatusTrialing,
 		ExternalID:         &subscription.ID,
 		ExternalCustomerID: user.PaymentCustomerID,
@@ -197,4 +199,16 @@ func (p *PaymentService) getCanceledAt(subscription stripe.Subscription) *time.T
 		return lo.ToPtr(time.Unix(subscription.CancelAt, 0))
 	}
 	return nil
+}
+
+func (p *PaymentService) getCancellationReason(subscription stripe.Subscription) *string {
+	var reason string
+	cancellationDetails := subscription.CancellationDetails
+	if cancellationDetails != nil {
+		reason = fmt.Sprintf("%s.%s", string(cancellationDetails.Reason), string(cancellationDetails.Feedback))
+		if cancellationDetails.Comment != "" {
+			reason = fmt.Sprintf("%s.%s", reason, cancellationDetails.Comment)
+		}
+	}
+	return &reason
 }
