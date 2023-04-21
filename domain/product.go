@@ -21,7 +21,9 @@ func NewProductDomain() *ProductDomain {
 	return &ProductDomain{}
 }
 
-func (p *ProductDomain) ListProductWithPlansAndFeatures(ctx context.Context) ([]pkg.ProductWithPlansAndFeatures, error) {
+func (p *ProductDomain) ListProductWithPlansAndFeatures(
+	ctx context.Context,
+) ([]pkg.ProductWithPlansAndFeatures, error) {
 	stmt := SELECT(Product.AllColumns, Plan.AllColumns, Feature.AllColumns, ProductFeature.AllColumns).FROM(
 		Product.
 			LEFT_JOIN(Plan, Plan.ProductID.EQ(Product.ID)).

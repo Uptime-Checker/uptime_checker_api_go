@@ -47,15 +47,17 @@ func (p *ProductController) ListInternal(c *fiber.Ctx) error {
 	ctx := c.Context()
 
 	var err error
-	products := make([]pkg.ProductWithPlansAndFeatures, 0)
+	var products []pkg.ProductWithPlansAndFeatures
 	cachedProducts := cache.GetInternalProducts(ctx)
 	if cachedProducts != nil {
 		products = *cachedProducts
+	} else {
+		products, err = p.productDomain.ListProductWithPlansAndFeatures(ctx)
+		if err != nil {
+			return resp.SendError(c, fiber.StatusInternalServerError, err)
+		}
 	}
-	products, err = p.productDomain.ListProductWithPlansAndFeatures(ctx)
-	if err != nil {
-		return resp.SendError(c, fiber.StatusInternalServerError, err)
-	}
+
 	// Minimum
 	if len(products) > 3 {
 		cache.SetInternalProducts(ctx, products)

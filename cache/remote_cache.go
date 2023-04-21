@@ -145,5 +145,5 @@ func DeleteInternalProducts(ctx context.Context) {
 }
 
 func getProductsCacheKey() string {
-	return fmt.Sprintf("products_internal")
+	return "products_internal"
 }
