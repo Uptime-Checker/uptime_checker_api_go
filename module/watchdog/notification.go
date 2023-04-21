@@ -66,8 +66,15 @@ func (w *WatchDog) notifyAlarmChannel(
 		lgr.Print(tracingID, "alarm channel is off", alarmChannel.ID)
 		return
 	}
-	notification := model.MonitorNotification{
-		Type:           0,
+	if alarmChannel.IntegrationID == nil && alarmChannel.UserContactID == nil {
+		sentry.CaptureException(errors.Newf("no integration or user contact found, alarm channel: %d", alarmChannel.ID))
+		return
+	}
+	notificationType := resource.MonitorIntegrationTypeRaiseAlarm
+	if check.Success {
+		notificationType = resource.MonitorIntegrationTypeResolveAlarm
+	}
+	notification := &model.MonitorNotification{
 		Successful:     false,
 		AlarmID:        &alarm.ID,
 		MonitorID:      monitor.ID,
@@ -85,6 +92,11 @@ func (w *WatchDog) notifyAlarmChannel(
 		if integrationType == resource.MonitorIntegrationTypeWebhook {
 			eventID := pkg.GetUniqueString()
 			notification.ExternalID = &eventID
+		}
+		_, err = w.monitorNotificationDomain.Create(ctx, tx, notification, notificationType)
+		if err != nil {
+			sentry.CaptureException(errors.Newf("failed to create notification: %d, err: %w", alarmChannel.ID, err))
+			return
 		}
 	}
 }

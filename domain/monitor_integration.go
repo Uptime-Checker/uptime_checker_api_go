@@ -9,6 +9,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
 )

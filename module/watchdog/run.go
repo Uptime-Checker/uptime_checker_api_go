@@ -22,14 +22,15 @@ import (
 )
 
 type WatchDog struct {
-	checkDomain              *domain.CheckDomain
-	regionDomain             *domain.RegionDomain
-	monitorDomain            *domain.MonitorDomain
-	monitorRegionDomain      *domain.MonitorRegionDomain
-	monitorStatusDomain      *domain.MonitorStatusDomain
-	monitorIntegrationDomain *domain.MonitorIntegrationDomain
-	alarmDomain              *domain.AlarmDomain
-	alarmChannelDomain       *domain.AlarmChannelDomain
+	checkDomain               *domain.CheckDomain
+	regionDomain              *domain.RegionDomain
+	monitorDomain             *domain.MonitorDomain
+	monitorRegionDomain       *domain.MonitorRegionDomain
+	monitorStatusDomain       *domain.MonitorStatusDomain
+	monitorIntegrationDomain  *domain.MonitorIntegrationDomain
+	alarmDomain               *domain.AlarmDomain
+	alarmChannelDomain        *domain.AlarmChannelDomain
+	monitorNotificationDomain *domain.MonitorNotificationnDomain
 
 	checkService         *service.CheckService
 	monitorService       *service.MonitorService
@@ -48,6 +49,7 @@ func NewWatchDog(
 	monitorIntegrationDomain *domain.MonitorIntegrationDomain,
 	alarmDomain *domain.AlarmDomain,
 	alarmChannelDomain *domain.AlarmChannelDomain,
+	monitorNotificationDomain *domain.MonitorNotificationnDomain,
 	checkService *service.CheckService,
 	monitorService *service.MonitorService,
 	monitorRegionService *service.MonitorRegionService,
