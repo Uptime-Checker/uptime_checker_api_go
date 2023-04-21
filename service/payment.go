@@ -105,6 +105,11 @@ func (p *PaymentService) createOrUpdateSubscription(
 		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", item.Price.ID, err)
 	}
 
+	// TODO
+	// 1. expire any free subscription
+	// 2. update existing subsription by upsert
+	// 3. check if there's two active sbscriptions, send error through sentry
+
 	localSubscription := &model.Subscription{
 		Status:             string(subscription.Status),
 		StartsAt:           lo.ToPtr(time.Unix(subscription.StartDate, 0)),
