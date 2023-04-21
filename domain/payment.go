@@ -59,10 +59,9 @@ func (p *PaymentDomain) CreateSubscription(
 	tx *sql.Tx,
 	subscription *model.Subscription,
 ) (*model.Subscription, error) {
-	insertStmt := Subscription.INSERT(Subscription.MutableColumns.
-		Except(Subscription.InsertedAt, Subscription.UpdatedAt)).
-		MODEL(subscription).
-		RETURNING(Subscription.AllColumns)
+	insertStmt := Subscription.INSERT(
+		Subscription.MutableColumns.Except(Subscription.InsertedAt, Subscription.UpdatedAt),
+	).MODEL(subscription).RETURNING(Subscription.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, subscription)
 	return subscription, err
 }

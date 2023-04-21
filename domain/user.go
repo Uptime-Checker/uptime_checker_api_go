@@ -7,6 +7,8 @@ import (
 
 	. "github.com/go-jet/jet/v2/postgres"
 
+	"github.com/stripe/stripe-go/v74"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
@@ -107,8 +109,7 @@ func (u *UserDomain) GetUserWithRoleAndSubscription(
 				LEFT_JOIN(Product, Subscription.ProductID.EQ(Product.ID)).
 				LEFT_JOIN(ProductFeature, Product.ID.EQ(ProductFeature.ProductID)).
 				LEFT_JOIN(Feature, ProductFeature.FeatureID.EQ(Feature.ID)),
-		).
-		WHERE(User.ID.EQ(Int(id)))
+		).WHERE(User.ID.EQ(Int(id)).AND(Subscription.Status.EQ(String(string(stripe.SubscriptionStatusActive)))))
 
 	user := &pkg.UserWithRoleAndSubscription{}
 	err := stmt.QueryContext(ctx, infra.DB, user)
