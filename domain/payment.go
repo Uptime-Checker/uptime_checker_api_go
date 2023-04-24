@@ -7,7 +7,6 @@ import (
 	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/stripe/stripe-go/v74"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -56,15 +55,14 @@ func (p *PaymentDomain) GetSubscriptionFromExternalID(
 	return subscription, err
 }
 
-func (p *PaymentDomain) GetFreeSubscriptionOfOrganization(
+func (p *PaymentDomain) GetLocalActiveSubscription(
 	ctx context.Context,
 	organizationID int64,
 ) (*model.Subscription, error) {
-	stmt := SELECT(Subscription.AllColumns).FROM(
-		Subscription.LEFT_JOIN(Product, Subscription.ProductID.EQ(Product.ID)),
-	).WHERE(
+	stmt := SELECT(Subscription.AllColumns).FROM(Subscription).WHERE(
 		Subscription.OrganizationID.EQ(Int(organizationID)).
-			AND(Product.Tier.EQ(Int(int64(resource.ProductTierFree)))),
+			AND(Subscription.ExternalID.IS_NULL()).
+			AND(Subscription.Status.EQ(String(string(stripe.SubscriptionStatusActive)))),
 	).LIMIT(1)
 
 	subscription := &model.Subscription{}
@@ -91,7 +89,14 @@ func (p *PaymentDomain) CreateSubscription(
 ) (*model.Subscription, error) {
 	insertStmt := Subscription.INSERT(
 		Subscription.MutableColumns.Except(Subscription.InsertedAt, Subscription.UpdatedAt),
-	).MODEL(subscription).RETURNING(Subscription.AllColumns)
+	).MODEL(subscription).ON_CONFLICT(Subscription.ExternalID).DO_UPDATE(SET(
+		Subscription.Status.SET(String(string(stripe.SubscriptionStatusActive))),
+		Subscription.ExpiresAt.SET(infra.GetTimestampExpression(subscription.ExpiresAt)),
+		Subscription.CanceledAt.SET(infra.GetTimestampExpression(subscription.CanceledAt)),
+		Subscription.CancellationReason.SET(infra.GetStringExpression(subscription.CancellationReason)),
+		Subscription.PlanID.SET(Int(subscription.PlanID)),
+		Subscription.ProductID.SET(Int(subscription.ProductID)),
+	)).RETURNING(Subscription.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, subscription)
 	return subscription, err
 }

@@ -93,38 +93,34 @@ func (p *PaymentService) createOrUpdateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
 	event stripe.Event,
-	subscription stripe.Subscription,
+	remoteSubscription stripe.Subscription,
 ) error {
-	user, err := p.userDomain.GetUserFromPaymentCustomerID(ctx, subscription.Customer.ID)
+	user, err := p.userDomain.GetUserFromPaymentCustomerID(ctx, remoteSubscription.Customer.ID)
 	if err != nil {
-		return errors.Newf("failed to get stripe customer: %s, err: %w", subscription.Customer.ID, err)
+		return errors.Newf("failed to get stripe customer: %s, err: %w", remoteSubscription.Customer.ID, err)
 	}
-	item := subscription.Items.Data[0]
+	item := remoteSubscription.Items.Data[0]
 	planWithProduct, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, item.Price.ID)
 	if err != nil {
 		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", item.Price.ID, err)
 	}
 
-	// TODO
-	// 2. update existing subsription by upsert
-	freeSubscription, err := p.paymentDomain.GetFreeSubscriptionOfOrganization(ctx, *user.OrganizationID)
-	if err == nil { // free subscription exists
-		if freeSubscription.Status == string(stripe.SubscriptionStatusActive) {
-			_, err := p.paymentDomain.ExpireSubscription(ctx, tx, freeSubscription.ID)
-			if err != nil {
-				return errors.Newf("failed to expire free subscription, org: %d, err: %w", *user.OrganizationID, err)
-			}
+	localSubscription, err := p.paymentDomain.GetLocalActiveSubscription(ctx, *user.OrganizationID)
+	if err == nil { // local active subscription found
+		_, err := p.paymentDomain.ExpireSubscription(ctx, tx, localSubscription.ID)
+		if err != nil {
+			return errors.Newf("failed to expire free subscription, org: %d, err: %w", *user.OrganizationID, err)
 		}
 	}
 
-	localSubscription := &model.Subscription{
-		Status:             string(subscription.Status),
-		StartsAt:           lo.ToPtr(time.Unix(subscription.StartDate, 0)),
-		ExpiresAt:          lo.ToPtr(time.Unix(subscription.CurrentPeriodEnd, 0)),
-		CanceledAt:         p.getCanceledAt(subscription),
-		CancellationReason: p.getCancellationReason(subscription),
-		IsTrial:            subscription.Status == stripe.SubscriptionStatusTrialing,
-		ExternalID:         &subscription.ID,
+	subscription := &model.Subscription{
+		Status:             string(remoteSubscription.Status),
+		StartsAt:           lo.ToPtr(time.Unix(remoteSubscription.StartDate, 0)),
+		ExpiresAt:          lo.ToPtr(time.Unix(remoteSubscription.CurrentPeriodEnd, 0)),
+		CanceledAt:         p.getCanceledAt(remoteSubscription),
+		CancellationReason: p.getCancellationReason(remoteSubscription),
+		IsTrial:            remoteSubscription.Status == stripe.SubscriptionStatusTrialing,
+		ExternalID:         &remoteSubscription.ID,
 		ExternalCustomerID: user.PaymentCustomerID,
 		PlanID:             planWithProduct.Plan.ID,
 		ProductID:          planWithProduct.Product.ID,
@@ -132,13 +128,13 @@ func (p *PaymentService) createOrUpdateSubscription(
 	}
 
 	eventAt := time.Unix(event.Created, 0)
-	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(subscription.Customer.ID))
+	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
-		_, err = p.paymentDomain.CreateSubscription(ctx, tx, localSubscription)
+		_, err = p.paymentDomain.CreateSubscription(ctx, tx, subscription)
 		if err != nil {
 			return errors.Newf("failed to create subscription, err: %w", err)
 		}
-		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(subscription.Customer.ID), eventAt)
+		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID), eventAt)
 	}
 
 	activeSubscriptions, err := p.paymentDomain.ListActiveSubscriptions(ctx, *user.OrganizationID)
