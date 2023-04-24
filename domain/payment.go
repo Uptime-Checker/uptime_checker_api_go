@@ -5,9 +5,12 @@ import (
 	"database/sql"
 
 	. "github.com/go-jet/jet/v2/postgres"
+	"github.com/stripe/stripe-go/v74"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	. "github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/table"
@@ -53,6 +56,22 @@ func (p *PaymentDomain) GetSubscriptionFromExternalID(
 	return subscription, err
 }
 
+func (p *PaymentDomain) GetFreeSubscriptionOfOrganization(
+	ctx context.Context,
+	organizationID int64,
+) (*model.Subscription, error) {
+	stmt := SELECT(Subscription.AllColumns).FROM(
+		Subscription.LEFT_JOIN(Product, Subscription.ProductID.EQ(Product.ID)),
+	).WHERE(
+		Subscription.OrganizationID.EQ(Int(organizationID)).
+			AND(Product.Tier.EQ(Int(int64(resource.ProductTierFree)))),
+	).LIMIT(1)
+
+	subscription := &model.Subscription{}
+	err := stmt.QueryContext(ctx, infra.DB, subscription)
+	return subscription, err
+}
+
 // CreateSubscription upserts
 func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,
@@ -84,4 +103,23 @@ func (p *PaymentDomain) CreateReceipt(
 	)).RETURNING(Receipt.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, receipt)
 	return receipt, err
+}
+
+func (u *UserDomain) ExpireSubscription(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+) (*model.Subscription, error) {
+	now := times.Now()
+	subscription := &model.Subscription{
+		Status:    string(stripe.SubscriptionStatusPaused),
+		ExpiresAt: &now,
+		UpdatedAt: now,
+	}
+
+	updateStmt := Subscription.UPDATE(Subscription.Status, Subscription.ExpiresAt, Subscription.UpdatedAt).
+		MODEL(subscription).WHERE(Subscription.ID.EQ(Int(id))).RETURNING(Subscription.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, subscription)
+	return subscription, err
 }
