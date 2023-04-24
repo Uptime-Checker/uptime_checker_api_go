@@ -75,7 +75,10 @@ func (p *PaymentDomain) ListActiveSubscriptions(
 	organizationID int64,
 ) ([]model.Subscription, error) {
 	stmt := SELECT(Subscription.AllColumns).FROM(Subscription).
-		WHERE(Subscription.Status.EQ(String(string(stripe.SubscriptionStatusActive))))
+		WHERE(
+			Subscription.OrganizationID.EQ(Int(organizationID)).
+				AND(Subscription.Status.EQ(String(string(stripe.SubscriptionStatusActive)))),
+		)
 	var subscriptions []model.Subscription
 	err := stmt.QueryContext(ctx, infra.DB, &subscriptions)
 	return subscriptions, err
@@ -121,7 +124,7 @@ func (p *PaymentDomain) CreateReceipt(
 	return receipt, err
 }
 
-func (u *PaymentDomain) ExpireSubscription(
+func (p *PaymentDomain) ExpireSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,
