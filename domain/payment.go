@@ -105,7 +105,7 @@ func (p *PaymentDomain) CreateReceipt(
 	return receipt, err
 }
 
-func (u *UserDomain) ExpireSubscription(
+func (u *PaymentDomain) ExpireSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,

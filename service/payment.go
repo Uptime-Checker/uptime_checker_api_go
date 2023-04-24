@@ -106,9 +106,17 @@ func (p *PaymentService) createOrUpdateSubscription(
 	}
 
 	// TODO
-	// 1. expire any free subscription
 	// 2. update existing subsription by upsert
 	// 3. check if there's two active sbscriptions, send error through sentry
+	freeSubscription, err := p.paymentDomain.GetFreeSubscriptionOfOrganization(ctx, *user.OrganizationID)
+	if err == nil { // free subscription exists
+		if freeSubscription.Status == string(stripe.SubscriptionStatusActive) {
+			_, err := p.paymentDomain.ExpireSubscription(ctx, tx, freeSubscription.ID)
+			if err != nil {
+				return errors.Newf("failed to expire free subscription, org: %d, err: %w", *user.OrganizationID, err)
+			}
+		}
+	}
 
 	localSubscription := &model.Subscription{
 		Status:             string(subscription.Status),
