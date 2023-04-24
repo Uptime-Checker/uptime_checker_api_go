@@ -61,14 +61,27 @@ func (w *WatchDog) notifyAlarmChannel(
 	alarm *model.Alarm,
 	alarmChannel *model.AlarmChannel,
 ) {
+	if err := w.handleNotifyAlarmChannel(ctx, tx, check, errorLog, monitor, alarm, alarmChannel); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func (w *WatchDog) handleNotifyAlarmChannel(
+	ctx context.Context,
+	tx *sql.Tx,
+	check *model.Check,
+	errorLog *model.ErrorLog,
+	monitor *model.Monitor,
+	alarm *model.Alarm,
+	alarmChannel *model.AlarmChannel,
+) error {
 	tracingID := pkg.GetTracingID(ctx)
 	if !alarmChannel.On {
 		lgr.Print(tracingID, "alarm channel is off", alarmChannel.ID)
-		return
+		return nil
 	}
 	if alarmChannel.IntegrationID == nil && alarmChannel.UserContactID == nil {
-		sentry.CaptureException(errors.Newf("no integration or user contact found, alarm channel: %d", alarmChannel.ID))
-		return
+		return errors.Newf("no integration or user contact found, alarm channel: %d", alarmChannel.ID)
 	}
 	notificationType := resource.MonitorIntegrationTypeRaiseAlarm
 	if check.Success {
@@ -83,9 +96,7 @@ func (w *WatchDog) notifyAlarmChannel(
 	if alarmChannel.IntegrationID != nil {
 		integration, err := w.monitorIntegrationDomain.Get(ctx, *alarmChannel.IntegrationID)
 		if err != nil {
-			sentry.CaptureException(errors.Newf("failed to get integration: %d, err: %w",
-				*alarmChannel.IntegrationID, err))
-			return
+			return errors.Newf("failed to get integration: %d, err: %w", *alarmChannel.IntegrationID, err)
 		}
 		integrationType := resource.MonitorIntegrationType(integration.Type)
 		notification.IntegrationID = &integration.ID
@@ -95,8 +106,8 @@ func (w *WatchDog) notifyAlarmChannel(
 		}
 		_, err = w.monitorNotificationDomain.Create(ctx, tx, notification, notificationType)
 		if err != nil {
-			sentry.CaptureException(errors.Newf("failed to create notification: %d, err: %w", alarmChannel.ID, err))
-			return
+			return errors.Newf("failed to create notification: %d, err: %w", alarmChannel.ID, err)
 		}
 	}
+	return nil
 }
