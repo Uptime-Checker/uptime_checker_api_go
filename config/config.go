@@ -41,6 +41,8 @@ type config struct {
 	AxiomOrganizationID string `mapstructure:"AXIOM_ORG_ID"`
 	AxiomToken          string `mapstructure:"AXIOM_TOKEN"`
 	AxiomDataset        string `mapstructure:"AXIOM_DATASET"`
+
+	SvixKey string `mapstructure:"SVIX_KEY"`
 }
 
 var (

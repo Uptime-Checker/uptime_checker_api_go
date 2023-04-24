@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stripe/stripe-go/v74"
 
@@ -73,4 +75,10 @@ type ProductWithPlansAndFeatures struct {
 type BillingProduct struct {
 	*stripe.Product
 	Prices []*stripe.Price
+}
+
+type WebhookData struct {
+	EventType, EventID string
+	EventAt            time.Time
+	Data               map[string]any
 }
