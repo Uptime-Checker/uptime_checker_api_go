@@ -72,6 +72,17 @@ func (p *PaymentDomain) GetFreeSubscriptionOfOrganization(
 	return subscription, err
 }
 
+func (p *PaymentDomain) ListActiveSubscriptions(
+	ctx context.Context,
+	organizationID int64,
+) ([]model.Subscription, error) {
+	stmt := SELECT(Subscription.AllColumns).FROM(Subscription).
+		WHERE(Subscription.Status.EQ(String(string(stripe.SubscriptionStatusActive))))
+	var subscriptions []model.Subscription
+	err := stmt.QueryContext(ctx, infra.DB, &subscriptions)
+	return subscriptions, err
+}
+
 // CreateSubscription upserts
 func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,

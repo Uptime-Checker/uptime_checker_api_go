@@ -107,7 +107,6 @@ func (p *PaymentService) createOrUpdateSubscription(
 
 	// TODO
 	// 2. update existing subsription by upsert
-	// 3. check if there's two active sbscriptions, send error through sentry
 	freeSubscription, err := p.paymentDomain.GetFreeSubscriptionOfOrganization(ctx, *user.OrganizationID)
 	if err == nil { // free subscription exists
 		if freeSubscription.Status == string(stripe.SubscriptionStatusActive) {
@@ -142,6 +141,14 @@ func (p *PaymentService) createOrUpdateSubscription(
 		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(subscription.Customer.ID), eventAt)
 	}
 
+	activeSubscriptions, err := p.paymentDomain.ListActiveSubscriptions(ctx, *user.OrganizationID)
+	if err != nil {
+		return errors.Newf("failed to list active subscriptions, err: %w", err)
+	}
+
+	if len(activeSubscriptions) > 1 {
+		sentry.CaptureMessage(fmt.Sprintf("more than one active subscription, org: %d", *user.OrganizationID))
+	}
 	return nil
 }
 
