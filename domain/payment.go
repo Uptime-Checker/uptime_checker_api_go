@@ -120,6 +120,19 @@ func (u *PaymentDomain) UpdateSubscription(
 	return subscription, err
 }
 
+func (p *PaymentDomain) GetReceiptFromExternalID(
+	ctx context.Context,
+	externalID string,
+) (*model.Receipt, error) {
+	stmt := SELECT(Receipt.AllColumns).FROM(Receipt).WHERE(
+		Receipt.ExternalID.EQ(String(externalID)),
+	).LIMIT(1)
+
+	receipt := &model.Receipt{}
+	err := stmt.QueryContext(ctx, infra.DB, receipt)
+	return receipt, err
+}
+
 func (p *PaymentDomain) CreateReceipt(
 	ctx context.Context,
 	tx *sql.Tx,
@@ -128,6 +141,30 @@ func (p *PaymentDomain) CreateReceipt(
 	insertStmt := Receipt.INSERT(Receipt.MutableColumns.Except(Receipt.InsertedAt, Receipt.UpdatedAt)).
 		MODEL(receipt).RETURNING(Receipt.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, receipt)
+	return receipt, err
+}
+
+func (u *PaymentDomain) UpdateReceipt(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+	receipt *model.Receipt,
+) (*model.Receipt, error) {
+	now := times.Now()
+	receipt.UpdatedAt = now
+
+	updateStmt := Receipt.UPDATE(
+		Receipt.Status,
+		Receipt.PaidAt,
+		Receipt.Price,
+		Receipt.Paid,
+		Receipt.URL,
+		Receipt.IsTrial,
+		Receipt.SubscriptionID,
+		Receipt.UpdatedAt,
+	).MODEL(receipt).WHERE(Receipt.ID.EQ(Int(id))).RETURNING(Receipt.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, receipt)
 	return receipt, err
 }
 
