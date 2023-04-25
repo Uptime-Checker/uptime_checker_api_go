@@ -93,7 +93,7 @@ func (p *PaymentDomain) CreateSubscription(
 	insertStmt := Subscription.INSERT(
 		Subscription.MutableColumns.Except(Subscription.InsertedAt, Subscription.UpdatedAt),
 	).MODEL(subscription).ON_CONFLICT(Subscription.ExternalID).DO_UPDATE(SET(
-		Subscription.Status.SET(String(string(stripe.SubscriptionStatusActive))),
+		Subscription.Status.SET(String(subscription.Status)),
 		Subscription.ExpiresAt.SET(infra.GetTimestampExpression(subscription.ExpiresAt)),
 		Subscription.CanceledAt.SET(infra.GetTimestampExpression(subscription.CanceledAt)),
 		Subscription.CancellationReason.SET(infra.GetStringExpression(subscription.CancellationReason)),
