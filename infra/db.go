@@ -103,19 +103,19 @@ func GetStringExpression(value *string) postgres.StringExpression {
 	if value == nil {
 		return nil
 	}
-	return postgres.CAST(postgres.String(*value)).AS_TEXT()
+	return postgres.String(*value)
 }
 
 func GetTimestampExpression(value *time.Time) postgres.TimestampExpression {
 	if value == nil {
 		return nil
 	}
-	return postgres.CAST(postgres.TimestampT(*value)).AS_TIMESTAMP()
+	return postgres.TimestampT(*value)
 }
 
 func GetIntegerExpression(value *int64) postgres.IntegerExpression {
 	if value == nil {
 		return nil
 	}
-	return postgres.CAST(postgres.Int(*value)).AS_BIGINT()
+	return postgres.Int(*value)
 }
