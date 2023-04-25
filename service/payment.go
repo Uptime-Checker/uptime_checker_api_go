@@ -113,7 +113,7 @@ func (p *PaymentService) createOrUpdateSubscription(
 		}
 	}
 
-	subscription := &model.Subscription{
+	newSubscription := &model.Subscription{
 		Status:             string(remoteSubscription.Status),
 		StartsAt:           lo.ToPtr(time.Unix(remoteSubscription.StartDate, 0)),
 		ExpiresAt:          lo.ToPtr(time.Unix(remoteSubscription.CurrentPeriodEnd, 0)),
@@ -130,10 +130,19 @@ func (p *PaymentService) createOrUpdateSubscription(
 	eventAt := time.Unix(event.Created, 0)
 	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
-		_, err = p.paymentDomain.CreateSubscription(ctx, tx, subscription)
-		if err != nil {
-			return errors.Newf("failed to create subscription, err: %w", err)
+		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, remoteSubscription.ID)
+		if err == nil {
+			_, err = p.paymentDomain.CreateSubscription(ctx, tx, newSubscription)
+			if err != nil {
+				return errors.Newf("failed to create subscription, err: %w", err)
+			}
+		} else {
+			_, err = p.paymentDomain.UpdateSubscription(ctx, tx, subscription.ID, newSubscription)
+			if err != nil {
+				return errors.Newf("failed to update subscription, err: %w", err)
+			}
 		}
+
 		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID), eventAt)
 	}
 

@@ -84,7 +84,6 @@ func (p *PaymentDomain) ListActiveSubscriptions(
 	return subscriptions, err
 }
 
-// CreateSubscription upserts
 func (p *PaymentDomain) CreateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
@@ -92,34 +91,42 @@ func (p *PaymentDomain) CreateSubscription(
 ) (*model.Subscription, error) {
 	insertStmt := Subscription.INSERT(
 		Subscription.MutableColumns.Except(Subscription.InsertedAt, Subscription.UpdatedAt),
-	).MODEL(subscription).ON_CONFLICT(Subscription.ExternalID).DO_UPDATE(SET(
-		Subscription.Status.SET(String(subscription.Status)),
-		Subscription.ExpiresAt.SET(infra.GetTimestampExpression(subscription.ExpiresAt)),
-		Subscription.CanceledAt.SET(infra.GetTimestampExpression(subscription.CanceledAt)),
-		Subscription.CancellationReason.SET(infra.GetStringExpression(subscription.CancellationReason)),
-		Subscription.PlanID.SET(Int(subscription.PlanID)),
-		Subscription.ProductID.SET(Int(subscription.ProductID)),
-	)).RETURNING(Subscription.AllColumns)
+	).MODEL(subscription).RETURNING(Subscription.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, subscription)
 	return subscription, err
 }
 
-// CreateReceipt upserts
+func (u *PaymentDomain) UpdateSubscription(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+	subscription *model.Subscription,
+) (*model.Subscription, error) {
+	now := times.Now()
+	subscription.UpdatedAt = now
+
+	updateStmt := Subscription.UPDATE(
+		Subscription.Status,
+		Subscription.IsTrial,
+		Subscription.ExpiresAt,
+		Subscription.CanceledAt,
+		Subscription.CancellationReason,
+		Subscription.PlanID,
+		Subscription.ProductID,
+		Subscription.UpdatedAt,
+	).MODEL(subscription).WHERE(Subscription.ID.EQ(Int(id))).RETURNING(Subscription.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, subscription)
+	return subscription, err
+}
+
 func (p *PaymentDomain) CreateReceipt(
 	ctx context.Context,
 	tx *sql.Tx,
 	receipt *model.Receipt,
 ) (*model.Receipt, error) {
-	insertStmt := Receipt.INSERT(Receipt.MutableColumns.Except(Receipt.InsertedAt, Receipt.UpdatedAt)).MODEL(receipt).
-		ON_CONFLICT(Receipt.ExternalID).DO_UPDATE(SET(
-		Receipt.Price.SET(Float(receipt.Price)),
-		Receipt.Paid.SET(Bool(receipt.Paid)),
-		Receipt.Status.SET(String(receipt.Status)),
-		Receipt.URL.SET(infra.GetStringExpression(receipt.URL)),
-		Receipt.PaidAt.SET(infra.GetTimestampExpression(receipt.PaidAt)),
-		Receipt.IsTrial.SET(Bool(receipt.IsTrial)),
-		Receipt.SubscriptionID.SET(infra.GetIntegerExpression(receipt.SubscriptionID)),
-	)).RETURNING(Receipt.AllColumns)
+	insertStmt := Receipt.INSERT(Receipt.MutableColumns.Except(Receipt.InsertedAt, Receipt.UpdatedAt)).
+		MODEL(receipt).RETURNING(Receipt.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, receipt)
 	return receipt, err
 }
