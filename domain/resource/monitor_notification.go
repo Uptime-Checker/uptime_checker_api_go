@@ -5,15 +5,15 @@ type MonitorNotificationType int
 
 // List of types
 const (
-	MonitorIntegrationTypeRaiseAlarm MonitorNotificationType = iota + 1
-	MonitorIntegrationTypeResolveAlarm
+	MonitorNotificationTypeMonitorUp MonitorNotificationType = iota + 1
+	MonitorNotificationTypeMonitorDown
 )
 
 // Valid checks if the MonitorType is valid
 func (m MonitorNotificationType) Valid() bool {
 	integrations := []MonitorNotificationType{
-		MonitorIntegrationTypeRaiseAlarm,
-		MonitorIntegrationTypeResolveAlarm,
+		MonitorNotificationTypeMonitorUp,
+		MonitorNotificationTypeMonitorDown,
 	}
 	for _, p := range integrations {
 		if p == m {
@@ -24,5 +24,5 @@ func (m MonitorNotificationType) Valid() bool {
 }
 
 func (m MonitorNotificationType) String() string {
-	return [...]string{"alarm:raise", "alarm:resolve"}[m-1]
+	return [...]string{"monitor:up", "monitor:down"}[m-1]
 }

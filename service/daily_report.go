@@ -54,8 +54,7 @@ func (d *DailyReportService) Add(
 }
 
 func (d *DailyReportService) UpdateDailyDowntime(
-	ctx context.Context,
-	tx *sql.Tx, dailyReport *model.DailyReport, from, to time.Time,
+	ctx context.Context, tx *sql.Tx, dailyReport *model.DailyReport, from, to time.Time,
 ) (*model.DailyReport, error) {
 	duration := to.Sub(from).Seconds()
 	dailyReport.Downtime += int32(duration)

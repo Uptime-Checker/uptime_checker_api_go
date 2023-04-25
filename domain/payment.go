@@ -96,7 +96,7 @@ func (p *PaymentDomain) CreateSubscription(
 	return subscription, err
 }
 
-func (u *PaymentDomain) UpdateSubscription(
+func (p *PaymentDomain) UpdateSubscription(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,
@@ -144,7 +144,7 @@ func (p *PaymentDomain) CreateReceipt(
 	return receipt, err
 }
 
-func (u *PaymentDomain) UpdateReceipt(
+func (p *PaymentDomain) UpdateReceipt(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,

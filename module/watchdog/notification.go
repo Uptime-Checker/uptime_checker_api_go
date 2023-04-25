@@ -10,6 +10,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
+	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog/channel"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
@@ -83,9 +84,9 @@ func (w *WatchDog) handleNotifyAlarmChannel(
 	if alarmChannel.IntegrationID == nil && alarmChannel.UserContactID == nil {
 		return errors.Newf("no integration or user contact found, alarm channel: %d", alarmChannel.ID)
 	}
-	notificationType := resource.MonitorIntegrationTypeRaiseAlarm
+	notificationType := resource.MonitorNotificationTypeMonitorUp
 	if check.Success {
-		notificationType = resource.MonitorIntegrationTypeResolveAlarm
+		notificationType = resource.MonitorNotificationTypeMonitorDown
 	}
 	notification := &model.MonitorNotification{
 		Successful:     false,
@@ -104,10 +105,11 @@ func (w *WatchDog) handleNotifyAlarmChannel(
 			eventID := pkg.GetUniqueString()
 			notification.ExternalID = &eventID
 		}
-		_, err = w.monitorNotificationDomain.Create(ctx, tx, notification, notificationType)
+		notification, err := w.monitorNotificationDomain.Create(ctx, tx, notification, notificationType)
 		if err != nil {
 			return errors.Newf("failed to create notification: %d, err: %w", alarmChannel.ID, err)
 		}
+		channel.SendAlarmWebhook(ctx, errorLog, monitor, alarm, integration, notification)
 	}
 	return nil
 }
