@@ -8,6 +8,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 )
 
 var svixClient *svix.Svix
@@ -23,11 +24,14 @@ func CreateOrganizationApplication(ctx context.Context, organizationSlug string)
 }
 
 func SendWebhook(ctx context.Context, appID string, webhookData pkg.WebhookData) {
+	payload := webhookData.Data
+	payload["eventAt"] = times.Format(webhookData.EventAt)
+
 	tracingID := pkg.GetTracingID(ctx)
 	outMessage, err := svixClient.Message.Create(ctx, appID, &svix.MessageIn{
 		EventType: webhookData.EventType,
 		EventId:   *svix.NullableString(webhookData.EventID),
-		Payload:   webhookData.Data,
+		Payload:   payload,
 	})
 	if err != nil {
 		lgr.Error(tracingID, "failed to send webhook", err)

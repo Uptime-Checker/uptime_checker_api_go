@@ -24,5 +24,5 @@ func (m MonitorNotificationType) Valid() bool {
 }
 
 func (m MonitorNotificationType) String() string {
-	return [...]string{"raise_alarm", "resolve_alarm"}[m-1]
+	return [...]string{"alarm:raise", "alarm:resolve"}[m-1]
 }
