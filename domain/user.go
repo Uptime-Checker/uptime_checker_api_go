@@ -68,7 +68,15 @@ func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) 
 
 // User
 
-func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, error) {
+func (u *UserDomain) GetUser(ctx context.Context, id int64) (*model.User, error) {
+	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.ID.EQ(Int(id))).LIMIT(1)
+
+	user := &model.User{}
+	err := stmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.Email.EQ(String(email))).LIMIT(1)
 
 	user := &model.User{}
