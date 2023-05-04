@@ -24,8 +24,6 @@ const (
 	checkCronFromAndToInSeconds         = 20
 	watchDogCheckCronFromAndToInSeconds = 4
 	watchDogCheckMaxGoroutine           = 100
-	cronInitDelayFromInSeconds          = 60
-	cronInitDelayToInSeconds            = 120
 )
 
 var s *gocron.Scheduler
@@ -80,11 +78,9 @@ func (c *Cron) Start(ctx context.Context) error {
 	now := times.Now()
 	s = gocron.NewScheduler(time.UTC)
 
-	random := pkg.RandomNumber(cronInitDelayFromInSeconds, cronInitDelayToInSeconds)
-
 	// start croner
 	_, err := s.Every(constant.CronCheckIntervalInSeconds).Second().
-		StartAt(now.Add(time.Second * time.Duration(random))).
+		StartAt(now.Add(time.Second * 5)).
 		Do(c.checkAndRun)
 	if err != nil {
 		return err
