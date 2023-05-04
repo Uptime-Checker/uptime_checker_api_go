@@ -98,6 +98,7 @@ func (c *Cron) Start(ctx context.Context) error {
 			for _, job := range recurringJobs {
 				if job.NextRunAt == nil || times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
 					nextRunAt := now.Add(time.Second * time.Duration(*job.Interval))
+					lgr.Print("updating the next run at for", job.Name, "to", times.Format(nextRunAt))
 					_, err := c.jobDomain.UpdateNextRunAt(ctx, tx, job.ID, &nextRunAt, resource.JobStatusScheduled)
 					if err != nil {
 						return err
@@ -123,7 +124,8 @@ func (c *Cron) Start(ctx context.Context) error {
 
 func (c *Cron) checkAndRun() {
 	ctx := pkg.NewTracingID(context.Background())
-	lgr.Print("Running cron check")
+	tid := pkg.GetTracingID(ctx)
+	lgr.Print(tid, 1, "running cron check")
 
 	// Cron check runs every 30s. We look for jobs that need to be run from last 20s to next 20s from current time
 	jobsToRun, err := c.jobDomain.ListJobsToRun(ctx, -checkCronFromAndToInSeconds, checkCronFromAndToInSeconds)
@@ -131,6 +133,7 @@ func (c *Cron) checkAndRun() {
 		sentry.CaptureException(err)
 		return
 	}
+	lgr.Print(tid, 2, "found", len(jobsToRun), "cron jobs to run")
 
 	for i, job := range jobsToRun {
 		if job.Name == string(JobNameSyncStripeProducts) {
