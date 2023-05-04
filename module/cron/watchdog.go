@@ -82,7 +82,7 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 
 func (c *Cron) stopTheDog(ctx context.Context) {
 	tid := pkg.GetTracingID(ctx)
-	lgr.Print(tid, 1, "check if we need to stopg the dog")
+	lgr.Print(tid, 1, "check if we need to stop the dog")
 	watchDogValue := c.propertyService.Get(ctx, resource.PropertyKeyWatchDog)
 	if watchDogValue == nil {
 		runWatchDog, err := strconv.ParseBool(*watchDogValue)
