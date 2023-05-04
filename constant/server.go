@@ -16,7 +16,7 @@ const (
 	MaxRequestPerMinute            = 10
 	ServerShutdownTimeoutInSeconds = 5
 	SentryTraceSampleRate          = 0.2
-	CronCheckIntervalInSeconds     = 30
+	CronCheckIntervalInSeconds     = 11
 	WatchDogCheckIntervalInSeconds = 5
 	MonitorStartDelayInSeconds     = 10
 )
