@@ -249,7 +249,7 @@ func registerProductHandlers(
 
 	router.Get("/list/external", auth, handler.ListExternal)
 	router.Get("/list/internal", handler.ListInternal)
-	router.Post("/billing/customer", auth, handler.CreateBillingCustomer)
+	router.Get("/billing/customer", auth, handler.CreateBillingCustomer)
 }
 
 func registerWebhookHandlers(
