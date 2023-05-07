@@ -83,7 +83,7 @@ func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Eve
 				lgr.Error(tracingID, 3, "failed to unmarshal stripe subscription", err)
 				return err
 			}
-			lgr.Print(tracingID, 2, "handling subscription, event type: %s", event.Type)
+			lgr.Print(tracingID, 2, "handling subscription, event type", event.Type)
 			return p.createOrUpdateSubscription(ctx, tx, event, stripeSubscription)
 		}
 		return nil
@@ -98,18 +98,21 @@ func (p *PaymentService) createOrUpdateSubscription(
 	event stripe.Event,
 	remoteSubscription stripe.Subscription,
 ) error {
+	tid := pkg.GetTracingID(ctx)
 	user, err := p.userDomain.GetUserFromPaymentCustomerID(ctx, remoteSubscription.Customer.ID)
 	if err != nil {
 		return errors.Newf("failed to get stripe customer: %s, err: %w", remoteSubscription.Customer.ID, err)
 	}
+	lgr.Print(tid, 1, "got user from billing customer ID", remoteSubscription.Customer.ID, "user", user.ID)
 	item := remoteSubscription.Items.Data[0]
 	planWithProduct, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, item.Price.ID)
 	if err != nil {
 		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", item.Price.ID, err)
 	}
+	lgr.Print(tid, 2, "got plan from invoice", item.Price.ID, "plan", planWithProduct.Plan.ID)
 
 	localSubscription, err := p.paymentDomain.GetLocalActiveSubscription(ctx, *user.OrganizationID)
-	if err == nil { // local active subscription found
+	if err == nil { // local active subscription found (free)
 		_, err := p.paymentDomain.ExpireSubscription(ctx, tx, localSubscription.ID)
 		if err != nil {
 			return errors.Newf("failed to expire free subscription, org: %d, err: %w", *user.OrganizationID, err)
@@ -135,11 +138,13 @@ func (p *PaymentService) createOrUpdateSubscription(
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
 		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, remoteSubscription.ID)
 		if err != nil {
+			lgr.Print(tid, 4, "creating subscription", newSubscription.ExternalID)
 			_, err = p.paymentDomain.CreateSubscription(ctx, tx, newSubscription)
 			if err != nil {
 				return errors.Newf("failed to create subscription, err: %w", err)
 			}
 		} else {
+			lgr.Print(tid, 4, "updating subscription", newSubscription.ExternalID)
 			_, err = p.paymentDomain.UpdateSubscription(ctx, tx, subscription.ID, newSubscription)
 			if err != nil {
 				return errors.Newf("failed to update subscription, err: %w", err)
