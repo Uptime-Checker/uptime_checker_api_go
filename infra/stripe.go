@@ -71,7 +71,7 @@ func ListProductsWithPrices() []pkg.BillingProduct {
 	return billingProducts
 }
 
-func CreateCustomer(name *string, email string) (*stripe.Customer, error) {
+func CreateBillingCustomer(name *string, email string) (*stripe.Customer, error) {
 	customerParams := &stripe.CustomerParams{
 		Email: &email,
 		Name:  name,

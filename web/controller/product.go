@@ -31,7 +31,7 @@ func (p *ProductController) CreateBillingCustomer(c *fiber.Ctx) error {
 	if user.PaymentCustomerID != nil {
 		return resp.ServeData(c, fiber.StatusOK, user)
 	}
-	billingCustomer, err := infra.CreateCustomer(user.Name, user.Email)
+	billingCustomer, err := infra.CreateBillingCustomer(user.Name, user.Email)
 	if err != nil {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrBillingCustomerCreateFailed, err)
 	}
