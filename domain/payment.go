@@ -161,6 +161,7 @@ func (p *PaymentDomain) UpdateReceipt(
 		Receipt.URL,
 		Receipt.IsTrial,
 		Receipt.SubscriptionID,
+		Receipt.ExternalSubscriptionID,
 		Receipt.UpdatedAt,
 	).MODEL(receipt).WHERE(Receipt.ID.EQ(Int(id))).RETURNING(Receipt.AllColumns)
 

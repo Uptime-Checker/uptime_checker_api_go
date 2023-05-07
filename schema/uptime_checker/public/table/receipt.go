@@ -17,24 +17,25 @@ type receiptTable struct {
 	postgres.Table
 
 	//Columns
-	ID                 postgres.ColumnInteger
-	Price              postgres.ColumnFloat
-	Currency           postgres.ColumnString
-	ExternalID         postgres.ColumnString
-	ExternalCustomerID postgres.ColumnString
-	URL                postgres.ColumnString
-	Status             postgres.ColumnString
-	Paid               postgres.ColumnBool
-	PaidAt             postgres.ColumnTimestamp
-	From               postgres.ColumnDate
-	To                 postgres.ColumnDate
-	IsTrial            postgres.ColumnBool
-	PlanID             postgres.ColumnInteger
-	ProductID          postgres.ColumnInteger
-	SubscriptionID     postgres.ColumnInteger
-	OrganizationID     postgres.ColumnInteger
-	InsertedAt         postgres.ColumnTimestamp
-	UpdatedAt          postgres.ColumnTimestamp
+	ID                     postgres.ColumnInteger
+	Price                  postgres.ColumnFloat
+	Currency               postgres.ColumnString
+	ExternalID             postgres.ColumnString
+	ExternalCustomerID     postgres.ColumnString
+	ExternalSubscriptionID postgres.ColumnString
+	URL                    postgres.ColumnString
+	Status                 postgres.ColumnString
+	Paid                   postgres.ColumnBool
+	PaidAt                 postgres.ColumnTimestamp
+	From                   postgres.ColumnDate
+	To                     postgres.ColumnDate
+	IsTrial                postgres.ColumnBool
+	PlanID                 postgres.ColumnInteger
+	ProductID              postgres.ColumnInteger
+	SubscriptionID         postgres.ColumnInteger
+	OrganizationID         postgres.ColumnInteger
+	InsertedAt             postgres.ColumnTimestamp
+	UpdatedAt              postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -75,50 +76,52 @@ func newReceiptTable(schemaName, tableName, alias string) *ReceiptTable {
 
 func newReceiptTableImpl(schemaName, tableName, alias string) receiptTable {
 	var (
-		IDColumn                 = postgres.IntegerColumn("id")
-		PriceColumn              = postgres.FloatColumn("price")
-		CurrencyColumn           = postgres.StringColumn("currency")
-		ExternalIDColumn         = postgres.StringColumn("external_id")
-		ExternalCustomerIDColumn = postgres.StringColumn("external_customer_id")
-		URLColumn                = postgres.StringColumn("url")
-		StatusColumn             = postgres.StringColumn("status")
-		PaidColumn               = postgres.BoolColumn("paid")
-		PaidAtColumn             = postgres.TimestampColumn("paid_at")
-		FromColumn               = postgres.DateColumn("from")
-		ToColumn                 = postgres.DateColumn("to")
-		IsTrialColumn            = postgres.BoolColumn("is_trial")
-		PlanIDColumn             = postgres.IntegerColumn("plan_id")
-		ProductIDColumn          = postgres.IntegerColumn("product_id")
-		SubscriptionIDColumn     = postgres.IntegerColumn("subscription_id")
-		OrganizationIDColumn     = postgres.IntegerColumn("organization_id")
-		InsertedAtColumn         = postgres.TimestampColumn("inserted_at")
-		UpdatedAtColumn          = postgres.TimestampColumn("updated_at")
-		allColumns               = postgres.ColumnList{IDColumn, PriceColumn, CurrencyColumn, ExternalIDColumn, ExternalCustomerIDColumn, URLColumn, StatusColumn, PaidColumn, PaidAtColumn, FromColumn, ToColumn, IsTrialColumn, PlanIDColumn, ProductIDColumn, SubscriptionIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns           = postgres.ColumnList{PriceColumn, CurrencyColumn, ExternalIDColumn, ExternalCustomerIDColumn, URLColumn, StatusColumn, PaidColumn, PaidAtColumn, FromColumn, ToColumn, IsTrialColumn, PlanIDColumn, ProductIDColumn, SubscriptionIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		IDColumn                     = postgres.IntegerColumn("id")
+		PriceColumn                  = postgres.FloatColumn("price")
+		CurrencyColumn               = postgres.StringColumn("currency")
+		ExternalIDColumn             = postgres.StringColumn("external_id")
+		ExternalCustomerIDColumn     = postgres.StringColumn("external_customer_id")
+		ExternalSubscriptionIDColumn = postgres.StringColumn("external_subscription_id")
+		URLColumn                    = postgres.StringColumn("url")
+		StatusColumn                 = postgres.StringColumn("status")
+		PaidColumn                   = postgres.BoolColumn("paid")
+		PaidAtColumn                 = postgres.TimestampColumn("paid_at")
+		FromColumn                   = postgres.DateColumn("from")
+		ToColumn                     = postgres.DateColumn("to")
+		IsTrialColumn                = postgres.BoolColumn("is_trial")
+		PlanIDColumn                 = postgres.IntegerColumn("plan_id")
+		ProductIDColumn              = postgres.IntegerColumn("product_id")
+		SubscriptionIDColumn         = postgres.IntegerColumn("subscription_id")
+		OrganizationIDColumn         = postgres.IntegerColumn("organization_id")
+		InsertedAtColumn             = postgres.TimestampColumn("inserted_at")
+		UpdatedAtColumn              = postgres.TimestampColumn("updated_at")
+		allColumns                   = postgres.ColumnList{IDColumn, PriceColumn, CurrencyColumn, ExternalIDColumn, ExternalCustomerIDColumn, ExternalSubscriptionIDColumn, URLColumn, StatusColumn, PaidColumn, PaidAtColumn, FromColumn, ToColumn, IsTrialColumn, PlanIDColumn, ProductIDColumn, SubscriptionIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns               = postgres.ColumnList{PriceColumn, CurrencyColumn, ExternalIDColumn, ExternalCustomerIDColumn, ExternalSubscriptionIDColumn, URLColumn, StatusColumn, PaidColumn, PaidAtColumn, FromColumn, ToColumn, IsTrialColumn, PlanIDColumn, ProductIDColumn, SubscriptionIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return receiptTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:                 IDColumn,
-		Price:              PriceColumn,
-		Currency:           CurrencyColumn,
-		ExternalID:         ExternalIDColumn,
-		ExternalCustomerID: ExternalCustomerIDColumn,
-		URL:                URLColumn,
-		Status:             StatusColumn,
-		Paid:               PaidColumn,
-		PaidAt:             PaidAtColumn,
-		From:               FromColumn,
-		To:                 ToColumn,
-		IsTrial:            IsTrialColumn,
-		PlanID:             PlanIDColumn,
-		ProductID:          ProductIDColumn,
-		SubscriptionID:     SubscriptionIDColumn,
-		OrganizationID:     OrganizationIDColumn,
-		InsertedAt:         InsertedAtColumn,
-		UpdatedAt:          UpdatedAtColumn,
+		ID:                     IDColumn,
+		Price:                  PriceColumn,
+		Currency:               CurrencyColumn,
+		ExternalID:             ExternalIDColumn,
+		ExternalCustomerID:     ExternalCustomerIDColumn,
+		ExternalSubscriptionID: ExternalSubscriptionIDColumn,
+		URL:                    URLColumn,
+		Status:                 StatusColumn,
+		Paid:                   PaidColumn,
+		PaidAt:                 PaidAtColumn,
+		From:                   FromColumn,
+		To:                     ToColumn,
+		IsTrial:                IsTrialColumn,
+		PlanID:                 PlanIDColumn,
+		ProductID:              ProductIDColumn,
+		SubscriptionID:         SubscriptionIDColumn,
+		OrganizationID:         OrganizationIDColumn,
+		InsertedAt:             InsertedAtColumn,
+		UpdatedAt:              UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

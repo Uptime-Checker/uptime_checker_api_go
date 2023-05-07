@@ -457,6 +457,7 @@ create table if not exists receipt (
     currency varchar(255) default 'usd'::character varying not null,
     external_id varchar(255),
     external_customer_id varchar(255),
+    external_subscription_id varchar(255),
     url varchar(255),
     status varchar(255) not null,
     paid boolean default false not null,

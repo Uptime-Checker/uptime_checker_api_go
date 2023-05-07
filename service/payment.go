@@ -196,6 +196,7 @@ func (p *PaymentService) createOrUpdateReceipt(
 		OrganizationID:     *user.OrganizationID,
 	}
 	if invoice.Subscription != nil {
+		newReceipt.ExternalSubscriptionID = &invoice.Subscription.ID
 		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, invoice.Subscription.ID)
 		if err != nil {
 			lgr.Print(tid, 3, "failed to get subscription", invoice.Subscription.ID, err)
