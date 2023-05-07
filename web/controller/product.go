@@ -56,11 +56,10 @@ func (p *ProductController) ListInternal(c *fiber.Ctx) error {
 		if err != nil {
 			return resp.SendError(c, fiber.StatusInternalServerError, err)
 		}
-	}
-
-	// Minimum
-	if len(products) > 3 {
-		cache.SetInternalProducts(ctx, products)
+		// Minimum
+		if len(products) > 3 {
+			cache.SetInternalProducts(ctx, products)
+		}
 	}
 	respProducts := make([]resp.Product, 0)
 	for _, product := range products {
