@@ -73,14 +73,17 @@ func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Eve
 				lgr.Error(tracingID, 1, "failed to unmarshal stripe invoice", err)
 				return err
 			}
+			lgr.Print(tracingID, 2, "handling invoice, event type: %s", event.Type)
 			return p.createOrUpdateReceipt(ctx, tx, event, stripeInvoice)
 		case constant.StripeCustomerSubscriptionCreated,
 			constant.StripeCustomerSubscriptionUpdated,
 			constant.StripeCustomerSubscriptionDeleted:
 			var stripeSubscription stripe.Subscription
 			if err := json.Unmarshal(event.Data.Raw, &stripeSubscription); err != nil {
-				panic(err)
+				lgr.Error(tracingID, 3, "failed to unmarshal stripe subscription", err)
+				return err
 			}
+			lgr.Print(tracingID, 2, "handling subscription, event type: %s", event.Type)
 			return p.createOrUpdateSubscription(ctx, tx, event, stripeSubscription)
 		}
 		return nil
@@ -131,7 +134,7 @@ func (p *PaymentService) createOrUpdateSubscription(
 	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
 		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, remoteSubscription.ID)
-		if err == nil {
+		if err != nil {
 			_, err = p.paymentDomain.CreateSubscription(ctx, tx, newSubscription)
 			if err != nil {
 				return errors.Newf("failed to create subscription, err: %w", err)
@@ -163,26 +166,21 @@ func (p *PaymentService) createOrUpdateReceipt(
 	event stripe.Event,
 	invoice stripe.Invoice,
 ) error {
+	tid := pkg.GetTracingID(ctx)
 	user, err := p.userDomain.GetUserFromPaymentCustomerID(ctx, invoice.Customer.ID)
 	if err != nil {
 		return errors.Newf("failed to get stripe customer: %s, err: %w", invoice.Customer.ID, err)
 	}
+	lgr.Print(tid, 1, "got user from billing customer ID", invoice.Customer.ID, "user", user.ID)
 	line := invoice.Lines.Data[0]
 	planWithProduct, err := p.paymentDomain.GetPlanWithProductFromExternalPlanID(ctx, line.Price.ID)
 	if err != nil {
 		return errors.Newf("failed to get plan, external plan ID: %s, err: %w", line.Price.ID, err)
 	}
+	lgr.Print(tid, 2, "got plan from invoice", line.Price.ID, "plan", planWithProduct.Plan.ID)
 
-	var subscriptionID int64
-	if invoice.Subscription != nil {
-		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, invoice.Subscription.ID)
-		if err != nil {
-			return errors.Newf("failed to get subscription, external ID: %s, err: %w", invoice.Subscription.ID, err)
-		}
-		subscriptionID = subscription.ID
-	}
 	newReceipt := &model.Receipt{
-		Price:              float64(invoice.Total),
+		Price:              pkg.CentsToDollars(int(invoice.Total)),
 		Currency:           string(invoice.Currency),
 		ExternalID:         &invoice.ID,
 		ExternalCustomerID: &invoice.Customer.ID,
@@ -195,20 +193,29 @@ func (p *PaymentService) createOrUpdateReceipt(
 		IsTrial:            false,
 		PlanID:             &planWithProduct.Plan.ID,
 		ProductID:          &planWithProduct.Product.ID,
-		SubscriptionID:     &subscriptionID,
 		OrganizationID:     *user.OrganizationID,
+	}
+	if invoice.Subscription != nil {
+		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, invoice.Subscription.ID)
+		if err != nil {
+			lgr.Print(tid, 3, "failed to get subscription", invoice.Subscription.ID, err)
+		} else {
+			newReceipt.SubscriptionID = &subscription.ID
+		}
 	}
 
 	eventAt := time.Unix(event.Created, 0)
 	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetReceiptEventKey(invoice.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
 		receipt, err := p.paymentDomain.GetReceiptFromExternalID(ctx, invoice.ID)
-		if err == nil {
+		if err != nil {
+			lgr.Print(tid, 4, "creating receipt", newReceipt.ExternalID)
 			_, err := p.paymentDomain.CreateReceipt(ctx, tx, newReceipt)
 			if err != nil {
 				return errors.Newf("failed to create receipt, external: %s, err: %w", invoice.ID, err)
 			}
 		} else {
+			lgr.Print(tid, 4, "updating receipt", newReceipt.ExternalID)
 			_, err := p.paymentDomain.UpdateReceipt(ctx, tx, receipt.ID, newReceipt)
 			if err != nil {
 				return errors.Newf("failed to update receipt, external: %s, err: %w", invoice.ID, err)
