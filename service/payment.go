@@ -142,6 +142,7 @@ func (p *PaymentService) createOrUpdateSubscription(
 			return errors.Newf("failed to create subscription, err: %w", err)
 		}
 
+		cache.DeleteUserWithRoleAndSubscription(ctx, user.ID)
 		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID), eventAt)
 	}
 
