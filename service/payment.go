@@ -224,8 +224,8 @@ func (p *PaymentService) getPaidAt(event stripe.Event) *time.Time {
 }
 
 func (p *PaymentService) getCanceledAt(subscription stripe.Subscription) *time.Time {
-	if subscription.CancelAt != 0 {
-		return lo.ToPtr(time.Unix(subscription.CancelAt, 0))
+	if subscription.CanceledAt != 0 {
+		return lo.ToPtr(time.Unix(subscription.CanceledAt, 0))
 	}
 	return nil
 }
@@ -233,8 +233,11 @@ func (p *PaymentService) getCanceledAt(subscription stripe.Subscription) *time.T
 func (p *PaymentService) getCancellationReason(subscription stripe.Subscription) *string {
 	var reason string
 	cancellationDetails := subscription.CancellationDetails
-	if cancellationDetails != nil && string(cancellationDetails.Reason) != "" {
-		reason = fmt.Sprintf("%s.%s", string(cancellationDetails.Reason), string(cancellationDetails.Feedback))
+	if cancellationDetails != nil && cancellationDetails.Reason != "" {
+		reason = string(cancellationDetails.Reason)
+		if cancellationDetails.Feedback != "" {
+			reason = fmt.Sprintf("%s.%s", reason, string(cancellationDetails.Feedback))
+		}
 		if cancellationDetails.Comment != "" {
 			reason = fmt.Sprintf("%s.%s", reason, cancellationDetails.Comment)
 		}
