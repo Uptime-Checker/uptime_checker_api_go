@@ -91,7 +91,16 @@ func (p *PaymentDomain) CreateSubscription(
 ) (*model.Subscription, error) {
 	insertStmt := Subscription.INSERT(
 		Subscription.MutableColumns.Except(Subscription.InsertedAt, Subscription.UpdatedAt),
-	).MODEL(subscription).RETURNING(Subscription.AllColumns)
+	).MODEL(subscription).ON_CONFLICT(Subscription.ExternalID).DO_UPDATE(
+		SET(
+			Subscription.Status.SET(String(subscription.Status)),
+			Subscription.IsTrial.SET(Bool(subscription.IsTrial)),
+			Subscription.ExpiresAt.SET(Subscription.EXCLUDED.ExpiresAt),
+			Subscription.CanceledAt.SET(Subscription.EXCLUDED.CanceledAt),
+			Subscription.CancellationReason.SET(Subscription.EXCLUDED.CancellationReason),
+			Subscription.PlanID.SET(Int(subscription.PlanID)),
+			Subscription.ProductID.SET(Int(subscription.ProductID)),
+		)).RETURNING(Subscription.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, subscription)
 	return subscription, err
 }

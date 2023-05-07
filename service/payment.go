@@ -136,19 +136,10 @@ func (p *PaymentService) createOrUpdateSubscription(
 	eventAt := time.Unix(event.Created, 0)
 	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
-		subscription, err := p.paymentDomain.GetSubscriptionFromExternalID(ctx, remoteSubscription.ID)
+		lgr.Print(tid, 4, "creating subscription", newSubscription.ExternalID)
+		_, err = p.paymentDomain.CreateSubscription(ctx, tx, newSubscription)
 		if err != nil {
-			lgr.Print(tid, 4, "creating subscription", newSubscription.ExternalID)
-			_, err = p.paymentDomain.CreateSubscription(ctx, tx, newSubscription)
-			if err != nil {
-				return errors.Newf("failed to create subscription, err: %w", err)
-			}
-		} else {
-			lgr.Print(tid, 4, "updating subscription", newSubscription.ExternalID)
-			_, err = p.paymentDomain.UpdateSubscription(ctx, tx, subscription.ID, newSubscription)
-			if err != nil {
-				return errors.Newf("failed to update subscription, err: %w", err)
-			}
+			return errors.Newf("failed to create subscription, err: %w", err)
 		}
 
 		cache.SetPaymentEventForCustomer(ctx, cache.GetSubscriptionEventKey(remoteSubscription.Customer.ID), eventAt)
@@ -242,7 +233,7 @@ func (p *PaymentService) getCanceledAt(subscription stripe.Subscription) *time.T
 func (p *PaymentService) getCancellationReason(subscription stripe.Subscription) *string {
 	var reason string
 	cancellationDetails := subscription.CancellationDetails
-	if cancellationDetails != nil {
+	if cancellationDetails != nil && string(cancellationDetails.Reason) != "" {
 		reason = fmt.Sprintf("%s.%s", string(cancellationDetails.Reason), string(cancellationDetails.Feedback))
 		if cancellationDetails.Comment != "" {
 			reason = fmt.Sprintf("%s.%s", reason, cancellationDetails.Comment)
