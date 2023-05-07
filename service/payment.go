@@ -213,19 +213,10 @@ func (p *PaymentService) createOrUpdateReceipt(
 	eventAt := time.Unix(event.Created, 0)
 	lastEventAt := cache.GetPaymentEventForCustomer(ctx, cache.GetReceiptEventKey(invoice.Customer.ID))
 	if lastEventAt == nil || times.CompareDate(eventAt, *lastEventAt) == constant.Date1AfterDate2 {
-		receipt, err := p.paymentDomain.GetReceiptFromExternalID(ctx, invoice.ID)
+		lgr.Print(tid, 4, "creating receipt", newReceipt.ExternalID)
+		_, err := p.paymentDomain.CreateReceipt(ctx, tx, newReceipt)
 		if err != nil {
-			lgr.Print(tid, 4, "creating receipt", newReceipt.ExternalID)
-			_, err := p.paymentDomain.CreateReceipt(ctx, tx, newReceipt)
-			if err != nil {
-				return errors.Newf("failed to create receipt, external: %s, err: %w", invoice.ID, err)
-			}
-		} else {
-			lgr.Print(tid, 4, "updating receipt", newReceipt.ExternalID)
-			_, err := p.paymentDomain.UpdateReceipt(ctx, tx, receipt.ID, newReceipt)
-			if err != nil {
-				return errors.Newf("failed to update receipt, external: %s, err: %w", invoice.ID, err)
-			}
+			return errors.Newf("failed to create receipt, external: %s, err: %w", invoice.ID, err)
 		}
 
 		cache.SetPaymentEventForCustomer(ctx, cache.GetReceiptEventKey(invoice.Customer.ID), eventAt)

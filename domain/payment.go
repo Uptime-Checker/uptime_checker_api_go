@@ -139,7 +139,17 @@ func (p *PaymentDomain) CreateReceipt(
 	receipt *model.Receipt,
 ) (*model.Receipt, error) {
 	insertStmt := Receipt.INSERT(Receipt.MutableColumns.Except(Receipt.InsertedAt, Receipt.UpdatedAt)).
-		MODEL(receipt).RETURNING(Receipt.AllColumns)
+		MODEL(receipt).ON_CONFLICT(Receipt.ExternalID).DO_UPDATE(
+		SET(
+			Receipt.Status.SET(String(receipt.Status)),
+			Receipt.PaidAt.SET(Receipt.EXCLUDED.PaidAt),
+			Receipt.Price.SET(Float(receipt.Price)),
+			Receipt.Paid.SET(Bool(receipt.Paid)),
+			Receipt.URL.SET(Receipt.EXCLUDED.URL),
+			Receipt.IsTrial.SET(Bool(receipt.IsTrial)),
+			Receipt.SubscriptionID.SET(Receipt.EXCLUDED.SubscriptionID),
+			Receipt.ExternalSubscriptionID.SET(Receipt.EXCLUDED.ExternalSubscriptionID),
+		)).RETURNING(Receipt.AllColumns)
 	err := insertStmt.QueryContext(ctx, tx, receipt)
 	return receipt, err
 }
