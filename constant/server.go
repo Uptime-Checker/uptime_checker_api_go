@@ -7,10 +7,14 @@ const (
 	OriginalIPHeader      = "X-Forwarded-For"
 	AuthorizationHeader   = "Authorization"
 	ContentTypeHeader     = "content-type"
+	CacheControlHeader    = "Cache-Control"
 	StripeSignatureHeader = "Stripe-Signature"
 )
 
-const AuthScheme = "Bearer"
+const (
+	AuthScheme   = "Bearer"
+	CacheNoStore = "no-store"
+)
 
 const (
 	MaxRequestPerMinute            = 10

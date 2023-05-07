@@ -61,7 +61,11 @@ func (a *AuthService) GenerateUserToken(user *model.User) (string, error) {
 }
 
 // GetUserByToken returns user by token
-func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*pkg.UserWithRoleAndSubscription, error) {
+func (a *AuthService) GetUserByToken(
+	ctx context.Context,
+	tok string,
+	skipCache bool,
+) (*pkg.UserWithRoleAndSubscription, error) {
 	token, err := jwt.Parse(tok, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, constant.ErrInvalidUserToken
@@ -80,7 +84,7 @@ func (a *AuthService) GetUserByToken(ctx context.Context, tok string) (*pkg.User
 	}
 
 	cachedUser := cache.GetUserWithRoleAndSubscription(ctx, usr.UserID)
-	if cachedUser == nil {
+	if cachedUser == nil || skipCache {
 		user, err := a.userDomain.GetUserWithRoleAndSubscription(ctx, usr.UserID)
 		if err != nil {
 			onlyUser, err := a.userDomain.GetUser(ctx, usr.UserID)

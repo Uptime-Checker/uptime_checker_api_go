@@ -23,7 +23,8 @@ func Protected(auth *service.AuthService) func(*fiber.Ctx) error {
 			return resp.ServeUnauthorizedError(c)
 		}
 
-		user, err := auth.GetUserByToken(c.Context(), token)
+		cacheControl := c.Get(constant.CacheControlHeader)
+		user, err := auth.GetUserByToken(c.Context(), token, cacheControl == constant.CacheNoStore)
 		if err != nil {
 			return resp.ServeUnauthorizedError(c)
 		}
