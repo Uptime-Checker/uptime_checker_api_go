@@ -54,7 +54,7 @@ func (s SyncProductsTask) Do(ctx context.Context) {
 					ctx,
 					tx,
 					plan,
-					float64(price.UnitAmount/100),
+					pkg.CentsToDollars(int(price.UnitAmount)),
 					s.getPlantType(price.Recurring.Interval),
 				)
 				if err != nil {

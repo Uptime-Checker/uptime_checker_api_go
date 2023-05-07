@@ -24,3 +24,8 @@ func Abs[T Number](a T) T {
 	}
 	return a
 }
+
+func CentsToDollars(cents int) float64 {
+	dollars := float64(cents) / 100.0
+	return dollars
+}
