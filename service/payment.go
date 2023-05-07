@@ -73,7 +73,7 @@ func (p *PaymentService) HandleStripeEvent(ctx context.Context, event stripe.Eve
 				lgr.Error(tracingID, 1, "failed to unmarshal stripe invoice", err)
 				return err
 			}
-			lgr.Print(tracingID, 2, "handling invoice, event type: %s", event.Type)
+			lgr.Print(tracingID, 2, "handling invoice, event type", event.Type)
 			return p.createOrUpdateReceipt(ctx, tx, event, stripeInvoice)
 		case constant.StripeCustomerSubscriptionCreated,
 			constant.StripeCustomerSubscriptionUpdated,
