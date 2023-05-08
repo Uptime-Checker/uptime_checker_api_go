@@ -92,6 +92,28 @@ func (u *UserDomain) GetUserFromPaymentCustomerID(ctx context.Context, pymentCus
 	return user, err
 }
 
+func (u *UserDomain) GetUserWithRole(
+	ctx context.Context,
+	id int64,
+) (*pkg.UserWithRoleAndSubscription, error) {
+	stmt := SELECT(
+		User.AllColumns,
+		Role.AllColumns,
+		RoleClaim.AllColumns,
+		Organization.AllColumns,
+	).
+		FROM(
+			User.
+				LEFT_JOIN(Role, User.RoleID.EQ(Role.ID)).
+				LEFT_JOIN(RoleClaim, User.RoleID.EQ(RoleClaim.RoleID)).
+				LEFT_JOIN(Organization, User.OrganizationID.EQ(Organization.ID)),
+		).WHERE(User.ID.EQ(Int(id)))
+
+	user := &pkg.UserWithRoleAndSubscription{}
+	err := stmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
 func (u *UserDomain) GetUserWithRoleAndSubscription(
 	ctx context.Context,
 	id int64,

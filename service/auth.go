@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jinzhu/copier"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
@@ -87,11 +86,8 @@ func (a *AuthService) GetUserByToken(
 	if cachedUser == nil || skipCache {
 		user, err := a.userDomain.GetUserWithRoleAndSubscription(ctx, usr.UserID)
 		if err != nil {
-			onlyUser, err := a.userDomain.GetUser(ctx, usr.UserID)
+			user, err := a.userDomain.GetUserWithRole(ctx, usr.UserID)
 			if err != nil {
-				return nil, err
-			}
-			if err := copier.Copy(&user, &onlyUser); err != nil {
 				return nil, err
 			}
 			return user, nil
