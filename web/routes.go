@@ -107,6 +107,8 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	wheel := worker.NewWorker(runCheckTask, startMonitorTask)
 
 	//  ========== Age of the routers ==========
+	regionController := controller.NewRegionController(regionDomain)
+	v1.Get("/regions", regionController.List)
 	// User router for auth and user account
 	userRouter := v1.Group("/user")
 	registerUserHandlers(userRouter, userDomain, authService, userService)

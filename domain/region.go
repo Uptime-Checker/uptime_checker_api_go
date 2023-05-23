@@ -24,3 +24,11 @@ func (m *RegionDomain) Get(ctx context.Context, key string) (*model.Region, erro
 	err := stmt.QueryContext(ctx, infra.DB, region)
 	return region, err
 }
+
+func (p *RegionDomain) List(ctx context.Context) ([]model.Region, error) {
+	stmt := SELECT(Region.AllColumns).FROM(Region)
+
+	var regions []model.Region
+	err := stmt.QueryContext(ctx, infra.DB, &regions)
+	return regions, err
+}
