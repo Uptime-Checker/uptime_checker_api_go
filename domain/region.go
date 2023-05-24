@@ -17,7 +17,7 @@ func NewRegionDomain() *RegionDomain {
 	return &RegionDomain{}
 }
 
-func (m *RegionDomain) Get(ctx context.Context, key string) (*model.Region, error) {
+func (r *RegionDomain) Get(ctx context.Context, key string) (*model.Region, error) {
 	stmt := SELECT(Region.AllColumns).FROM(Region).WHERE(Region.Key.EQ(String(key))).LIMIT(1)
 
 	region := &model.Region{}
@@ -25,7 +25,7 @@ func (m *RegionDomain) Get(ctx context.Context, key string) (*model.Region, erro
 	return region, err
 }
 
-func (p *RegionDomain) List(ctx context.Context) ([]model.Region, error) {
+func (r *RegionDomain) List(ctx context.Context) ([]model.Region, error) {
 	stmt := SELECT(Region.AllColumns).FROM(Region)
 
 	var regions []model.Region

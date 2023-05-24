@@ -7,6 +7,8 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+const Hundred = 100.0
+
 type Number interface {
 	constraints.Integer | constraints.Float
 }
@@ -26,6 +28,5 @@ func Abs[T Number](a T) T {
 }
 
 func CentsToDollars(cents int) float64 {
-	dollars := float64(cents) / 100.0
-	return dollars
+	return float64(cents) / Hundred
 }
