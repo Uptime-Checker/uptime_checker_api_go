@@ -262,3 +262,7 @@ func registerWebhookHandlers(
 
 	router.Post("/stripe", handler.StripePayment)
 }
+
+func registerIntegrationHandlers(router fiber.Router) {
+
+}
