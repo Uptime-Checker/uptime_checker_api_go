@@ -25,7 +25,7 @@ func NewMonitorIntegrationService(
 
 func (m *MonitorIntegrationService) Create(
 	ctx context.Context, tx *sql.Tx, organization *model.Organization,
-	monitorIntegrationType resource.MonitorIntegrationType, config map[string]string,
+	monitorIntegrationType resource.MonitorIntegrationType, config map[string]any,
 ) (*model.MonitorIntegration, error) {
 	jsonConfig, err := json.Marshal(config)
 	if err != nil {
@@ -42,10 +42,10 @@ func (m *MonitorIntegrationService) Create(
 			return nil, err
 		}
 		monitorIntegration.ExternalID = &svixApp.Id
-		monitorIntegration, err = m.monitorIntegrationDomain.Create(ctx, tx, monitorIntegration, monitorIntegrationType)
-		if err != nil {
-			return nil, err
-		}
+	}
+	monitorIntegration, err = m.monitorIntegrationDomain.Create(ctx, tx, monitorIntegration, monitorIntegrationType)
+	if err != nil {
+		return nil, err
 	}
 	return monitorIntegration, err
 }

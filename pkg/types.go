@@ -82,3 +82,10 @@ type WebhookData struct {
 	EventAt            time.Time
 	Data               map[string]any
 }
+
+type IncomingSlackWebhook struct {
+	Channel          string `json:"channel"           validate:"required"`
+	ChannelID        string `json:"channel_id"        validate:"required"`
+	ConfigurationURL string `json:"configuration_url" validate:"required"`
+	URL              string `json:"url"               validate:"required"`
+}

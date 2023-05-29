@@ -70,6 +70,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	alarmPolicyService := service.NewAlarmPolicyService(alarmPolicyDomain)
 	productService := service.NewProductService(productDomain)
 	propertyService := service.NewPropertyService(propertyDomain)
+	monitorIntegrationService := service.NewMonitorIntegrationService(monitorIntegrationDomain)
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
@@ -107,6 +108,8 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	wheel := worker.NewWorker(runCheckTask, startMonitorTask)
 
 	//  ========== Age of the routers ==========
+
+	// start - versioned route
 	regionController := controller.NewRegionController(regionDomain)
 	v1.Get("/regions", regionController.List)
 	// User router for auth and user account
@@ -140,6 +143,11 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 
 	productRouter := v1.Group("/product")
 	registerProductHandlers(productRouter, productDomain, userDomain, authService)
+
+	integrationRouter := v1.Group("/integration")
+	registerIntegrationHandlers(integrationRouter, alarmChannelDomain, monitorIntegrationService, authService)
+
+	// end - versioned route
 
 	webhookRouter := app.Group("/webhook")
 	registerWebhookHandlers(webhookRouter, paymentService)
@@ -263,6 +271,15 @@ func registerWebhookHandlers(
 	router.Post("/stripe", handler.StripePayment)
 }
 
-func registerIntegrationHandlers(router fiber.Router) {
+func registerIntegrationHandlers(
+	router fiber.Router,
+	alarmChannelDomain *domain.AlarmChannelDomain,
+	monitorIntegrationService *service.MonitorIntegrationService,
+	authService *service.AuthService,
+) {
+	auth := middlelayer.Protected(authService)
 
+	handler := controller.NewMonitorIntegrationController(alarmChannelDomain, monitorIntegrationService)
+
+	router.Post("/", auth, handler.Create)
 }

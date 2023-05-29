@@ -45,6 +45,8 @@ var (
 	ErrHeaderKeyNeeded              = errors.New("header key needed")
 	ErrStatusCodeAssertionRequired  = errors.New("status code assertion required")
 	ErrWebhookURLRequired           = errors.New("webhook URL is required")
+	ErrAccessTokenRequired          = errors.New("access token is required")
+	ErrIncomingWebhookRequired      = errors.New("incoming webhook is required")
 )
 
 var Validate = validator.New()

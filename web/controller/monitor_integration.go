@@ -2,13 +2,11 @@ package controller
 
 import (
 	"database/sql"
-
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
-	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/web/controller/resp"
@@ -31,8 +29,8 @@ func NewMonitorIntegrationController(
 }
 
 type MonitorIntegrationBody struct {
-	MonitorIntegrationType int32             `json:"type"   validate:"required"`
-	Config                 map[string]string `json:"config" validate:"required"`
+	MonitorIntegrationType int32          `json:"type"   validate:"required"`
+	Config                 map[string]any `json:"config" validate:"required"`
 }
 
 func (m *MonitorIntegrationController) Create(c *fiber.Ctx) error {
@@ -49,9 +47,18 @@ func (m *MonitorIntegrationController) Create(c *fiber.Ctx) error {
 
 	integrationType := resource.MonitorIntegrationType(body.MonitorIntegrationType)
 	if integrationType == resource.MonitorIntegrationTypeWebhook {
-		url := body.Config["url"]
-		if pkg.IsEmpty(url) {
+		_, ok := body.Config["url"].(string)
+		if !ok {
 			return resp.SendError(c, fiber.StatusUnprocessableEntity, resp.ErrWebhookURLRequired)
+		}
+	} else if integrationType == resource.MonitorIntegrationTypeSlack {
+		_, ok := body.Config["access_token"].(string)
+		if !ok {
+			return resp.SendError(c, fiber.StatusUnprocessableEntity, resp.ErrAccessTokenRequired)
+		}
+		_, ok = body.Config["incoming_webhook"].(map[string]any)
+		if !ok {
+			return resp.SendError(c, fiber.StatusUnprocessableEntity, resp.ErrIncomingWebhookRequired)
 		}
 	}
 
