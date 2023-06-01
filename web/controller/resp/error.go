@@ -30,6 +30,7 @@ const (
 	ErrFailedToGetMonitor          = "failed to get monitor"
 	ErrFailedToCreateIntegration   = "failed to create integration"
 	ErrFailedToListIntegration     = "failed to list integrations"
+	ErrFailedToListAlarmChannels   = "failed to list alarm channels"
 	ErrMonitorNotFound             = "monitor not found"
 	ErrMalformedJWT                = "missing or malformed JWT"
 	ErrDryRunFailed                = "dry run failed"

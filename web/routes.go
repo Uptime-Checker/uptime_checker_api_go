@@ -147,6 +147,8 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	integrationRouter := v1.Group("/integration")
 	registerIntegrationHandlers(integrationRouter, alarmChannelDomain, monitorIntegrationDomain, monitorIntegrationService, authService)
 
+	alarmChannelRouter := v1.Group("/alarm_channel")
+	registerAlarmChannelHandlers(alarmChannelRouter, alarmChannelDomain, authService)
 	// end - versioned route
 
 	webhookRouter := app.Group("/webhook")
@@ -283,5 +285,13 @@ func registerIntegrationHandlers(
 	handler := controller.NewMonitorIntegrationController(alarmChannelDomain, monitorIntegrationDomain, monitorIntegrationService)
 
 	router.Post("/", auth, handler.Create)
+	router.Get("/list", auth, handler.List)
+}
+
+func registerAlarmChannelHandlers(router fiber.Router, alarmChannelDomain *domain.AlarmChannelDomain, authService *service.AuthService) {
+	auth := middlelayer.Protected(authService)
+
+	handler := controller.NewAlarmChannelController(alarmChannelDomain)
+
 	router.Get("/list", auth, handler.List)
 }
