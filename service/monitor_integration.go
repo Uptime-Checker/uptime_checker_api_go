@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 
 	"github.com/getsentry/sentry-go"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
@@ -32,6 +32,14 @@ func (m *MonitorIntegrationService) Create(
 	if err != nil {
 		return nil, err
 	}
+
+	prevIntegration, _ := m.findIntegrationFromType(ctx, organization.ID, monitorIntegrationType)
+	if prevIntegration != nil {
+		// update
+
+		return prevIntegration, nil
+	}
+
 	monitorIntegration := &model.MonitorIntegration{
 		Config:         string(jsonConfig),
 		OrganizationID: organization.ID,
@@ -65,5 +73,5 @@ func (m *MonitorIntegrationService) findIntegrationFromType(
 			return &integrations[i], nil
 		}
 	}
-	return nil, errors.New("no integration found")
+	return nil, constant.ErrIntegrationNotFound
 }

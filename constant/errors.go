@@ -27,6 +27,7 @@ var (
 	ErrUpgradeSubscription = errors.New("upgrade subscription")
 	ErrUpgradePermission   = errors.New("upgrade permission")
 	ErrSubscriptionExpired = errors.New("subscription expired")
+	ErrIntegrationNotFound = errors.New("integration not found")
 )
 
 const (
