@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 
 	"github.com/getsentry/sentry-go"
 
@@ -48,4 +49,21 @@ func (m *MonitorIntegrationService) Create(
 		return nil, err
 	}
 	return monitorIntegration, err
+}
+
+func (m *MonitorIntegrationService) findIntegrationFromType(
+	ctx context.Context,
+	orgID int64,
+	monitorIntegrationType resource.MonitorIntegrationType,
+) (*model.MonitorIntegration, error) {
+	integrations, err := m.monitorIntegrationDomain.List(ctx, orgID)
+	if err != nil {
+		return nil, err
+	}
+	for i, integration := range integrations {
+		if resource.MonitorIntegrationType(integration.Type) == monitorIntegrationType {
+			return &integrations[i], nil
+		}
+	}
+	return nil, errors.New("no integration found")
 }
