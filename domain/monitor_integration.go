@@ -58,3 +58,17 @@ func (m *MonitorIntegrationDomain) List(
 	err := stmt.QueryContext(ctx, infra.DB, &monitorIntegrations)
 	return monitorIntegrations, err
 }
+
+func (c *MonitorIntegrationDomain) Update(
+	ctx context.Context,
+	tx *sql.Tx,
+	id int64,
+	monitorIntegration *model.MonitorIntegration,
+) (*model.MonitorIntegration, error) {
+	updateStmt := MonitorIntegration.UPDATE(
+		MonitorIntegration.Config, MonitorIntegration.UpdatedAt,
+	).MODEL(monitorIntegration).WHERE(MonitorIntegration.ID.EQ(Int(id))).RETURNING(MonitorIntegration.AllColumns)
+
+	err := updateStmt.QueryContext(ctx, tx, monitorIntegration)
+	return monitorIntegration, err
+}

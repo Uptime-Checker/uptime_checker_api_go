@@ -11,6 +11,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
 )
 
@@ -35,7 +36,10 @@ func (m *MonitorIntegrationService) Create(
 
 	prevIntegration, _ := m.findIntegrationFromType(ctx, organization.ID, monitorIntegrationType)
 	if prevIntegration != nil {
-		// update
+		now := times.Now()
+		prevIntegration.Config = string(jsonConfig)
+		prevIntegration.UpdatedAt = now
+		m.monitorIntegrationDomain.Update(ctx, tx, prevIntegration.ID, prevIntegration)
 
 		return prevIntegration, nil
 	}
