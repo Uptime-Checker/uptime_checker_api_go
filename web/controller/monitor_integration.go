@@ -16,15 +16,18 @@ import (
 
 type MonitorIntegrationController struct {
 	alarmChannelDomain        *domain.AlarmChannelDomain
+	monitorIntegrationDomain  *domain.MonitorIntegrationDomain
 	monitorIntegrationService *service.MonitorIntegrationService
 }
 
 func NewMonitorIntegrationController(
 	alarmChannelDomain *domain.AlarmChannelDomain,
+	monitorIntegrationDomain *domain.MonitorIntegrationDomain,
 	monitorIntegrationService *service.MonitorIntegrationService,
 ) *MonitorIntegrationController {
 	return &MonitorIntegrationController{
 		alarmChannelDomain:        alarmChannelDomain,
+		monitorIntegrationDomain:  monitorIntegrationDomain,
 		monitorIntegrationService: monitorIntegrationService,
 	}
 }
@@ -83,4 +86,14 @@ func (m *MonitorIntegrationController) Create(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToCreateIntegration, err)
 	}
 	return resp.ServeData(c, fiber.StatusOK, monitorIntegration)
+}
+
+func (m *MonitorIntegrationController) List(c *fiber.Ctx) error {
+	ctx := c.Context()
+	user := middlelayer.GetUser(c)
+	integrations, err := m.monitorIntegrationDomain.List(ctx, *user.OrganizationID)
+	if err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToListIntegration, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, integrations)
 }

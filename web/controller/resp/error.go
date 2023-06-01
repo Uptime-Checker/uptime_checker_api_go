@@ -29,6 +29,7 @@ const (
 	ErrBillingCustomerUpdateFailed = "failed to update billing customer"
 	ErrFailedToGetMonitor          = "failed to get monitor"
 	ErrFailedToCreateIntegration   = "failed to create integration"
+	ErrFailedToListIntegration     = "failed to list integrations"
 	ErrMonitorNotFound             = "monitor not found"
 	ErrMalformedJWT                = "missing or malformed JWT"
 	ErrDryRunFailed                = "dry run failed"
