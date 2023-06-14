@@ -7,6 +7,8 @@ import (
 
 	. "github.com/go-jet/jet/v2/postgres"
 
+	"github.com/stripe/stripe-go/v74"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
@@ -66,7 +68,15 @@ func (u *UserDomain) DeleteGuestUser(ctx context.Context, tx *sql.Tx, id int64) 
 
 // User
 
-func (u *UserDomain) GetUser(ctx context.Context, email string) (*model.User, error) {
+func (u *UserDomain) GetUser(ctx context.Context, id int64) (*model.User, error) {
+	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.ID.EQ(Int(id))).LIMIT(1)
+
+	user := &model.User{}
+	err := stmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.Email.EQ(String(email))).LIMIT(1)
 
 	user := &model.User{}
@@ -78,6 +88,28 @@ func (u *UserDomain) GetUserFromPaymentCustomerID(ctx context.Context, pymentCus
 	stmt := SELECT(User.AllColumns).FROM(User).WHERE(User.PaymentCustomerID.EQ(String(pymentCustomerID))).LIMIT(1)
 
 	user := &model.User{}
+	err := stmt.QueryContext(ctx, infra.DB, user)
+	return user, err
+}
+
+func (u *UserDomain) GetUserWithRole(
+	ctx context.Context,
+	id int64,
+) (*pkg.UserWithRoleAndSubscription, error) {
+	stmt := SELECT(
+		User.AllColumns,
+		Role.AllColumns,
+		RoleClaim.AllColumns,
+		Organization.AllColumns,
+	).
+		FROM(
+			User.
+				LEFT_JOIN(Role, User.RoleID.EQ(Role.ID)).
+				LEFT_JOIN(RoleClaim, User.RoleID.EQ(RoleClaim.RoleID)).
+				LEFT_JOIN(Organization, User.OrganizationID.EQ(Organization.ID)),
+		).WHERE(User.ID.EQ(Int(id)))
+
+	user := &pkg.UserWithRoleAndSubscription{}
 	err := stmt.QueryContext(ctx, infra.DB, user)
 	return user, err
 }
@@ -107,8 +139,7 @@ func (u *UserDomain) GetUserWithRoleAndSubscription(
 				LEFT_JOIN(Product, Subscription.ProductID.EQ(Product.ID)).
 				LEFT_JOIN(ProductFeature, Product.ID.EQ(ProductFeature.ProductID)).
 				LEFT_JOIN(Feature, ProductFeature.FeatureID.EQ(Feature.ID)),
-		).
-		WHERE(User.ID.EQ(Int(id)))
+		).WHERE(User.ID.EQ(Int(id)).AND(Subscription.Status.EQ(String(string(stripe.SubscriptionStatusActive)))))
 
 	user := &pkg.UserWithRoleAndSubscription{}
 	err := stmt.QueryContext(ctx, infra.DB, user)

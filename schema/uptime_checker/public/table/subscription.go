@@ -22,6 +22,7 @@ type subscriptionTable struct {
 	StartsAt           postgres.ColumnTimestamp
 	ExpiresAt          postgres.ColumnTimestamp
 	CanceledAt         postgres.ColumnTimestamp
+	CancellationReason postgres.ColumnString
 	IsTrial            postgres.ColumnBool
 	ExternalID         postgres.ColumnString
 	ExternalCustomerID postgres.ColumnString
@@ -75,6 +76,7 @@ func newSubscriptionTableImpl(schemaName, tableName, alias string) subscriptionT
 		StartsAtColumn           = postgres.TimestampColumn("starts_at")
 		ExpiresAtColumn          = postgres.TimestampColumn("expires_at")
 		CanceledAtColumn         = postgres.TimestampColumn("canceled_at")
+		CancellationReasonColumn = postgres.StringColumn("cancellation_reason")
 		IsTrialColumn            = postgres.BoolColumn("is_trial")
 		ExternalIDColumn         = postgres.StringColumn("external_id")
 		ExternalCustomerIDColumn = postgres.StringColumn("external_customer_id")
@@ -83,8 +85,8 @@ func newSubscriptionTableImpl(schemaName, tableName, alias string) subscriptionT
 		OrganizationIDColumn     = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn         = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn          = postgres.TimestampColumn("updated_at")
-		allColumns               = postgres.ColumnList{IDColumn, StatusColumn, StartsAtColumn, ExpiresAtColumn, CanceledAtColumn, IsTrialColumn, ExternalIDColumn, ExternalCustomerIDColumn, PlanIDColumn, ProductIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns           = postgres.ColumnList{StatusColumn, StartsAtColumn, ExpiresAtColumn, CanceledAtColumn, IsTrialColumn, ExternalIDColumn, ExternalCustomerIDColumn, PlanIDColumn, ProductIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns               = postgres.ColumnList{IDColumn, StatusColumn, StartsAtColumn, ExpiresAtColumn, CanceledAtColumn, CancellationReasonColumn, IsTrialColumn, ExternalIDColumn, ExternalCustomerIDColumn, PlanIDColumn, ProductIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns           = postgres.ColumnList{StatusColumn, StartsAtColumn, ExpiresAtColumn, CanceledAtColumn, CancellationReasonColumn, IsTrialColumn, ExternalIDColumn, ExternalCustomerIDColumn, PlanIDColumn, ProductIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return subscriptionTable{
@@ -96,6 +98,7 @@ func newSubscriptionTableImpl(schemaName, tableName, alias string) subscriptionT
 		StartsAt:           StartsAtColumn,
 		ExpiresAt:          ExpiresAtColumn,
 		CanceledAt:         CanceledAtColumn,
+		CancellationReason: CancellationReasonColumn,
 		IsTrial:            IsTrialColumn,
 		ExternalID:         ExternalIDColumn,
 		ExternalCustomerID: ExternalCustomerIDColumn,

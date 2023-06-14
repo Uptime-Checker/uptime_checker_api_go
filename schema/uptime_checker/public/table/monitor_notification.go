@@ -19,6 +19,7 @@ type monitorNotificationTable struct {
 	//Columns
 	ID             postgres.ColumnInteger
 	Type           postgres.ColumnInteger
+	ExternalID     postgres.ColumnString
 	Successful     postgres.ColumnBool
 	AlarmID        postgres.ColumnInteger
 	MonitorID      postgres.ColumnInteger
@@ -69,6 +70,7 @@ func newMonitorNotificationTableImpl(schemaName, tableName, alias string) monito
 	var (
 		IDColumn             = postgres.IntegerColumn("id")
 		TypeColumn           = postgres.IntegerColumn("type")
+		ExternalIDColumn     = postgres.StringColumn("external_id")
 		SuccessfulColumn     = postgres.BoolColumn("successful")
 		AlarmIDColumn        = postgres.IntegerColumn("alarm_id")
 		MonitorIDColumn      = postgres.IntegerColumn("monitor_id")
@@ -77,8 +79,8 @@ func newMonitorNotificationTableImpl(schemaName, tableName, alias string) monito
 		IntegrationIDColumn  = postgres.IntegerColumn("integration_id")
 		InsertedAtColumn     = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, TypeColumn, SuccessfulColumn, AlarmIDColumn, MonitorIDColumn, UserContactIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{TypeColumn, SuccessfulColumn, AlarmIDColumn, MonitorIDColumn, UserContactIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns           = postgres.ColumnList{IDColumn, TypeColumn, ExternalIDColumn, SuccessfulColumn, AlarmIDColumn, MonitorIDColumn, UserContactIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{TypeColumn, ExternalIDColumn, SuccessfulColumn, AlarmIDColumn, MonitorIDColumn, UserContactIDColumn, OrganizationIDColumn, IntegrationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorNotificationTable{
@@ -87,6 +89,7 @@ func newMonitorNotificationTableImpl(schemaName, tableName, alias string) monito
 		//Columns
 		ID:             IDColumn,
 		Type:           TypeColumn,
+		ExternalID:     ExternalIDColumn,
 		Successful:     SuccessfulColumn,
 		AlarmID:        AlarmIDColumn,
 		MonitorID:      MonitorIDColumn,

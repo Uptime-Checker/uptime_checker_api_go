@@ -17,6 +17,7 @@ type Subscription struct {
 	StartsAt           *time.Time
 	ExpiresAt          *time.Time
 	CanceledAt         *time.Time
+	CancellationReason *string
 	IsTrial            bool
 	ExternalID         *string
 	ExternalCustomerID *string

@@ -16,6 +16,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
+	"github.com/Uptime-Checker/uptime_checker_api_go/service"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
@@ -23,14 +24,12 @@ const (
 	checkCronFromAndToInSeconds         = 20
 	watchDogCheckCronFromAndToInSeconds = 4
 	watchDogCheckMaxGoroutine           = 100
-	cronInitDelayFromInSeconds          = 60
-	cronInitDelayToInSeconds            = 120
 )
 
 var s *gocron.Scheduler
 
 type Task interface {
-	Do(ctx context.Context, tx *sql.Tx)
+	Do(ctx context.Context)
 }
 
 // JobName type
@@ -38,6 +37,7 @@ type JobName string
 
 const (
 	JobNameSyncStripeProducts JobName = "SYNC_STRIPE_PRODUCTS"
+	JobNameCheckWatchdog      JobName = "CHECK_WATCHDOG"
 )
 
 type Cron struct {
@@ -45,6 +45,8 @@ type Cron struct {
 	regionDomain        *domain.RegionDomain
 	monitorDomain       *domain.MonitorDomain
 	monitorRegionDomain *domain.MonitorRegionDomain
+
+	propertyService *service.PropertyService
 
 	syncProductsTask *task.SyncProductsTask
 }
@@ -54,6 +56,7 @@ func NewCron(
 	regionDomain *domain.RegionDomain,
 	monitorDomain *domain.MonitorDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
+	propertyService *service.PropertyService,
 	syncProductsTask *task.SyncProductsTask,
 ) *Cron {
 	return &Cron{
@@ -61,6 +64,7 @@ func NewCron(
 		regionDomain:        regionDomain,
 		monitorDomain:       monitorDomain,
 		monitorRegionDomain: monitorRegionDomain,
+		propertyService:     propertyService,
 		syncProductsTask:    syncProductsTask,
 	}
 }
@@ -74,11 +78,9 @@ func (c *Cron) Start(ctx context.Context) error {
 	now := times.Now()
 	s = gocron.NewScheduler(time.UTC)
 
-	random := pkg.RandomNumber(cronInitDelayFromInSeconds, cronInitDelayToInSeconds)
-
 	// start croner
 	_, err := s.Every(constant.CronCheckIntervalInSeconds).Second().
-		StartAt(now.Add(time.Second * time.Duration(random))).
+		StartAt(now.Add(time.Second * 5)).
 		Do(c.checkAndRun)
 	if err != nil {
 		return err
@@ -91,7 +93,8 @@ func (c *Cron) Start(ctx context.Context) error {
 		if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
 			for _, job := range recurringJobs {
 				if job.NextRunAt == nil || times.CompareDate(now, *job.NextRunAt) == constant.Date1AfterDate2 {
-					nextRunAt := now.Add(time.Minute * time.Duration(*job.Interval))
+					nextRunAt := now.Add(time.Second * time.Duration(*job.Interval))
+					lgr.Print("updating the next run at for", job.Name, "to", times.Format(nextRunAt))
 					_, err := c.jobDomain.UpdateNextRunAt(ctx, tx, job.ID, &nextRunAt, resource.JobStatusScheduled)
 					if err != nil {
 						return err
@@ -116,8 +119,9 @@ func (c *Cron) Start(ctx context.Context) error {
 }
 
 func (c *Cron) checkAndRun() {
-	ctx := context.Background()
-	lgr.Print("Running cron check")
+	ctx := pkg.NewTracingID(context.Background())
+	tid := pkg.GetTracingID(ctx)
+	lgr.Print(tid, 1, "running cron check")
 
 	// Cron check runs every 30s. We look for jobs that need to be run from last 20s to next 20s from current time
 	jobsToRun, err := c.jobDomain.ListJobsToRun(ctx, -checkCronFromAndToInSeconds, checkCronFromAndToInSeconds)
@@ -125,10 +129,13 @@ func (c *Cron) checkAndRun() {
 		sentry.CaptureException(err)
 		return
 	}
+	lgr.Print(tid, 2, "found", len(jobsToRun), "cron jobs to run")
 
 	for i, job := range jobsToRun {
 		if job.Name == string(JobNameSyncStripeProducts) {
 			go runTask(c.jobDomain, *c.syncProductsTask, jobsToRun[i])
+		} else if job.Name == string(JobNameCheckWatchdog) {
+			c.stopTheDog(ctx)
 		}
 	}
 }
@@ -139,7 +146,7 @@ func runTask[T Task](jobDomain *domain.JobDomain, tsk T, job model.Job) {
 	now := times.Now()
 	nextRunAt := now
 	if job.Recurring {
-		nextRunAt = now.Add(time.Minute * time.Duration(*job.Interval))
+		nextRunAt = now.Add(time.Second * time.Duration(*job.Interval))
 	}
 
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
@@ -147,7 +154,7 @@ func runTask[T Task](jobDomain *domain.JobDomain, tsk T, job model.Job) {
 		if err != nil {
 			return err
 		}
-		tsk.Do(ctx, tx)
+		tsk.Do(ctx)
 		if job.Recurring {
 			_, err = jobDomain.UpdateStatus(ctx, tx, job.ID, resource.JobStatusScheduled)
 			if err != nil {

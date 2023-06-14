@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stripe/stripe-go/v74"
 
@@ -64,12 +66,26 @@ type PlanWithProduct struct {
 	*model.Product
 }
 
-type ProductWithPlans struct {
+type ProductWithPlansAndFeatures struct {
 	*model.Product
-	Plans []*model.Plan
+	Plans    []*model.Plan
+	Features []*SubscriptionFeature
 }
 
 type BillingProduct struct {
 	*stripe.Product
 	Prices []*stripe.Price
+}
+
+type WebhookData struct {
+	EventType, EventID string
+	EventAt            time.Time
+	Data               map[string]any
+}
+
+type IncomingSlackWebhook struct {
+	Channel          string `json:"channel"           validate:"required"`
+	ChannelID        string `json:"channel_id"        validate:"required"`
+	ConfigurationURL string `json:"configuration_url" validate:"required"`
+	URL              string `json:"url"               validate:"required"`
 }

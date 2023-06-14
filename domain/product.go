@@ -21,12 +21,17 @@ func NewProductDomain() *ProductDomain {
 	return &ProductDomain{}
 }
 
-func (p *ProductDomain) ListProductWithPlans(ctx context.Context) ([]pkg.ProductWithPlans, error) {
-	stmt := SELECT(Product.AllColumns, Plan.AllColumns).FROM(
-		Product.LEFT_JOIN(Plan, Plan.ProductID.EQ(Product.ID)),
+func (p *ProductDomain) ListProductWithPlansAndFeatures(
+	ctx context.Context,
+) ([]pkg.ProductWithPlansAndFeatures, error) {
+	stmt := SELECT(Product.AllColumns, Plan.AllColumns, Feature.AllColumns, ProductFeature.AllColumns).FROM(
+		Product.
+			LEFT_JOIN(Plan, Plan.ProductID.EQ(Product.ID)).
+			LEFT_JOIN(ProductFeature, ProductFeature.ProductID.EQ(Product.ID)).
+			LEFT_JOIN(Feature, Feature.ID.EQ(ProductFeature.FeatureID)),
 	)
 
-	var products []pkg.ProductWithPlans
+	var products []pkg.ProductWithPlansAndFeatures
 	err := stmt.QueryContext(ctx, infra.DB, &products)
 	return products, err
 }

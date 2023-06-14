@@ -7,16 +7,20 @@ const (
 	OriginalIPHeader      = "X-Forwarded-For"
 	AuthorizationHeader   = "Authorization"
 	ContentTypeHeader     = "content-type"
+	CacheControlHeader    = "Cache-Control"
 	StripeSignatureHeader = "Stripe-Signature"
 )
 
-const AuthScheme = "Bearer"
+const (
+	AuthScheme   = "Bearer"
+	CacheNoStore = "no-store"
+)
 
 const (
 	MaxRequestPerMinute            = 10
 	ServerShutdownTimeoutInSeconds = 5
 	SentryTraceSampleRate          = 0.2
-	CronCheckIntervalInSeconds     = 30
+	CronCheckIntervalInSeconds     = 11
 	WatchDogCheckIntervalInSeconds = 5
 	MonitorStartDelayInSeconds     = 10
 )

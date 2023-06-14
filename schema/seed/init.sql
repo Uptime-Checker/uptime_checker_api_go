@@ -75,3 +75,8 @@ VALUES('DESTROY_ORGANIZATION', 1);
 -- Job
 INSERT INTO job (status, "on", name, interval, recurring)
 VALUES(1, true, 'SYNC_STRIPE_PRODUCTS', 60, true);
+INSERT INTO job (status, "on", name, interval, recurring)
+VALUES(1, true, 'CHECK_WATCHDOG', 35, true);
+-- Property
+INSERT INTO property (key, value)
+VALUES('WATCHDOG', 'true');

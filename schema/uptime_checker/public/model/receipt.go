@@ -12,22 +12,23 @@ import (
 )
 
 type Receipt struct {
-	ID                 int64 `sql:"primary_key"`
-	Price              float64
-	Currency           string
-	ExternalID         *string
-	ExternalCustomerID *string
-	URL                *string
-	Status             string
-	Paid               bool
-	PaidAt             *time.Time
-	From               *time.Time
-	To                 *time.Time
-	IsTrial            bool
-	PlanID             *int64
-	ProductID          *int64
-	SubscriptionID     *int64
-	OrganizationID     int64
-	InsertedAt         time.Time
-	UpdatedAt          time.Time
+	ID                     int64 `sql:"primary_key"`
+	Price                  float64
+	Currency               string
+	ExternalID             *string
+	ExternalCustomerID     *string
+	ExternalSubscriptionID *string
+	URL                    *string
+	Status                 string
+	Paid                   bool
+	PaidAt                 *time.Time
+	From                   *time.Time
+	To                     *time.Time
+	IsTrial                bool
+	PlanID                 *int64
+	ProductID              *int64
+	SubscriptionID         *int64
+	OrganizationID         int64
+	InsertedAt             time.Time
+	UpdatedAt              time.Time
 }

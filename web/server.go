@@ -44,6 +44,9 @@ func Setup(ctx context.Context, shutdown context.CancelFunc) {
 	// Sentry
 	infra.SetupSentry()
 
+	// Svix - webhook SaaS
+	infra.SetupSvix()
+
 	// NewRelic
 	newRelicApp, err := infra.SetupNewRelic()
 	if err != nil {

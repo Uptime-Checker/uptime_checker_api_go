@@ -2,6 +2,7 @@ package cron
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/cache"
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
+	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
@@ -76,4 +78,20 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 		}
 	})
 	return nil
+}
+
+func (c *Cron) stopTheDog(ctx context.Context) {
+	tid := pkg.GetTracingID(ctx)
+	lgr.Print(tid, 1, "check if we need to stop the dog")
+	watchDogValue := c.propertyService.Get(ctx, resource.PropertyKeyWatchDog)
+	if watchDogValue == nil {
+		runWatchDog, err := strconv.ParseBool(*watchDogValue)
+		if err != nil {
+			sentry.CaptureException(err)
+			return
+		}
+		if !runWatchDog {
+			s.Stop()
+		}
+	}
 }

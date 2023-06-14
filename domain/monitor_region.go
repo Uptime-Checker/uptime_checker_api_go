@@ -43,7 +43,7 @@ func (m *MonitorRegionDomain) Create(
 	return monitorRegion, err
 }
 
-func (m *MonitorRegionDomain) GetAll(
+func (m *MonitorRegionDomain) List(
 	ctx context.Context,
 	monitorID int64,
 ) ([]model.MonitorRegion, error) {

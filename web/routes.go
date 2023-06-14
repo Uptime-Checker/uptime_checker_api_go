@@ -39,6 +39,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	paymentDomain := domain.NewPaymentDomain()
 	organizationDomain := domain.NewOrganizationDomain()
 
+	propertyDomain := domain.NewPropertyDomain()
 	monitorDomain := domain.NewMonitorDomain()
 	checkDomain := domain.NewCheckDomain()
 	monitorStatusDomain := domain.NewMonitorStatusDomain()
@@ -51,6 +52,9 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	alarmDomain := domain.NewAlarmDomain()
 	productDomain := domain.NewProductDomain()
 	planDomain := domain.NewPlanDomain()
+	alarmChannelDomain := domain.NewAlarmChannelDomain()
+	monitorIntegrationDomain := domain.NewMonitorIntegrationDomain()
+	monitorNotificationDomain := domain.NewMonitorNotificationDomain()
 
 	//  ========== Age of the services ==========
 	authService := service.NewAuthService(userDomain)
@@ -65,6 +69,8 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	dailyReportService := service.NewDailyReportService(dailyReportDomain)
 	alarmPolicyService := service.NewAlarmPolicyService(alarmPolicyDomain)
 	productService := service.NewProductService(productDomain)
+	propertyService := service.NewPropertyService(propertyDomain)
+	monitorIntegrationService := service.NewMonitorIntegrationService(monitorIntegrationDomain)
 
 	//  ========== Age of the modules ==========
 	// Setup Watchdog
@@ -74,7 +80,10 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		monitorDomain,
 		monitorRegionDomain,
 		monitorStatusDomain,
+		monitorIntegrationDomain,
 		alarmDomain,
+		alarmChannelDomain,
+		monitorNotificationDomain,
 		checkService,
 		monitorService,
 		monitorRegionService,
@@ -88,10 +97,21 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	runCheckTask := task.NewRunCheckTask(dog, monitorDomain, monitorRegionDomain)
 	startMonitorTask := task.NewStartMonitorTask(dog, monitorDomain, regionDomain, assertionDomain)
 
-	cogman := cron.NewCron(jobDomain, regionDomain, monitorDomain, monitorRegionDomain, syncProductsTask)
+	cogman := cron.NewCron(
+		jobDomain,
+		regionDomain,
+		monitorDomain,
+		monitorRegionDomain,
+		propertyService,
+		syncProductsTask,
+	)
 	wheel := worker.NewWorker(runCheckTask, startMonitorTask)
 
 	//  ========== Age of the routers ==========
+
+	// start - versioned route
+	regionController := controller.NewRegionController(regionDomain)
+	v1.Get("/regions", regionController.List)
 	// User router for auth and user account
 	userRouter := v1.Group("/user")
 	registerUserHandlers(userRouter, userDomain, authService, userService)
@@ -123,6 +143,19 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 
 	productRouter := v1.Group("/product")
 	registerProductHandlers(productRouter, productDomain, userDomain, authService)
+
+	integrationRouter := v1.Group("/integration")
+	registerIntegrationHandlers(
+		integrationRouter,
+		alarmChannelDomain,
+		monitorIntegrationDomain,
+		monitorIntegrationService,
+		authService,
+	)
+
+	alarmChannelRouter := v1.Group("/alarm_channel")
+	registerAlarmChannelHandlers(alarmChannelRouter, alarmChannelDomain, authService)
+	// end - versioned route
 
 	webhookRouter := app.Group("/webhook")
 	registerWebhookHandlers(webhookRouter, paymentService)
@@ -233,7 +266,7 @@ func registerProductHandlers(
 	handler := controller.NewProductController(productDomain, userDomain)
 
 	router.Get("/list/external", auth, handler.ListExternal)
-	router.Get("/list/internal", auth, handler.ListInternal)
+	router.Get("/list/internal", handler.ListInternal)
 	router.Get("/billing/customer", auth, handler.CreateBillingCustomer)
 }
 
@@ -244,4 +277,35 @@ func registerWebhookHandlers(
 	handler := controller.NewWebhookController(paymentService)
 
 	router.Post("/stripe", handler.StripePayment)
+}
+
+func registerIntegrationHandlers(
+	router fiber.Router,
+	alarmChannelDomain *domain.AlarmChannelDomain,
+	monitorIntegrationDomain *domain.MonitorIntegrationDomain,
+	monitorIntegrationService *service.MonitorIntegrationService,
+	authService *service.AuthService,
+) {
+	auth := middlelayer.Protected(authService)
+
+	handler := controller.NewMonitorIntegrationController(
+		alarmChannelDomain,
+		monitorIntegrationDomain,
+		monitorIntegrationService,
+	)
+
+	router.Post("/", auth, handler.Create)
+	router.Get("/list", auth, handler.List)
+}
+
+func registerAlarmChannelHandlers(
+	router fiber.Router,
+	alarmChannelDomain *domain.AlarmChannelDomain,
+	authService *service.AuthService,
+) {
+	auth := middlelayer.Protected(authService)
+
+	handler := controller.NewAlarmChannelController(alarmChannelDomain)
+
+	router.Get("/list", auth, handler.List)
 }

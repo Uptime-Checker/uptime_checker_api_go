@@ -72,3 +72,78 @@ func DeleteUserWithRoleAndSubscription(ctx context.Context, userID int64) {
 func getUserCacheKey(userID int64) string {
 	return fmt.Sprintf("%s_%d", "user", userID)
 }
+
+// ========================================================================
+
+// SetReceiptEventForCustomer caches for 1 hour
+func SetPaymentEventForCustomer(ctx context.Context, key string, eventAt time.Time) {
+	serializedTime, err := json.Marshal(eventAt)
+	if err != nil {
+		sentry.CaptureException(err)
+		return
+	}
+
+	if err := remoteCache.Set(&cache.Item{
+		Ctx: ctx, Key: key, Value: serializedTime, TTL: 1 * time.Hour,
+	}); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func GetPaymentEventForCustomer(ctx context.Context, key string) *time.Time {
+	var serializedTime string
+	if err := remoteCache.Get(ctx, key, &serializedTime); err != nil {
+		return nil
+	}
+	var eventAt time.Time
+	if err := json.Unmarshal([]byte(serializedTime), &eventAt); err != nil {
+		sentry.CaptureException(err)
+	}
+	return &eventAt
+}
+
+func GetReceiptEventKey(customerID string) string {
+	return fmt.Sprintf("receipt_event_%s", customerID)
+}
+
+func GetSubscriptionEventKey(customerID string) string {
+	return fmt.Sprintf("subscription_event_%s", customerID)
+}
+
+// ========================================================================
+// SetInternalProducts caches for 7 days
+func SetInternalProducts(ctx context.Context, products []pkg.ProductWithPlansAndFeatures) {
+	serializedProducts, err := json.Marshal(products)
+	if err != nil {
+		sentry.CaptureException(err)
+		return
+	}
+
+	if err := remoteCache.Set(&cache.Item{
+		Ctx: ctx, Key: getProductsCacheKey(), Value: serializedProducts, TTL: 7 * 24 * time.Hour,
+	}); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func GetInternalProducts(ctx context.Context) *[]pkg.ProductWithPlansAndFeatures {
+	var serializedProducts string
+	if err := remoteCache.Get(ctx, getProductsCacheKey(), &serializedProducts); err != nil {
+		return nil
+	}
+	var products []pkg.ProductWithPlansAndFeatures
+	if err := json.Unmarshal([]byte(serializedProducts), &products); err != nil {
+		sentry.CaptureException(err)
+	}
+	return &products
+}
+
+func DeleteInternalProducts(ctx context.Context) {
+	if err := remoteCache.Delete(ctx, getProductsCacheKey()); err != nil {
+		sentry.CaptureException(err)
+	}
+}
+
+func getProductsCacheKey() string {
+	return "products_internal"
+}

@@ -32,7 +32,7 @@ type config struct {
 
 	SentryDSN string `mapstructure:"SENTRY_DSN"`
 
-	StripeKey        string `mapstructure:"STRIPE_SECRET_KEY"`
+	StripeKey        string `mapstructure:"STRIPE_API_KEY"`
 	StripeWebhookKey string `mapstructure:"STRIPE_WEBHOOK_SIGNING_SECRET"`
 
 	NewRelicApp     string `mapstructure:"NEWRELIC_APP"`
@@ -41,6 +41,8 @@ type config struct {
 	AxiomOrganizationID string `mapstructure:"AXIOM_ORG_ID"`
 	AxiomToken          string `mapstructure:"AXIOM_TOKEN"`
 	AxiomDataset        string `mapstructure:"AXIOM_DATASET"`
+
+	SvixKey string `mapstructure:"SVIX_KEY"`
 }
 
 var (

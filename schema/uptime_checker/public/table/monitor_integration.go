@@ -18,9 +18,9 @@ type monitorIntegrationTable struct {
 
 	//Columns
 	ID             postgres.ColumnInteger
-	Name           postgres.ColumnString
 	Type           postgres.ColumnInteger
 	Config         postgres.ColumnString
+	ExternalID     postgres.ColumnString
 	OrganizationID postgres.ColumnInteger
 	InsertedAt     postgres.ColumnTimestamp
 	UpdatedAt      postgres.ColumnTimestamp
@@ -65,14 +65,14 @@ func newMonitorIntegrationTable(schemaName, tableName, alias string) *MonitorInt
 func newMonitorIntegrationTableImpl(schemaName, tableName, alias string) monitorIntegrationTable {
 	var (
 		IDColumn             = postgres.IntegerColumn("id")
-		NameColumn           = postgres.StringColumn("name")
 		TypeColumn           = postgres.IntegerColumn("type")
 		ConfigColumn         = postgres.StringColumn("config")
+		ExternalIDColumn     = postgres.StringColumn("external_id")
 		OrganizationIDColumn = postgres.IntegerColumn("organization_id")
 		InsertedAtColumn     = postgres.TimestampColumn("inserted_at")
 		UpdatedAtColumn      = postgres.TimestampColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, NameColumn, TypeColumn, ConfigColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{NameColumn, TypeColumn, ConfigColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		allColumns           = postgres.ColumnList{IDColumn, TypeColumn, ConfigColumn, ExternalIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{TypeColumn, ConfigColumn, ExternalIDColumn, OrganizationIDColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return monitorIntegrationTable{
@@ -80,9 +80,9 @@ func newMonitorIntegrationTableImpl(schemaName, tableName, alias string) monitor
 
 		//Columns
 		ID:             IDColumn,
-		Name:           NameColumn,
 		Type:           TypeColumn,
 		Config:         ConfigColumn,
+		ExternalID:     ExternalIDColumn,
 		OrganizationID: OrganizationIDColumn,
 		InsertedAt:     InsertedAtColumn,
 		UpdatedAt:      UpdatedAtColumn,

@@ -28,6 +28,9 @@ const (
 	ErrBillingCustomerCreateFailed = "failed to create billing customer"
 	ErrBillingCustomerUpdateFailed = "failed to update billing customer"
 	ErrFailedToGetMonitor          = "failed to get monitor"
+	ErrFailedToCreateIntegration   = "failed to create integration"
+	ErrFailedToListIntegration     = "failed to list integrations"
+	ErrFailedToListAlarmChannels   = "failed to list alarm channels"
 	ErrMonitorNotFound             = "monitor not found"
 	ErrMalformedJWT                = "missing or malformed JWT"
 	ErrDryRunFailed                = "dry run failed"
@@ -43,6 +46,9 @@ var (
 	ErrMaxTimeoutExceeded           = errors.New("max timeout exceeded")
 	ErrHeaderKeyNeeded              = errors.New("header key needed")
 	ErrStatusCodeAssertionRequired  = errors.New("status code assertion required")
+	ErrWebhookURLRequired           = errors.New("webhook URL is required")
+	ErrAccessTokenRequired          = errors.New("access token is required")
+	ErrIncomingWebhookRequired      = errors.New("incoming webhook is required")
 )
 
 var Validate = validator.New()

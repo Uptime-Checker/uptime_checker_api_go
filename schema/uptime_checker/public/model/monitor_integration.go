@@ -13,9 +13,9 @@ import (
 
 type MonitorIntegration struct {
 	ID             int64 `sql:"primary_key"`
-	Name           *string
-	Type           *int32
-	Config         *string
+	Type           int32
+	Config         string
+	ExternalID     *string
 	OrganizationID int64
 	InsertedAt     time.Time
 	UpdatedAt      time.Time

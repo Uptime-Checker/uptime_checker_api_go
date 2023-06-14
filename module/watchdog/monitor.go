@@ -19,8 +19,10 @@ func (w *WatchDog) verify(
 	ctx context.Context,
 	tx *sql.Tx,
 	check *model.Check,
+	errorLog *model.ErrorLog,
 	monitor *model.Monitor,
 	monitorRegion *model.MonitorRegion,
+	dailyReport *model.DailyReport,
 ) error {
 	tracingID := pkg.GetTracingID(ctx)
 	alarmPolicy, err := w.alarmPolicyService.Get(ctx, monitor.ID, monitor.OrganizationID)
@@ -60,7 +62,7 @@ func (w *WatchDog) verify(
 		return errors.Newf("failed to update monitor consecutive count, err: %w", err)
 	}
 
-	return w.alarmCheck(ctx, tx, monitor, check, status)
+	return w.alarmCheck(ctx, tx, check, errorLog, monitor, status, dailyReport)
 }
 
 func (w *WatchDog) handleAlarmPolicy(
@@ -91,7 +93,7 @@ func (w *WatchDog) handleAlarmPolicy(
 				}
 			}
 		case resource.AlarmPolicyRegionThreshold:
-			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
+			monitorRegions, err := w.monitorRegionDomain.List(ctx, monitor.ID)
 			if err != nil {
 				return status, errors.Newf("failed to get monitor regions, err: %w", err)
 			}
@@ -117,7 +119,7 @@ func (w *WatchDog) handleAlarmPolicy(
 				status = resource.MonitorStatusPassing
 			}
 		case resource.AlarmPolicyRegionThreshold:
-			monitorRegions, err := w.monitorRegionDomain.GetAll(ctx, monitor.ID)
+			monitorRegions, err := w.monitorRegionDomain.List(ctx, monitor.ID)
 			if err != nil {
 				return status, errors.Newf("failed to get monitor regions, err: %w", err)
 			}

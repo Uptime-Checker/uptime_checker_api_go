@@ -197,9 +197,9 @@ create index if not exists check_monitor_id_index on "check" (monitor_id);
 create index if not exists check_organization_id_index on "check" (organization_id);
 create table if not exists monitor_integration (
     id bigserial,
-    name varchar(255),
-    type integer,
-    config jsonb,
+    type integer not null,
+    config jsonb not null,
+    external_id varchar(255),
     organization_id bigint not null,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
@@ -309,7 +309,8 @@ create index if not exists daily_report_organization_id_index on daily_report (o
 create unique index if not exists daily_report_date_monitor_id_index on daily_report (date, monitor_id);
 create table if not exists monitor_notification (
     id bigserial,
-    type integer,
+    type integer not null,
+    external_id varchar(255),
     successful boolean default true not null,
     alarm_id bigint,
     monitor_id bigint not null,
@@ -342,6 +343,14 @@ create table if not exists guest_user (
 );
 create unique index if not exists guest_user_code_index on guest_user (code);
 create index if not exists guest_user_expires_at_index on guest_user (expires_at);
+create table if not exists property (
+    id bigserial,
+    key varchar(255) not null,
+    value varchar(255) not null,
+    inserted_at timestamp(0) not null default now(),
+    updated_at timestamp(0) not null default now(),
+    primary key (id)
+);
 create table if not exists invitation (
     id bigserial,
     email varchar(255) not null,
@@ -420,6 +429,7 @@ create table if not exists subscription (
     starts_at timestamp(0),
     expires_at timestamp(0),
     canceled_at timestamp(0),
+    cancellation_reason varchar(1000),
     is_trial boolean default false not null,
     external_id varchar(255),
     external_customer_id varchar(255),
@@ -447,6 +457,7 @@ create table if not exists receipt (
     currency varchar(255) default 'usd'::character varying not null,
     external_id varchar(255),
     external_customer_id varchar(255),
+    external_subscription_id varchar(255),
     url varchar(255),
     status varchar(255) not null,
     paid boolean default false not null,
@@ -550,6 +561,7 @@ drop table "check";
 drop table region;
 drop table user_contact;
 drop table guest_user;
+drop table property;
 drop table invitation;
 drop table organization_user;
 drop table receipt;

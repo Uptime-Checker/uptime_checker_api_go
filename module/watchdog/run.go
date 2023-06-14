@@ -22,12 +22,15 @@ import (
 )
 
 type WatchDog struct {
-	checkDomain         *domain.CheckDomain
-	regionDomain        *domain.RegionDomain
-	monitorDomain       *domain.MonitorDomain
-	monitorRegionDomain *domain.MonitorRegionDomain
-	monitorStatusDomain *domain.MonitorStatusDomain
-	alarmDomain         *domain.AlarmDomain
+	checkDomain               *domain.CheckDomain
+	regionDomain              *domain.RegionDomain
+	monitorDomain             *domain.MonitorDomain
+	monitorRegionDomain       *domain.MonitorRegionDomain
+	monitorStatusDomain       *domain.MonitorStatusDomain
+	monitorIntegrationDomain  *domain.MonitorIntegrationDomain
+	alarmDomain               *domain.AlarmDomain
+	alarmChannelDomain        *domain.AlarmChannelDomain
+	monitorNotificationDomain *domain.MonitorNotificationnDomain
 
 	checkService         *service.CheckService
 	monitorService       *service.MonitorService
@@ -43,7 +46,10 @@ func NewWatchDog(
 	monitorDomain *domain.MonitorDomain,
 	monitorRegionDomain *domain.MonitorRegionDomain,
 	monitorStatusDomain *domain.MonitorStatusDomain,
+	monitorIntegrationDomain *domain.MonitorIntegrationDomain,
 	alarmDomain *domain.AlarmDomain,
+	alarmChannelDomain *domain.AlarmChannelDomain,
+	monitorNotificationDomain *domain.MonitorNotificationnDomain,
 	checkService *service.CheckService,
 	monitorService *service.MonitorService,
 	monitorRegionService *service.MonitorRegionService,
@@ -52,18 +58,21 @@ func NewWatchDog(
 	alarmPolicyService *service.AlarmPolicyService,
 ) *WatchDog {
 	return &WatchDog{
-		checkDomain:          checkDomain,
-		regionDomain:         regionDomain,
-		monitorDomain:        monitorDomain,
-		monitorRegionDomain:  monitorRegionDomain,
-		monitorStatusDomain:  monitorStatusDomain,
-		alarmDomain:          alarmDomain,
-		checkService:         checkService,
-		monitorService:       monitorService,
-		monitorRegionService: monitorRegionService,
-		errorLogService:      errorLogService,
-		dailyReportService:   dailyReportService,
-		alarmPolicyService:   alarmPolicyService,
+		checkDomain:               checkDomain,
+		regionDomain:              regionDomain,
+		monitorDomain:             monitorDomain,
+		monitorRegionDomain:       monitorRegionDomain,
+		monitorStatusDomain:       monitorStatusDomain,
+		monitorIntegrationDomain:  monitorIntegrationDomain,
+		alarmDomain:               alarmDomain,
+		alarmChannelDomain:        alarmChannelDomain,
+		monitorNotificationDomain: monitorNotificationDomain,
+		checkService:              checkService,
+		monitorService:            monitorService,
+		monitorRegionService:      monitorRegionService,
+		errorLogService:           errorLogService,
+		dailyReportService:        dailyReportService,
+		alarmPolicyService:        alarmPolicyService,
 	}
 }
 
@@ -81,7 +90,7 @@ func (w *WatchDog) Launch(
 	}
 
 	if err := infra.Transaction(ctx, func(tx *sql.Tx) error {
-		check, err := w.run(
+		check, errorLog, err := w.run(
 			ctx, tx, check, monitor.Monitor, monitor.Assertions, hitResponse, hitErr,
 		)
 		if err != nil {
@@ -90,12 +99,14 @@ func (w *WatchDog) Launch(
 		lgr.Print(tracingID, 1, "check ran, successful:", check.Success,
 			"duration:", fmt.Sprintf("%dms", *check.Duration))
 		// Insert to the daily report
-		_, err = w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
+		dailyReport, err := w.dailyReportService.Add(ctx, tx, monitor.ID, monitor.OrganizationID, check.Success)
 		if err != nil {
 			return errors.Newf("daily report add failed, err: %w", err)
 		}
 		// Send for verification and alarm
-		return w.verify(ctx, tx, check, monitor.Monitor, monitorRegionWithAssertions.MonitorRegion)
+		return w.verify(
+			ctx, tx, check, errorLog, monitor.Monitor, monitorRegionWithAssertions.MonitorRegion, dailyReport,
+		)
 	}); err != nil {
 		sentry.CaptureException(err)
 	}
@@ -133,7 +144,7 @@ func (w *WatchDog) startMonitor(
 	}
 
 	return infra.Transaction(ctx, func(tx *sql.Tx) error {
-		check, err := w.run(
+		check, _, err := w.run(
 			ctx, tx, check, monitor, assertions, hitResponse, hitErr,
 		)
 		if err != nil {
@@ -208,16 +219,19 @@ func (w *WatchDog) run(
 	monitor *model.Monitor,
 	assertions []model.Assertion,
 	hitResponse *HitResponse, hitError *HitErr,
-) (*model.Check, error) {
+) (*model.Check, *model.ErrorLog, error) {
 	tracingID := pkg.GetTracingID(ctx)
+
+	var err error
+	var errorLog *model.ErrorLog
 	method := resource.GetMonitorMethod(*monitor.Method)
 
 	if hitResponse == nil && hitError != nil {
 		lgr.Print(tracingID, 1, "hit request failed", method, monitor.URL)
 		// Create error log
-		_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
+		errorLog, err = w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil, &hitError.Text, hitError.Type)
 		if err != nil {
-			return check, errors.Newf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
+			return check, nil, errors.Newf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
 		}
 	} else {
 		checkSuccess := true
@@ -235,31 +249,31 @@ func (w *WatchDog) run(
 		} else {
 			checkSuccess = false
 			// Create error log
-			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil,
+			errorLog, err = w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, nil,
 				&hitError.Text, hitError.Type)
 			if err != nil {
-				return check, errors.Newf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
+				return check, nil, errors.Newf("failed to create error log, check %d, err: %w", check.ID, err)
 			}
 		}
 
 		if failedAssertion != nil {
 			checkSuccess = false
 			// Create error log
-			_, err := w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID),
+			errorLog, err = w.errorLogService.Create(ctx, tx, monitor.ID, check.ID, lo.ToPtr(failedAssertion.ID),
 				nil, resource.ErrorLogTypeAssertionFailure)
 			if err != nil {
-				return check, errors.Newf("failed to create error log, monitor %d, err: %w", monitor.ID, err)
+				return check, nil, errors.Newf("failed to create error log, check %d, err: %w", check.ID, err)
 			}
 		}
 
 		// update the check
-		check, err := w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
+		check, err = w.checkService.Update(ctx, tx, check, checkSuccess, hitResponse.Duration, hitResponse.Size,
 			hitResponse.StatusCode, hitResponse.ContentType, hitResponse.Body, hitResponse.Headers, hitResponse.Traces)
 		if err != nil {
-			return check, errors.Newf("failed to update checl %d, monitor %d, err: %w", check.ID, monitor.ID, err)
+			return check, nil, errors.Newf("failed to update check %d, err: %w", check.ID, err)
 		}
 	}
-	return check, nil
+	return check, errorLog, nil
 }
 
 func (w *WatchDog) gateCheck() {
