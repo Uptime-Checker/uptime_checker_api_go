@@ -59,7 +59,7 @@ func (m *MonitorIntegrationDomain) List(
 	return monitorIntegrations, err
 }
 
-func (c *MonitorIntegrationDomain) Update(
+func (m *MonitorIntegrationDomain) Update(
 	ctx context.Context,
 	tx *sql.Tx,
 	id int64,

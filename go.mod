@@ -16,7 +16,7 @@ require (
 	github.com/gofiber/contrib/fibersentry v1.0.2
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
-	github.com/hibiken/asynq v0.24.1
+	github.com/hibiken/asynq v0.24.0
 	github.com/hibiken/asynqmon v0.7.1
 	github.com/imroc/req/v3 v3.35.2
 	github.com/jackc/pgx/v5 v5.3.1
@@ -121,7 +121,6 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230525234025-438c736192d0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/grpc v1.55.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

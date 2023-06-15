@@ -34,12 +34,18 @@ func (m *MonitorIntegrationService) Create(
 		return nil, err
 	}
 
-	prevIntegration, _ := m.findIntegrationFromType(ctx, organization.ID, monitorIntegrationType)
+	prevIntegration, err := m.findIntegrationFromType(ctx, organization.ID, monitorIntegrationType)
+	if err != nil {
+		return nil, err
+	}
 	if prevIntegration != nil {
 		now := times.Now()
 		prevIntegration.Config = string(jsonConfig)
 		prevIntegration.UpdatedAt = now
-		m.monitorIntegrationDomain.Update(ctx, tx, prevIntegration.ID, prevIntegration)
+		_, err := m.monitorIntegrationDomain.Update(ctx, tx, prevIntegration.ID, prevIntegration)
+		if err != nil {
+			return nil, err
+		}
 
 		return prevIntegration, nil
 	}
