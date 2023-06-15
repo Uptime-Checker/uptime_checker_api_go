@@ -145,7 +145,13 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	registerProductHandlers(productRouter, productDomain, userDomain, authService)
 
 	integrationRouter := v1.Group("/integration")
-	registerIntegrationHandlers(integrationRouter, alarmChannelDomain, monitorIntegrationDomain, monitorIntegrationService, authService)
+	registerIntegrationHandlers(
+		integrationRouter,
+		alarmChannelDomain,
+		monitorIntegrationDomain,
+		monitorIntegrationService,
+		authService,
+	)
 
 	alarmChannelRouter := v1.Group("/alarm_channel")
 	registerAlarmChannelHandlers(alarmChannelRouter, alarmChannelDomain, authService)
@@ -282,13 +288,21 @@ func registerIntegrationHandlers(
 ) {
 	auth := middlelayer.Protected(authService)
 
-	handler := controller.NewMonitorIntegrationController(alarmChannelDomain, monitorIntegrationDomain, monitorIntegrationService)
+	handler := controller.NewMonitorIntegrationController(
+		alarmChannelDomain,
+		monitorIntegrationDomain,
+		monitorIntegrationService,
+	)
 
 	router.Post("/", auth, handler.Create)
 	router.Get("/list", auth, handler.List)
 }
 
-func registerAlarmChannelHandlers(router fiber.Router, alarmChannelDomain *domain.AlarmChannelDomain, authService *service.AuthService) {
+func registerAlarmChannelHandlers(
+	router fiber.Router,
+	alarmChannelDomain *domain.AlarmChannelDomain,
+	authService *service.AuthService,
+) {
 	auth := middlelayer.Protected(authService)
 
 	handler := controller.NewAlarmChannelController(alarmChannelDomain)
