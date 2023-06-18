@@ -249,10 +249,10 @@ func registerMonitorHandlers(
 	)
 
 	router.Post("/", auth, handler.Create)
-	router.Get("/:id", auth, handler.Get)
 	router.Post("/start", auth, handler.Start)
 	router.Post("/dry", auth, handler.DryRun)
 	router.Get("/list", auth, handler.ListMonitors)
+	router.Get("/:id", auth, handler.Get)
 }
 
 func registerProductHandlers(
