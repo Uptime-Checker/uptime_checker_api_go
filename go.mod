@@ -11,13 +11,11 @@ require (
 	github.com/go-jet/jet/v2 v2.10.0
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/go-redis/cache/v9 v9.0.0
-	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/contrib/fibernewrelic v1.1.4
 	github.com/gofiber/contrib/fibersentry v1.0.2
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/hibiken/asynq v0.24.0
-	github.com/hibiken/asynqmon v0.7.1
 	github.com/imroc/req/v3 v3.35.2
 	github.com/jackc/pgx/v5 v5.3.1
 	github.com/jinzhu/copier v0.3.5
@@ -61,7 +59,6 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20230602150820-91b7bce49751 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

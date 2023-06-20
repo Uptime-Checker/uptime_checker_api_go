@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vgarvardt/gue/v5"
 	"github.com/vgarvardt/gue/v5/adapter"
@@ -19,10 +18,8 @@ import (
 )
 
 var (
-	gueWheel         *gue.Client
-	asynqWheel       *asynq.Client
-	asynqWheelServer *asynq.Server
-	dbPoolAdapter    adapter.ConnPool
+	gueWheel      *gue.Client
+	dbPoolAdapter adapter.ConnPool
 )
 
 // Task list
@@ -66,7 +63,8 @@ func (w *Worker) StartGue(ctx context.Context) error {
 	}
 
 	workMap := gue.WorkMap{
-		TaskRunCheck: w.runCheckTask.Do,
+		TaskRunCheck:     w.runCheckTask.Do,
+		TaskStartMonitor: w.startMonitorTask.Do,
 	}
 
 	// create a pool of workers
@@ -86,31 +84,8 @@ func (w *Worker) StartGue(ctx context.Context) error {
 		if err := workers.Run(ctx); err != nil {
 			panic(err)
 		}
+		lgr.Print(tracingID, "gue worker started with", config.App.WorkerPool, "worker pool")
 	}()
-	lgr.Print(tracingID, "slow worker started with", config.App.WorkerPool, "worker pool")
-	return nil
-}
-
-func (w *Worker) StartAsynq(ctx context.Context) error {
-	tracingID := pkg.GetTracingID(ctx)
-
-	redisClientOpt := asynq.RedisClientOpt{
-		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
-	}
-	asynqWheel = asynq.NewClient(redisClientOpt)
-	asynqWheelServer = asynq.NewServer(redisClientOpt, asynq.Config{
-		Concurrency: config.App.RedisQueuePool, Logger: lgr.Zapper,
-	})
-
-	mux := asynq.NewServeMux()
-	mux.Handle(TaskStartMonitor, w.startMonitorTask)
-
-	go func() {
-		if err := asynqWheelServer.Run(mux); err != nil {
-			panic(err)
-		}
-	}()
-	lgr.Print(tracingID, "fast worker started with", config.App.RedisQueuePool, "worker pool")
 	return nil
 }
 
@@ -118,15 +93,7 @@ func GueEnqueue(ctx context.Context, job *gue.Job) error {
 	return gueWheel.Enqueue(ctx, job)
 }
 
-func AsynqEnqueue(ctx context.Context, t *asynq.Task) (*asynq.TaskInfo, error) {
-	return asynqWheel.EnqueueContext(ctx, t)
-}
-
 func Shutdown() {
-	asynqWheelServer.Shutdown()
-	if err := asynqWheel.Close(); err != nil {
-		sentry.CaptureException(err)
-	}
 	if err := dbPoolAdapter.Close(); err != nil {
 		sentry.CaptureException(err)
 	}

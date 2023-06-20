@@ -40,7 +40,7 @@ func NewStartMonitorTask(
 	}
 }
 
-func (s StartMonitorTask) ProcessTask(ctx context.Context, t *asynq.Task) error {
+func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
 	return s.process(ctx, t.Payload())
 }
 

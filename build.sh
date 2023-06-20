@@ -33,6 +33,7 @@ fi
 
 go mod verify
 go mod vendor
+go mod tidy
 
 ./format.sh
 go build -o bin/${PROJ}

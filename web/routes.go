@@ -2,14 +2,9 @@ package web
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
-	"github.com/hibiken/asynq"
-	"github.com/hibiken/asynqmon"
 
-	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/cron"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/watchdog"
@@ -160,15 +155,6 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	webhookRouter := app.Group("/webhook")
 	registerWebhookHandlers(webhookRouter, paymentService)
 
-	redisClientOpt := asynq.RedisClientOpt{
-		Addr: config.App.RedisQueue, Username: config.App.RedisQueueUser, Password: config.App.RedisQueuePass,
-	}
-	fastWheelMonitoring := asynqmon.New(asynqmon.Options{
-		RootPath:     "/wheel/fast/monitoring", // RootPath specifies the root for asynqmon app
-		RedisConnOpt: redisClientOpt,
-	})
-	app.All(fmt.Sprintf("%s/*", fastWheelMonitoring.RootPath()), adaptor.HTTPHandler(fastWheelMonitoring))
-
 	// 404 Handler
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
@@ -177,13 +163,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 		if err := cogman.Start(ctx); err != nil {
 			panic(err)
 		}
-		if err := wheel.StartGue(ctx); err != nil {
-			panic(err)
-		}
-		if err := wheel.StartAsynq(ctx); err != nil {
-			panic(err)
-		}
-		return nil
+		return wheel.StartGue(ctx)
 	})
 }
 
