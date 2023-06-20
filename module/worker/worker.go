@@ -84,8 +84,8 @@ func (w *Worker) StartGue(ctx context.Context) error {
 		if err := workers.Run(ctx); err != nil {
 			panic(err)
 		}
-		lgr.Print(tracingID, "gue worker started with", config.App.WorkerPool, "worker pool")
 	}()
+	lgr.Print(tracingID, "gue worker started with", config.App.WorkerPool, "worker pool")
 	return nil
 }
 
