@@ -18,3 +18,8 @@ jet -source=postgresql -host=localhost -port=5432 -user=postgres -password=passw
 ```cmd
 go list -mod=mod -u -m -json all | go-mod-outdated -direct -update
 ```
+
+### Update All Dependencies
+```cmd
+go get -u ./...
+```
