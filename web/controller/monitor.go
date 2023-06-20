@@ -185,7 +185,7 @@ func (m *MonitorController) Create(c *fiber.Ctx) error {
 		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrMonitorCreateFailed, err)
 	}
 
-	// StartOn the monitor asynchronously
+	// Start the monitor asynchronously
 	if err := client.StartMonitorAsync(ctx, monitor.ID); err != nil {
 		return resp.SendError(c, fiber.StatusInternalServerError, err)
 	}

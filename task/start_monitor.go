@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/hibiken/asynq"
+	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/config"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
@@ -41,7 +41,7 @@ func NewStartMonitorTask(
 }
 
 func (s StartMonitorTask) Do(ctx context.Context, job *gue.Job) error {
-	return s.process(ctx, t.Payload())
+	return s.process(ctx, job.Args)
 }
 
 func (s StartMonitorTask) process(ctx context.Context, payload []byte) error {

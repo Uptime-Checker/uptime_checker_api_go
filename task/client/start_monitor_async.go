@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/hibiken/asynq"
+	"github.com/vgarvardt/gue/v5"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra/lgr"
 	"github.com/Uptime-Checker/uptime_checker_api_go/module/worker"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/task"
 )
 
@@ -25,11 +26,6 @@ func StartMonitorAsync(ctx context.Context, monitorID int64) error {
 		return err
 	}
 
-	t := asynq.NewTask(worker.TaskStartMonitor, payload)
-	info, err := worker.AsynqEnqueue(ctx, t)
-	if err != nil {
-		return err
-	}
-	lgr.Print(tid, 2, "start monitor task sent", info.ID, info.State.String())
-	return nil
+	job := &gue.Job{Type: worker.TaskStartMonitor, RunAt: times.Now(), Args: payload}
+	return worker.GueEnqueue(ctx, job)
 }
