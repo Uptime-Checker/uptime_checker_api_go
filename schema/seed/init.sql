@@ -1,14 +1,14 @@
 -- Insert Regions
-INSERT INTO region (name, key)
-VALUES('Sunnyvale, California (US)', 'sjc');
-INSERT INTO region (name, key)
-VALUES('Frankfurt, Germany', 'fra');
-INSERT INTO region (name, key)
-VALUES('Singapore', 'sin');
-INSERT INTO region (name, key)
-VALUES('Sydney, Australia', 'syd');
-INSERT INTO region (name, key)
-VALUES('Toronto, Canada', 'yyz');
+INSERT INTO region (name, key, `default`)
+VALUES('Sunnyvale, California (US)', 'sjc', true);
+INSERT INTO region (name, key, `default`)
+VALUES('Frankfurt, Germany', 'fra', true);
+INSERT INTO region (name, key, `default`)
+VALUES('Singapore', 'sin', false);
+INSERT INTO region (name, key, `default`)
+VALUES('Sydney, Australia', 'syd', false);
+INSERT INTO region (name, key, `default`)
+VALUES('Toronto, Canada', 'yyz', false);
 -- Insert Roles
 INSERT INTO role (name, type)
 VALUES('Super Admin', 1);
