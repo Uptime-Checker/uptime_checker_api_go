@@ -233,6 +233,7 @@ func registerMonitorHandlers(
 	router.Post("/dry", auth, handler.DryRun)
 	router.Get("/list", auth, handler.ListMonitors)
 	router.Get("/:id", auth, handler.Get)
+	router.Get("/:id/all", auth, handler.GetAll)
 }
 
 func registerProductHandlers(

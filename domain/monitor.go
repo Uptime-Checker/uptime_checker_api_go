@@ -10,6 +10,7 @@ import (
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/infra"
+	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
@@ -39,6 +40,27 @@ func (m *MonitorDomain) Get(
 	stmt := SELECT(Monitor.AllColumns).FROM(Monitor).WHERE(Monitor.ID.EQ(Int(monitorID))).LIMIT(1)
 
 	monitor := &model.Monitor{}
+	err := stmt.QueryContext(ctx, infra.DB, monitor)
+	return monitor, err
+}
+
+func (m *MonitorDomain) GetAll(
+	ctx context.Context,
+	monitorID int64,
+) (*pkg.MonitorWithResources, error) {
+	stmt := SELECT(
+		Monitor.AllColumns,
+		Region.AllColumns,
+		Assertion.AllColumns,
+	).
+		FROM(
+			Monitor.
+				LEFT_JOIN(MonitorRegion, MonitorRegion.MonitorID.EQ(Monitor.ID)).
+				LEFT_JOIN(Region, MonitorRegion.RegionID.EQ(Region.ID)).
+				LEFT_JOIN(Assertion, Assertion.MonitorID.EQ(Monitor.ID)),
+		).WHERE(Monitor.ID.EQ(Int(monitorID))).LIMIT(1)
+
+	monitor := &pkg.MonitorWithResources{}
 	err := stmt.QueryContext(ctx, infra.DB, monitor)
 	return monitor, err
 }

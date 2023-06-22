@@ -55,6 +55,12 @@ type MonitorRegionWithAssertions struct {
 	}
 }
 
+type MonitorWithResources struct {
+	*model.Monitor
+	Regions    []model.Region
+	Assertions []model.Assertion
+}
+
 type OrganizationUserRole struct {
 	*model.OrganizationUser
 	Role         *model.Role

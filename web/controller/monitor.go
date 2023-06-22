@@ -129,6 +129,18 @@ func (m *MonitorController) Get(c *fiber.Ctx) error {
 	return resp.ServeData(c, fiber.StatusOK, monitor)
 }
 
+func (m *MonitorController) GetAll(c *fiber.Ctx) error {
+	monitorID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return resp.SendError(c, fiber.StatusUnprocessableEntity, err)
+	}
+	monitor, err := m.monitorDomain.GetAll(c.Context(), int64(monitorID))
+	if err != nil {
+		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToGetMonitor, err)
+	}
+	return resp.ServeData(c, fiber.StatusOK, monitor)
+}
+
 func (m *MonitorController) Create(c *fiber.Ctx) error {
 	ctx := c.Context()
 	body := new(MonitorBody)
