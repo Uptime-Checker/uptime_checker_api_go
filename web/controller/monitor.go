@@ -124,7 +124,7 @@ func (m *MonitorController) Get(c *fiber.Ctx) error {
 	}
 	monitor, err := m.monitorDomain.Get(c.Context(), int64(monitorID))
 	if err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToGetMonitor, err)
+		return resp.ServeError(c, fiber.StatusNotFound, resp.ErrFailedToGetMonitor, err)
 	}
 	return resp.ServeData(c, fiber.StatusOK, monitor)
 }
@@ -136,7 +136,7 @@ func (m *MonitorController) GetAll(c *fiber.Ctx) error {
 	}
 	monitor, err := m.monitorDomain.GetAll(c.Context(), int64(monitorID))
 	if err != nil {
-		return resp.ServeError(c, fiber.StatusBadRequest, resp.ErrFailedToGetMonitor, err)
+		return resp.ServeError(c, fiber.StatusNotFound, resp.ErrFailedToGetMonitor, err)
 	}
 	return resp.ServeData(c, fiber.StatusOK, monitor)
 }
