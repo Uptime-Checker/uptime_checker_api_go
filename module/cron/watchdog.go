@@ -61,6 +61,8 @@ func (c *Cron) watchTheDog(ctx context.Context, tid string) error {
 				sentry.CaptureException(err)
 				return
 			}
+			// oldestCheckedMonitorRegion cannot be nil since to create a monitor we run it successfully at least
+			// once. We create the monitor region at that time. So there should be at least 1 monitor region available.
 			oldestCheckedMonitorRegion, err := c.monitorRegionDomain.GetOldestChecked(ctx, monitor.ID)
 			if err != nil {
 				lgr.Error(tid, 4, "failed to get the oldest monitor region", err)

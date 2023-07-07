@@ -33,3 +33,7 @@ const (
 	StripeInvoicePaid                 = "invoice.paid"
 	StripeInvoicePaymentFailed        = "invoice.payment_failed"
 )
+
+const (
+	AllGoodStatusCode = "200..299"
+)

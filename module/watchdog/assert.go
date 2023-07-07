@@ -8,12 +8,9 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/samber/lo"
 
+	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
-)
-
-const (
-	allGoodStatusCode = "200..299"
 )
 
 func (w *WatchDog) Assert(source int32, property *string, comparison int32, value string, resp HitResponse) bool {
@@ -35,7 +32,7 @@ func (w *WatchDog) Assert(source int32, property *string, comparison int32, valu
 }
 
 func assertStatusCode(assertionComparison resource.AssertionComparison, value string, statusCode int) bool {
-	if value == allGoodStatusCode {
+	if value == constant.AllGoodStatusCode {
 		return checkSuccessStatusCode(statusCode)
 	}
 
