@@ -17,11 +17,13 @@ type organizationTable struct {
 	postgres.Table
 
 	//Columns
-	ID         postgres.ColumnInteger
-	Name       postgres.ColumnString
-	Slug       postgres.ColumnString
-	InsertedAt postgres.ColumnTimestamp
-	UpdatedAt  postgres.ColumnTimestamp
+	ID                    postgres.ColumnInteger
+	Name                  postgres.ColumnString
+	Slug                  postgres.ColumnString
+	AlarmReminderInterval postgres.ColumnInteger
+	AlarmReminderCount    postgres.ColumnInteger
+	InsertedAt            postgres.ColumnTimestamp
+	UpdatedAt             postgres.ColumnTimestamp
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -62,24 +64,28 @@ func newOrganizationTable(schemaName, tableName, alias string) *OrganizationTabl
 
 func newOrganizationTableImpl(schemaName, tableName, alias string) organizationTable {
 	var (
-		IDColumn         = postgres.IntegerColumn("id")
-		NameColumn       = postgres.StringColumn("name")
-		SlugColumn       = postgres.StringColumn("slug")
-		InsertedAtColumn = postgres.TimestampColumn("inserted_at")
-		UpdatedAtColumn  = postgres.TimestampColumn("updated_at")
-		allColumns       = postgres.ColumnList{IDColumn, NameColumn, SlugColumn, InsertedAtColumn, UpdatedAtColumn}
-		mutableColumns   = postgres.ColumnList{NameColumn, SlugColumn, InsertedAtColumn, UpdatedAtColumn}
+		IDColumn                    = postgres.IntegerColumn("id")
+		NameColumn                  = postgres.StringColumn("name")
+		SlugColumn                  = postgres.StringColumn("slug")
+		AlarmReminderIntervalColumn = postgres.IntegerColumn("alarm_reminder_interval")
+		AlarmReminderCountColumn    = postgres.IntegerColumn("alarm_reminder_count")
+		InsertedAtColumn            = postgres.TimestampColumn("inserted_at")
+		UpdatedAtColumn             = postgres.TimestampColumn("updated_at")
+		allColumns                  = postgres.ColumnList{IDColumn, NameColumn, SlugColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, InsertedAtColumn, UpdatedAtColumn}
+		mutableColumns              = postgres.ColumnList{NameColumn, SlugColumn, AlarmReminderIntervalColumn, AlarmReminderCountColumn, InsertedAtColumn, UpdatedAtColumn}
 	)
 
 	return organizationTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:         IDColumn,
-		Name:       NameColumn,
-		Slug:       SlugColumn,
-		InsertedAt: InsertedAtColumn,
-		UpdatedAt:  UpdatedAtColumn,
+		ID:                    IDColumn,
+		Name:                  NameColumn,
+		Slug:                  SlugColumn,
+		AlarmReminderInterval: AlarmReminderIntervalColumn,
+		AlarmReminderCount:    AlarmReminderCountColumn,
+		InsertedAt:            InsertedAtColumn,
+		UpdatedAt:             UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

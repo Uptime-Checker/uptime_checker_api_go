@@ -12,9 +12,11 @@ import (
 )
 
 type Organization struct {
-	ID         int64 `sql:"primary_key"`
-	Name       string
-	Slug       string
-	InsertedAt time.Time
-	UpdatedAt  time.Time
+	ID                    int64 `sql:"primary_key"`
+	Name                  string
+	Slug                  string
+	AlarmReminderInterval int32
+	AlarmReminderCount    int32
+	InsertedAt            time.Time
+	UpdatedAt             time.Time
 }

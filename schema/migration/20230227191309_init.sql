@@ -13,6 +13,8 @@ create table if not exists organization (
     id bigserial,
     name varchar(255) not null,
     slug varchar(255) not null,
+    alarm_reminder_interval integer default 300 not null,
+    alarm_reminder_count integer default 5 not null,
     inserted_at timestamp(0) not null default now(),
     updated_at timestamp(0) not null default now(),
     primary key (id)
