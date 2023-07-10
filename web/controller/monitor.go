@@ -75,11 +75,11 @@ type MonitorBody struct {
 	Password *string `json:"password" validate:"required_with=username"`
 
 	GlobalAlarmSettings   bool   `json:"globalAlarmSettings"   validate:"required"`
-	AlarmReminderInterval *int32 `json:"alarmReminderInterval" validate:"min=600,max=3600"`
-	AlarmReminderCount    *int32 `json:"alarmReminderCount"    validate:"min=0,max=30"`
+	AlarmReminderInterval *int32 `json:"alarmReminderInterval"`
+	AlarmReminderCount    *int32 `json:"alarmReminderCount"`
 
-	CheckSSL       bool `json:"checkSSL"       validate:"required"`
-	FollowRedirect bool `json:"followRedirect" validate:"required"`
+	CheckSSL       bool `json:"checkSSL"`
+	FollowRedirect bool `json:"followRedirect"`
 
 	Assertions []AssertionBody `json:"assertions" validate:"required"`
 }
@@ -113,6 +113,16 @@ func (m *MonitorController) validateMonitorBody(body *MonitorBody) error {
 		return resp.ErrStatusCodeAssertionRequired
 	}
 	// Validate the status code
+
+	// Reminders
+	if body.AlarmReminderInterval != nil &&
+		(*body.AlarmReminderInterval > constant.MaxAlarmReminderIntervalInSeconds ||
+			*body.AlarmReminderInterval < constant.MinAlarmReminderIntervalInSeconds) {
+		return resp.ErrInvalidAlarmReminderInterval
+	}
+	if body.AlarmReminderCount != nil && (*body.AlarmReminderCount > constant.MaxAlarmReminderCount) {
+		return resp.ErrInvalidAlarmReminderCount
+	}
 
 	return nil
 }

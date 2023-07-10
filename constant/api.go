@@ -9,7 +9,9 @@ const (
 	MaxMonitorBodySizeInBytes              = 1024
 	MinMonitorIntervalInSeconds            = 10
 	MaxMonitorIntervalInSeconds            = 86_400
-	MinAlarmReminderIntervalInMinutes      = 5
+	MaxAlarmReminderIntervalInSeconds      = 3600
+	MinAlarmReminderIntervalInSeconds      = 300
+	MaxAlarmReminderCount                  = 30
 	MaxMonitorTimeoutInSeconds             = 30
 	DefaultOrganizationAlarmErrorThreshold = 2
 )
