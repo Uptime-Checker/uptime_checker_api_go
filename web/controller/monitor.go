@@ -74,9 +74,9 @@ type MonitorBody struct {
 	Username *string `json:"username" validate:"required_with=password"`
 	Password *string `json:"password" validate:"required_with=username"`
 
-	GlobalAlarmSettings   bool  `json:"globalAlarmSettings"   validate:"required"`
-	AlarmReminderInterval int32 `json:"alarmReminderInterval" validate:"min=600,max=3600"`
-	AlarmReminderCount    int32 `json:"alarmReminderCount"    validate:"min=0,max=30"`
+	GlobalAlarmSettings   bool   `json:"globalAlarmSettings"   validate:"required"`
+	AlarmReminderInterval *int32 `json:"alarmReminderInterval" validate:"min=600,max=3600"`
+	AlarmReminderCount    *int32 `json:"alarmReminderCount"    validate:"min=0,max=30"`
 
 	CheckSSL       bool `json:"checkSSL"       validate:"required"`
 	FollowRedirect bool `json:"followRedirect" validate:"required"`

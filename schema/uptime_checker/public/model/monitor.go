@@ -27,8 +27,8 @@ type Monitor struct {
 	On                    bool
 	Muted                 bool
 	GlobalAlarmSettings   bool
-	AlarmReminderInterval int32
-	AlarmReminderCount    int32
+	AlarmReminderInterval *int32
+	AlarmReminderCount    *int32
 	Status                int32
 	ConsecutiveCount      int32
 	CheckSsl              bool
