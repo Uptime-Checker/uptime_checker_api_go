@@ -32,7 +32,7 @@ type Monitor struct {
 	Status                int32
 	ConsecutiveCount      int32
 	CheckSsl              bool
-	FollowRedirects       bool
+	FollowRedirect        bool
 	NextCheckAt           *time.Time
 	LastCheckedAt         *time.Time
 	LastSslCheckedAt      *time.Time

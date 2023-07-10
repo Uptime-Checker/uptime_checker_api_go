@@ -206,7 +206,7 @@ func (w *WatchDog) fly(
 		resource.MonitorBodyFormat(monitor.BodyFormat),
 		&headers,
 		monitor.Timeout,
-		monitor.FollowRedirects,
+		monitor.FollowRedirect,
 	)
 	return check, hitResponse, hitError, err
 }

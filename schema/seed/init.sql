@@ -1,13 +1,13 @@
 -- Insert Regions
-INSERT INTO region (name, key, `default`)
+INSERT INTO region (name, key, "default")
 VALUES('Sunnyvale, California (US)', 'sjc', true);
-INSERT INTO region (name, key, `default`)
+INSERT INTO region (name, key, "default")
 VALUES('Frankfurt, Germany', 'fra', true);
-INSERT INTO region (name, key, `default`)
+INSERT INTO region (name, key, "default")
 VALUES('Singapore', 'sin', false);
-INSERT INTO region (name, key, `default`)
+INSERT INTO region (name, key, "default")
 VALUES('Sydney, Australia', 'syd', false);
-INSERT INTO region (name, key, `default`)
+INSERT INTO region (name, key, "default")
 VALUES('Toronto, Canada', 'yyz', false);
 -- Insert Roles
 INSERT INTO role (name, type)

@@ -108,7 +108,7 @@ create table if not exists monitor (
     status integer default 1 not null,
     consecutive_count integer default 0 not null,
     check_ssl boolean default false not null,
-    follow_redirects boolean default false not null,
+    follow_redirect boolean default false not null,
     next_check_at timestamp(0),
     last_checked_at timestamp(0),
     last_ssl_checked_at timestamp(0),

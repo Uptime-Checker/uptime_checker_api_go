@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cockroachdb/errors"
+
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg"
 	"github.com/Uptime-Checker/uptime_checker_api_go/pkg/times"
 	"github.com/Uptime-Checker/uptime_checker_api_go/schema/uptime_checker/public/model"
-	"github.com/cockroachdb/errors"
 )
 
 type MonitorService struct {
@@ -64,7 +65,7 @@ func (m *MonitorService) Create(
 		AlarmReminderCount:    alarmReminderCount,
 		Status:                int32(pendingStatus),
 		CheckSsl:              checkSSL,
-		FollowRedirects:       followRedirect,
+		FollowRedirect:        followRedirect,
 		CreatedBy:             &userID,
 		UpdatedBy:             &userID,
 		NextID:                nil,
