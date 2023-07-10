@@ -9,10 +9,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/imroc/req/v3"
+	"github.com/samber/lo"
 
 	"github.com/Uptime-Checker/uptime_checker_api_go/constant"
 	"github.com/Uptime-Checker/uptime_checker_api_go/domain/resource"
@@ -162,6 +165,16 @@ func (w *WatchDog) getResponse(resp *req.Response) (*HitResponse, *HitErr) {
 	}
 	stringBody := string(respBody)
 	hitResponse.Body = &stringBody
+
+	if hitResponse.Size == nil || *hitResponse.Size < 0 {
+		size, err := strconv.ParseInt(resp.GetHeader(strings.ToLower(constant.ContentLengthHeader)), 10, 64)
+		if err == nil {
+			hitResponse.Size = lo.ToPtr(int32(size))
+		} else {
+			hitResponse.Size = lo.ToPtr(int32(len(respBody)))
+		}
+	}
+
 	if pkg.IsEmpty(*hitResponse.ContentType) {
 		hitResponse.ContentType = pkg.StringPointer(http.DetectContentType(respBody))
 	}

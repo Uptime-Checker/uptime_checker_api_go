@@ -6,7 +6,8 @@ const (
 	APIKeyHeader          = "X_API_KEY"
 	OriginalIPHeader      = "X-Forwarded-For"
 	AuthorizationHeader   = "Authorization"
-	ContentTypeHeader     = "content-type"
+	ContentTypeHeader     = "Content-Type"
+	ContentLengthHeader   = "Content-Length"
 	CacheControlHeader    = "Cache-Control"
 	StripeSignatureHeader = "Stripe-Signature"
 )
