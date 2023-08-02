@@ -159,7 +159,7 @@ func SetupRoutes(ctx context.Context, app *fiber.App) {
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
 	})
-	app.Hooks().OnListen(func() error {
+	app.Hooks().OnListen(func(ld fiber.ListenData) error {
 		if err := cogman.Start(ctx); err != nil {
 			panic(err)
 		}
