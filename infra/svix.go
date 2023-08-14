@@ -30,7 +30,7 @@ func SendWebhook(ctx context.Context, appID string, webhookData pkg.WebhookData)
 	tracingID := pkg.GetTracingID(ctx)
 	outMessage, err := svixClient.Message.Create(ctx, appID, &svix.MessageIn{
 		EventType: webhookData.EventType,
-		EventId:   *svix.NullableString(webhookData.EventID),
+		EventId:   *svix.NullableString(&webhookData.EventID),
 		Payload:   payload,
 	})
 	if err != nil {
